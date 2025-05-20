@@ -1,0 +1,11 @@
+.chart-card {
+    width: 100%;
+    height: 30%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+      /* Bordes redondeados */
+    padding: 15px;
+   /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);  Sombra suave */
+  }

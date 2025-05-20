@@ -1,0 +1,16 @@
+/* Ocultar las filas con las horas en la vista semanal */
+.fc-timegrid-slot {
+    display: none; /* Esto oculta las filas con las horas del día */
+  }
+  
+  /* Asegurarse de que solo se muestren los días de la semana */
+  .fc-day-grid-container {
+    display: flex;
+    flex-direction: row; /* Alinear los días horizontalmente */
+  }
+  
+  .fc-day-header {
+    display: flex;
+    justify-content: center;
+    text-align: center;
+  }

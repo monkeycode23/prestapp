@@ -1,0 +1,6 @@
+{
+    "watch": ["src/main/*"],
+    "ignore": ["src/renderer/*"],
+    "exec": "electron .",
+    "ext": "js,json"
+  }

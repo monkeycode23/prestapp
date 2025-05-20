@@ -1,0 +1,38 @@
+
+
+{
+    "appId": "com.presta.app",
+    "productName": "PrestamosApp",
+    "publish": [{
+      "provider": "github",
+      "owner": "monkeycode23",
+      "repo": "loans",
+      "releaseType": "draft" 
+    }],
+    
+    "directories": {
+      "output": "build"
+    },
+    "files": [
+        "dist/**/*",
+        "src/main/**/*",
+      "./package.json",
+      "./app-update.yml"
+    ],
+    "extraResources": [
+      {
+        "from": "test.db",
+        "to": "test.db"
+      }
+    ],
+    "win": {
+      "target": "portable",
+      "sign": false
+    },
+    "asar": true,
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*"
+    ],
+    "removePackageScripts": true,
+    "buildDependenciesFromSource": false
+  }

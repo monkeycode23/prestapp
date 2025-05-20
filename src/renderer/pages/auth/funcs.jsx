@@ -1,0 +1,217 @@
+export const initFields2 = {
+  username: {
+    value: "",
+    isValid: true,
+    error: "",
+  },
+  email: {
+    value: "",
+    isValid: true,
+    error: "",
+  },
+  password: {
+    value: "",
+    isValid: true,
+    error: "",
+  },
+  rpassword: {
+    value: "",
+    isValid: true,
+    error: "",
+  },
+};
+
+export const validateRules2 = {
+  username: {
+    required: {
+      param: true,
+      message: "Este campo es requerido",
+    },
+    minLength: {
+      param: 3,
+      message: "No puede ser menor a 3",
+    },
+    maxLength: {
+      param: 15,
+      message: "No puede ser mayor a 15",
+    },
+  },
+  email: {
+    required: {
+      param: true,
+      message: "Este campo es requerido",
+    },
+    minLength: {
+      param: 3,
+      message: "No puede ser menor a 3",
+    },
+    maxLength: {
+      param: 40,
+      message: "No puede ser mayor a 40",
+    },
+    email: {
+      param: true,
+      message: "No es un formato de email valido",
+    },
+  },
+  password: {
+    required: {
+      param: true,
+      message: "Este campo es requerido",
+    },
+    minLength: {
+      param: 8,
+      message: "No puede ser menor a 8",
+    },
+    maxLength: {
+      param: 20,
+      message: "No puede ser mayor a 20",
+    },
+  },
+  rpassword: {
+    required: {
+      param: true,
+      message: "Este campo es requerido",
+    },
+    minLength: {
+      param: 8,
+      message: "No puede ser menor a 8",
+    },
+    maxLength: {
+      param: 20,
+      message: "No puede ser mayor a 20",
+    }
+    
+  },
+};
+
+export const initFields = {
+  username: {
+    value: "",
+    isValid: true,
+    error: "",
+  },
+ 
+  password: {
+    value: "",
+    isValid: true,
+    error: "",
+  },
+};
+
+export const validateRules = {
+  username: {
+    required: {
+      param: true,
+      message: "Este campo es requerido",
+    },
+    minLength: {
+      param: 3,
+      message: "No puede ser menor a 3",
+    },
+    maxLength: {
+      param: 15,
+      message: "No puede ser mayor a 15",
+    },
+  },
+  password: {
+    required: {
+      param: true,
+      message: "Este campo es requerido",
+    },
+    minLength: {
+      param: 6,
+      message: "No puede ser menor a 6",
+    },
+    maxLength: {
+      param: 20,
+      message: "No puede ser mayor a 20",
+    },  
+  },
+};
+
+export async function validateUserName(username) {
+  //const user= await window.sqlite.query("SELECT * FROM users WHERE username=?",fields.username.value)
+  
+  const user = await window.database.models.Users.getUser({username:username}  );
+
+  
+  return user.length>0 ||  user != undefined ? user[0] : false;
+
+ 
+}
+
+export async function validateUserEmail(email) {
+  const user = await window.database.models.Users.getUser({email: email});
+  return user.length>0 ||  user != undefined ? user[0] : false;
+}
+
+
+
+export async function comparePassword(password, hash) {
+  const compare = await compareHash(password, hash)
+  return compare
+}
+
+
+export function generateToken(obj, expirationDate) {
+
+  if(!expirationDate){
+    expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días a partir de ahora
+  }
+
+  
+  const  tokenObject ={
+    ...obj,
+    expirationDate:expirationDate.getTime()
+  }
+  const jsonString = JSON.stringify(tokenObject);
+  
+
+  const base64Encoded = btoa(jsonString);
+  
+  return base64Encoded;
+}
+
+
+export function decodeToken(token) {
+  // Decodificar el token de Base64
+  const decodedData = atob(token);
+
+  // Convertir la cadena JSON de nuevo a un objeto
+  const obj = JSON.parse(decodedData);
+ 
+  return { ...obj };
+}
+
+async function generateHash(message) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function compareHash(message, hashToCompare) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex === hashToCompare;
+}
+
+export async function insertUser(data){
+    
+    const hash =await generateHash(data.password.value)
+   // console.log("hash",hash)
+   // console.log("compareHash",await compareHash("asdasdasd",hash))
+  const user = await window.database.models.Users.createUser({
+    username:data.username.value,
+    email:data.email.value,
+    password:hash,
+   // rol:"admin"
+  }); 
+
+  if(user)return user;
+  return false;
+}
