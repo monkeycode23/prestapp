@@ -6,12 +6,12 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 
     
-  
+   
 dotenv.config();
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/test'; // Use environment variable or placeholder
-
+/* 
 mongoose.connect(MONGO_URI)
   .then(() => {
     logger.info('MongoDB connected successfully');
@@ -22,7 +22,7 @@ mongoose.connect(MONGO_URI)
     console.error('MongoDB connection error:', err);
     // Optionally, you might want to quit the app or show an error to the user
     // if MongoDB connection is critical
-  });
+  }); */
  
 /* 
  ipcMain.on('check-for-updates', () => {

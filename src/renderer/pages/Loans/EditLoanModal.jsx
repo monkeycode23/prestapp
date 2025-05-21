@@ -1,4 +1,3 @@
-
 import React,{useState,useEffect} from 'react'
 import Modal, { useModal } from '../components/Modal'
 
@@ -264,7 +263,7 @@ function  EditLoanForm({loan}){
             <button
                 onClick={()=>{
 
-                    console.log(formData)
+                    //console.log(formData)
                     
                     //console.log(loan)
                      loansModel.updateLoan({

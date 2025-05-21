@@ -12,14 +12,9 @@ const Settings= () => {
 
   const lokForUpdates = async () => {
     const res = await window.updater.checkForUpdates();
-    console.log(res);
   };
 
   const handleUpload = async () => {
-    console.log(file);
-
-    const res = await window.electron.uploadFile(file);
-    console.log(res);
   };
 
  

@@ -22,7 +22,7 @@ const Step4 = ({ setLoans }) => {
       enableNext()
       // Registra el callback para este paso
       registerOnNext(async () => {
-        console.log("Callback ejecutado desde Step4");
+        //console.log("Callback ejecutado desde Step4");
   
         //if(formData.pagos.value=="custom") nextStep()
           

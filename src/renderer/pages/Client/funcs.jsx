@@ -3,7 +3,7 @@ import { deleteClient } from "../../redux/reducers/clients"
 
 
 export const getClient = async (clientId) => {
-   // console.log("clientId:----------------------------->",clientId)
+   // //console.log("clientId:----------------------------->",clientId)
    try {
     const data = await window.database.models.Clients.getClientById(clientId)
     return data[0]
@@ -108,7 +108,7 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
 
     function setAmountQuery(filter){
 
-      console.log("filter2:----------------------------->",filter)
+      //console.log("filter2:----------------------------->",filter)
 
       let  query =filter.amount?.from || filter.amount?.to ? 'AND loans.amount ' : ''
 
@@ -125,14 +125,14 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
       }
 
    
-      console.log("query23123:----------------------------->",query)
+      //console.log("query23123:----------------------------->",query)
       return query
    }
 
 
    function setInstallmentsQuery(filter){
 
-      console.log("filter2:----------------------------->",filter)
+      //console.log("filter2:----------------------------->",filter)
 
       let  query =filter.installments?.from || filter.installments?.to ? 'AND loans.installment_number ' : ''
 
@@ -149,14 +149,14 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
       }
 
    
-      console.log("query23123:----------------------------->",query)
+      //console.log("query23123:----------------------------->",query)
       return query
    }
 
 
    function setDatesQuery(filter){
 
-      console.log("filter2:----------------------------->",filter)
+      //console.log("filter2:----------------------------->",filter)
 
       let  query =filter.dates?.from || filter.dates?.to ? 'AND loans.loan_date ' : ''
 
@@ -173,14 +173,14 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
       }
 
    
-      console.log("query23123:----------------------------->",query)
+      //console.log("query23123:----------------------------->",query)
       return query
    }
 
 
    function setInterestRateQuery(filter){
 
-      console.log("filter2:----------------------------->",filter)
+      //console.log("filter2:----------------------------->",filter)
 
       let  query =filter.interestRate ? 'AND loans.interest_rate ' : ''
 
@@ -189,13 +189,13 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
       }
 
    
-      console.log("query23123:----------------------------->",query)
+      //console.log("query23123:----------------------------->",query)
       return query
    }
 
  
 
-   console.log("filter:----------------------------->",filter)
+   //console.log("filter:----------------------------->",filter)
    try {
 
        let statusKeys = []
@@ -205,7 +205,7 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
        const installmentsQuery=setInstallmentsQuery(filter)
        const datesQuery=setDatesQuery(filter)
        const interestRateQuery=setInterestRateQuery(filter)
-       console.log("datesQuery:----------------------------->",datesQuery)
+       //console.log("datesQuery:----------------------------->",datesQuery)
       if(filter?.status){
          statusKeys = Object.keys(filter.status)
          statusValues = Object.values(filter.status)
@@ -218,8 +218,11 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
             statusQuery = `AND loans.status IN (${keys})`
          }
       
-         console.log("statusQuery:----------------------------->",statusQuery)
-      } 
+         //console.log("statusQuery:----------------------------->",statusQuery)
+      }
+      
+
+      console.log(`${statusQuery} ${amountQuery} ${installmentsQuery} ${datesQuery} ${interestRateQuery}`)
     const query = {
         select: `loans.label,loans.id,loans.client_id,loans.amount,loans.gain,
         loans.loan_date,loans.generate_payments_date,loans.installment_number,
@@ -237,7 +240,7 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
         groupBy: "loans.id"
     }
 
-    console.log("query:----------------------------->",query)
+    //console.log("query:----------------------------->",query)
     const data = await window.database.models.Loans.getLoans(query)
 
     const total = await window.database.models.Loans.getLoans(
@@ -251,7 +254,7 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
     //nsole.log("loans data:----------------------------->",data)
     return {loans:data,total:total[0].total}
    } catch (error) {
-    console.log("error:----------------------------->",error)
+    //console.log("error:----------------------------->",error)
     return []
    }
 }
@@ -264,7 +267,7 @@ export const getClientNotes = async (clientId) => {
          where: `client_id = ${clientId}`,
          
       })
-      console.log("data:----------------------------->",data)
+      //console.log("data:----------------------------->",data)
       return data.length>0 ? data[0].notes : []
    } catch (error) {
       console.log("error23234234:----------------------------->",error)

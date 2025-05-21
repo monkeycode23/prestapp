@@ -27,9 +27,6 @@ export const PaymentsList = ({  }) => {
   //console.log(clients)
   const payments = useSelector(state=>state.payments.payments)
 
-  console.log("payments--asdasdasdasdasd-a>>",payments)
-
-
   return (
     <>
       {
@@ -100,8 +97,6 @@ export const PaymentCard = ({ payment }) => {
 
     const  isCompleted = await payPayment(id,loan)
 
-    console.log("isCompleted--a>>",isCompleted)
-
     dispatch(updatePayment({
       id:payment.id,
       payment:{
@@ -156,8 +151,6 @@ export const PaymentCard = ({ payment }) => {
 
   const handlePayInterest = () => {
     const interest = amount * 0.3; // 30% del monto del pago
-    console.log(`Pago de interés: $${interest}`);
-    // Aquí puedes agregar la lógica para procesar el pago del interés
   };
 
   return (
@@ -257,7 +250,6 @@ export const PaymentCard = ({ payment }) => {
                       installment_number:loan.installment_number-1
                    }))
 
-                  console.log("loan---a>>",loan)
                   await window.database.models.Loans.updateLoan({
                       id:loan.id,
                       installment_number:loan.installment_number-1

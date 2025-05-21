@@ -5,7 +5,7 @@ const initialState = {
     payment: null,
     progress: 0,
     paidPayments: 0,
-    
+    progressbar:0,
     totalPayments: 0,
     loading: false,
     error: null,
@@ -24,6 +24,13 @@ const paymentsSlice = createSlice({
     name: 'payments',
     initialState,
     reducers: {
+        setPaidPayments : (state, action) => {
+            state.paidPayments = action.payload;
+        },
+
+        setProgress : (state, action) => {
+            state.progressbar = action.payload;
+        },
         setPayments: (state, action) => {
             
                 state.payments =[
@@ -48,7 +55,6 @@ const paymentsSlice = createSlice({
             state.error = action.payload;
         },
         updatePayment   : (state, action) => {
-            console.log(action.payload.payment)
             state.payments = state.payments.map(payment => payment.id === action.payload.id ? action.payload.payment : payment);
         },
         deletePayment: (state, action) => {
@@ -66,5 +72,5 @@ const paymentsSlice = createSlice({
     },
 })  
 
-export const { deletePayment, setPayments, setTotalPayments, setLoading, setError, updatePayment, setBruteGains, setExpiredPayments, setNetGains, setPaymentsCount   } = paymentsSlice.actions;
+export const {setPaidPayments,setProgress,deletePayment, setPayments, setTotalPayments, setLoading, setError, updatePayment, setBruteGains, setExpiredPayments, setNetGains, setPaymentsCount   } = paymentsSlice.actions;
 export default paymentsSlice.reducer;

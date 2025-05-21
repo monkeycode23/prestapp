@@ -19,14 +19,14 @@ const Step5 = ({ setLoans }) => {
    const installments = new Array(Number(formData.installments.value)).fill(0);
    const [pDates, setPDates] = useState(installments.map((e, i) => new Date()))
  
-   console.log(formData.installments.value)
+   //console.log(formData.installments.value)
    
    useEffect(() => {
  
      enableNext()
      // Registra el callback para este paso
      registerOnNext(async () => {
-     // console.log("Callback ejecutado desde Step5");
+     // //console.log("Callback ejecutado desde Step5");
  
        const errors = validate({
           payment_interval: {
@@ -39,11 +39,11 @@ const Step5 = ({ setLoans }) => {
          }
        })
  
-      console.log("errrrrrrrrrrrrrrrrooorss=====>",errors)
+      //console.log("errrrrrrrrrrrrrrrrooorss=====>",errors)
       
       if(errors) {
  
-        console.log("formData:----------------------------->", formData)
+        //console.log("formData:----------------------------->", formData)
         const gains = Math.floor(Number(formData.amount.value) * Number(formData.interest_rate.value) / 100)
 
          const loan = await insertLoan({
@@ -60,16 +60,16 @@ const Step5 = ({ setLoans }) => {
             client_id: id
           }) 
 
-          console.log("pDates:----------------------------->",pDates)
+          //console.log("pDates:----------------------------->",pDates)
 
           const payments = await createPayments({
             ...loan,
             dates:pDates
           },formData.sunday.value)
  
-          console.log("loan:----------------------------->",loan)
+          //console.log("loan:----------------------------->",loan)
           dispatch(addLoan(loan))
-          console.log("payments:----------------------------->",payments)
+          //console.log("payments:----------------------------->",payments)
           dispatch(setPaymentsCount({
             ...paymentsCount,
             pending:formData.installments.value,
@@ -116,7 +116,7 @@ const Step5 = ({ setLoans }) => {
  
                    setPDates((prev) =>prev.map((e, j) =>j == i ? el.target.value : e))
  
-                   console.log(pDates)
+                   //console.log(pDates)
                  } }
                  defaultValue={pDates[i]}
                  value={pDates[i]} />

@@ -97,34 +97,41 @@ const Client = () => {
  */
 
   useEffect(() => {
-    // console.log("FILTERRRRRRR:----------------------------->",pagination.filter)
     const init = async () => {
       dispatch(setLabel("loans"));
       dispatch(setPage(1));
 
+      // Resetear el filtro si viene de la página de pagos
+      if (pagination.label === "payments") {
+        dispatch(setFilter({
+          status: {
+            active: true,
+            completed: false,
+            canceled: false
+          }
+        }));
+      }
       
       //Get Client
       const data = await getClient(id);
-      console.log("data:----------------------------->", data);
-
       dispatch(setClient(data));
 
-      const limit = pagination.limit.loans.limit
+      const limit = pagination.limit.loans.limit;
 
       const fetchLoans = await getClientLoans(
         id,
         pagination.filter,
-        1,
+        pagination.page,
         limit
       );
 
       dispatch(setTotalResults(fetchLoans.total));
-
       dispatch(setTotalPages(Math.ceil(fetchLoans.total / limit)));
+      dispatch(setLoans(fetchLoans.loans));
+      dispatch(setTotalLoans(fetchLoans.total));
+
       //Get Information
       const _information = await getClientInformation(id);
-      console.log("information:----------------------------->", _information);
-      //dispatch(setInformation(information))
       if (_information !== undefined) {
         dispatch(
           setContactInformation({
@@ -150,33 +157,35 @@ const Client = () => {
 
       //Get Notes
       const notes = await getClientNotes(id);
-      console.log("notes:----------------------------->", notes);
-      //dispatch(setNotes(notes))
 
       //Get Payments Count
       const paymentsCount = await getClientPaymentsCount(id);
-      console.log(
-        "COUNTpayments:----------------------------->",
-        paymentsCount
-      );
       dispatch(setPaymentsCount(paymentsCount));
-
-      console.log("fetchLoans:----------------------------->", fetchLoans);
-      dispatch(setLoans(fetchLoans.loans));
-      dispatch(setTotalLoans(fetchLoans.total));
-
-      console.log("loans:----------------------------->", totalLoans);
 
       //Get Gains
       const gains = await getClientGains(id);
-      console.log("gains:----------------------------->", gains);
       dispatch(setNetGains(gains.net_amount));
       dispatch(setBruteGains(gains.brute_gain));
     };
     init();
 
-    return () => {};
-  }, [pagination.page, pagination.limit, pagination.filter, totalLoans]);
+    return () => {
+      // Limpiar el estado al desmontar
+      dispatch(setLoans([]));
+      dispatch(setTotalLoans(0));
+    };
+  }, [id, pagination.page, pagination.limit.loans.limit, pagination.label]);
+
+  // Efecto separado para resetear el filtro solo cuando cambia el ID del cliente
+/*   useEffect(() => {
+    dispatch(setFilter({
+      status: {
+        active: true,
+        completed: false,
+        canceled: false
+      }
+    }));
+  }, [id]); */
 
   function changePage(page) {
     dispatch(setPage(page));

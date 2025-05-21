@@ -15,7 +15,34 @@ import { useSelector,useDispatch } from 'react-redux';
               plotOptions: {
             pie: {
               donut: {
-                size: '30%' // más delgado (puedes usar 60% o 50% si quieres aún más fino)
+                size: '30%',
+                labels: {
+                  show: true,
+                  name: {
+                    show: true,
+                    fontSize: '22px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 600,
+                    color: '#373d3f',
+                    offsetY: -10,
+                  },
+                  value: {
+                    show: true,
+                    fontSize: '16px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 400,
+                    color: '#373d3f',
+                    offsetY: 16,
+                  },
+                  total: {
+                    show: true,
+                    label: 'Total',
+                    fontSize: '16px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 600,
+                    color: '#373d3f',
+                  }
+                }
               }
             }
           },
@@ -65,11 +92,28 @@ import { useSelector,useDispatch } from 'react-redux';
           console.log(payments)
 
           const paymentState = payments.map((val)=>val.total_payments)
-
-          console.log(paymentState)
+          const total = paymentState.reduce((a, b) => a + b, 0);
 
           setState({
-              ...state,
+              options:{
+                ...state.options,
+                plotOptions: {
+                  pie: {
+                    donut: {
+                      ...state.options.plotOptions.pie.donut,
+                      labels: {
+                        ...state.options.plotOptions.pie.donut.labels,
+                        total: {
+                          ...state.options.plotOptions.pie.donut.labels.total,
+                          formatter: function (w) {
+                            return total;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
               series:paymentState
           })
        /*  setPayments(payments)
@@ -84,7 +128,7 @@ import { useSelector,useDispatch } from 'react-redux';
           return () => {
             
           }
-        }, [])
+        }, [loan?.id, payments, state.options]);
         
       
         

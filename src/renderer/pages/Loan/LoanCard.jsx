@@ -28,58 +28,8 @@ export const LoanCard = () => {
     navigate(`/clients/${loan.client_id}`);
   };
 
-  /* 
-    const loan = useSelector(state=>state.loans.loan)
-    console.log(loan)
-    const {amount, installment_number: installments, loan_date: date,
-       status, label,nickname,  client_id } = loan
-  
-    
-    
-    const updateState=async()=>{
-  
-      const payed = payments.filter((e)=>e.state=="payed")
-  
-      if(payed.length == loan.installments) {
-        
-         await window.sqlite.query(`update loans set state='completed' where  id='${loanId}'`)
-          stateState("completed")
-         
-        }
-      
-    }
-  
-    const navigate = useNavigate()
-  
-  useEffect(() => {
-  
-  
-    const init = async () => {
-   */
 
-  /* console.log(payments)
-        console.log("asdasdaukwgdb12geas")
-         const payed = payments.filter((e)=>e.state=="payed")
-  
-        
-        
-        const isCompleted = payed.length == installments
-  
-         isCompleted ? await window.sqlite.query("UPDATE loans SET state ='completed' WHERE id='"+loanId+"'")
-        
-        : await window.sqlite.query("UPDATE loans SET state ='active' WHERE id='"+loanId+"'")
-       */
 
-  /* }
-  
-  
-    init();
-  
-    return () => {
-      
-    }
-  }, [])
-   */
 
   return (
     <>
@@ -104,7 +54,6 @@ export const LoanCard = () => {
                     await deleteLoanDb(loan.id);
                     handleBack();
                   } catch (error) {
-                    console.log(error);
                   }
                 }}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"

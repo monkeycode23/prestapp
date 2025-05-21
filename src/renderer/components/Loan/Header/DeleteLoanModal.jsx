@@ -45,6 +45,8 @@ function FormModal() {
   const [showModal, setShowModal] = useState(false);
   const {setNotification,showNotification} = useNotification();
   const loan = useSelector((state) => state.loans.loan);
+  const client = useSelector((state) => state.clients.client);
+
   const {toggleModal} = useModal();
   const dispatch = useDispatch();
 
@@ -67,7 +69,7 @@ function FormModal() {
 
             showNotification()
 
-            navigate("/clients")
+            navigate("/clients/"+client.id)
             
         }}
 

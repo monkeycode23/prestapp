@@ -25,7 +25,7 @@ import { formatAmount } from "../../../common/funcs";
 //redux
 import {useSelector,useDispatch} from 'react-redux'
 import { setLoan } from "../../../redux/reducers/loans";
-import { updatePayment } from "../../../redux/reducers/payments";
+import { setPaidPayments, updatePayment } from "../../../redux/reducers/payments";
 
 import { setBruteGains, setNetGains } from "../../../redux/reducers/payments";
 
@@ -36,7 +36,10 @@ const PaymentCard = ({ payment }) => {
   const [hasNotes, setHasNotes] = useState(false);
   const loan = useSelector((state) => state.loans.loan)
   const {bruteGains,netGains}  = useSelector((state)=> state.payments)
+  const payments = useSelector((state)=> state.payments)
+
   const dispatch = useDispatch()
+
   //console.log("payment", payment);
 
   useEffect(() => {
@@ -51,6 +54,8 @@ const PaymentCard = ({ payment }) => {
     const isCompleted = await payPayment(payment.id, loan);
     //console.log("isCompleted--a>>", isCompleted);
     
+    dispatch(setPaidPayments(payments.paidPayment+1))
+
     dispatch(
       updatePayment({
         id: payment.id,

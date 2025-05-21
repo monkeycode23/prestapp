@@ -10,6 +10,7 @@ import { useSelector } from 'react-redux'
 import Tag from '../../Tag'
 import AddLoanModal from '../../../pages/Client/AddLoanModal'
 import DeleteClientModal from './DeleteClientModal'
+import Chart from './Chart'
 
 const ClientHeader = () => {
     const client = useSelector(state => state.clients.client)
@@ -46,7 +47,7 @@ const ClientHeader = () => {
                         total: {
                             show: true,
                             label: 'Total',
-                            formatter: () => loans.length
+                            formatter: () => loans.totalLoans
                         }
                     }
                 }
@@ -95,16 +96,8 @@ const ClientHeader = () => {
             </div>
 
             <div className='xl:col-span-4 xl:block md:hidden xsm:col-span-12 sm:col-span-12 md:col-span-12 row-span-2'>
-                {loans.length > 0 && (
-                    <div className="w-full h-[300px]">
-                        <ReactApexChart
-                            options={chartOptions}
-                            series={chartSeries}
-                            type="donut"
-                            height="100%"
-                        />
-                    </div>
-                )}
+                {/*  */}
+                {/* <Chart></Chart> */}
             </div>
         </div>
     )

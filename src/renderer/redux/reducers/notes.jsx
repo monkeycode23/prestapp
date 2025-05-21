@@ -18,11 +18,9 @@ const notesSlice = createSlice({
         state.notes = action.payload;
       },
       updateNote: (state, action) => {
-        console.log("action.payload---a>>",action.payload)
         state.notes = state.notes.map(note => note.id === action.payload.id ? action.payload.note : note);
       },
       deleteNote: (state,   action) => {
-        console.log("action.payload---a>>",action.payload)
         state.notes = state.notes.filter(note => note.id !== action.payload.id);
       },
       

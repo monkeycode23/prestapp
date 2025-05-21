@@ -1,5 +1,3 @@
-
-
 export const getClientPaymentsCountDate = async (date) => {   
     try {
  
@@ -159,7 +157,6 @@ export const getTodayPaymentsDate = async (date,filter)  => {
 
 
         const curentDate =date != undefined  ? new Date(date) : new Date()
-        console.log("now:----------------------------->",curentDate)
         //const date =filter.date ? new Date(filter.date) : now
 
         const dateLocal = new Date(curentDate.getTime() - (curentDate.getTimezoneOffset() * 60000));  // Ajusta la fecha a la zona horaria local

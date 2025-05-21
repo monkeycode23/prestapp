@@ -7,7 +7,7 @@ import SelectGroupOne from "../../../components/Forms/SelectGroup/SelectGroupOne
 
 import { useSelector,useDispatch } from "react-redux";
 import { createPayments } from "../funcs";
-import { setLoans,addLoan } from "../../../redux/reducers/loans";
+import { setLoans,addLoan, setTotalLoans } from "../../../redux/reducers/loans";
 import {setPaymentsCount} from "../../../redux/reducers/payments"
 const Step6 = () => {
 
@@ -26,12 +26,12 @@ const Step6 = () => {
       enableNext()
 
       registerOnBack(()=>{
-        console.log("Callback ejecutado desde Step1");
+        //console.log("Callback ejecutado desde Step1");
         goToStep(4)
       })
       // Registra el callback para este paso
       registerOnNext(async() => {
-        console.log("Callback ejecutado desde Step1");
+        //console.log("Callback ejecutado desde Step1");
   
         const errors = validate({
           generated_payments_date: {
@@ -46,7 +46,7 @@ const Step6 = () => {
   
   
         if (errors) {
-            //console.log("formData:----------------------------->", formData)
+            ////console.log("formData:----------------------------->", formData)
             const gains = Math.floor(Number(formData.amount.value) * Number(formData.interest_rate.value) / 100)
             const labelNumber = Number(totalLoans)
 
@@ -65,10 +65,11 @@ const Step6 = () => {
               }) 
 
               const payments = await createPayments(loan,formData.sunday.value)
-              console.log("payments:----------------------------->",payments)
-              console.log("loan:----------------------------->",loan)
+              //console.log("payments:----------------------------->",payments)
+              //console.log("loan:----------------------------->",loan)
               dispatch(addLoan(loan))
-              // console.log(insert)
+              dispatch(setTotalLoans(totalLoans+1))
+              // //console.log(insert)
              /*  */
     
           /*      */

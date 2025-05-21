@@ -56,7 +56,6 @@ function EditPaymentForm({ payment, button }) {
 
   function setField({ type, field, value }) {
     if (type == "set") {
-      console.log(value);
       setFormData((prev) => {
         return {
           ...prev,
@@ -66,7 +65,6 @@ function EditPaymentForm({ payment, button }) {
           },
         };
       });
-      console.log(formData[field]);
     }
 
     if (type == "error") {
@@ -181,8 +179,6 @@ function EditPaymentForm({ payment, button }) {
             let paid_date = payment.status == "paid" && formData.status.value != "paid" ?
              'NULL': payment.paid_date;
 
-             console.log("paiddddddddasd adat asdasd12",paid_date)
-
             window.database.models.Payments.updatePayment( {
                 id: payment.id,
               amount: formData.amount.value,
@@ -239,11 +235,7 @@ function EditPaymentForm({ payment, button }) {
               type: "success",
               message: "Pago actualizado con exito",
             });
-            //cami matias primer uota no llego transferencia
-            //jesus debo debe 2500
-            //  setGains((prev)=>prev>0 ? prev-formData.amount.value: 0 )
 
-        
           showNotification();
               
 

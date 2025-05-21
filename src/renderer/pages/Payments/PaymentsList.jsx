@@ -20,13 +20,10 @@ const PaymentList = ({date}) =>
   function changePage(page){
 
     if(typeof page === "number"){
-      console.log("page",page)
       dispatch(setPage(page))
     }
     else{
-      console.log("page",page)
       const pageNumber = page()
-      console.log("pageNumber",pageNumber)
       dispatch(setPage(pageNumber))
     }
   }
@@ -36,13 +33,7 @@ const PaymentList = ({date}) =>
     <div className="col-span-1  md:col-span-2 xl:col-span-2   bg-white  rounded-sm overflow-hidden">
       {/* Título */}
       <h3 className="text-lg font-semibold p-4 flex justify-between items-center">
-      Pagos  del dia {date.toDateString() === new Date().toDateString() ? "de hoy" : new Date(date).toLocaleDateString("es-ES", {
-      weekday: "long", // Día de la semana (lunes, martes...)
-      day: "numeric", // Día del mes (23)
-      month: "long", // Mes (febrero, marzo...)
-      year: "numeric" // Año (2025)
-    })}
-
+      
       </h3>
       <div className="  text-md font-semibold p-4 flex justify-between items-center">
          

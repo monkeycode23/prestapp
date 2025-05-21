@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
 import Logo from '../../images/logo/logo.svg';
+import { MoneyBillAlt, ToolOutlined } from '../Icons';
 
 
 
@@ -55,13 +56,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   return (
     <aside
       ref={sidebar}
-      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-black duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
+      className={`absolute left-0 top-0 z-9999 flex h-screen w-72.5 flex-col overflow-y-hidden bg-success duration-300 ease-linear dark:bg-boxdark lg:static lg:translate-x-0 ${
         sidebarOpen ? 'translate-x-0' : '-translate-x-full'
       }`}>
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        <NavLink to="/">
-          <img src={Logo} alt="Logo" />
+        <NavLink to="/dashboard">
+         <img src={Logo} alt="Logo" /> 
         </NavLink>
 
         <button
@@ -93,7 +94,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         <nav className="mt-5 py-4 px-4 lg:mt-9 lg:px-6">
           {/* <!-- Menu Group --> */}
           <div>
-            <h3 className="mb-4 ml-4 text-sm font-semibold text-bodydark2">
+            <h3 className="mb-4 ml-4 text-sm font-semibold text-white">
               MENU
             </h3>
 
@@ -102,10 +103,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
             <li>
             <NavLink
                         to="/dashboard"
-                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                        className={`group relative flex items-center gap-2.5 rounded-sm px-4 py-2 font-medium text-white duration-300 ease-in-out hover:bg-green-700 dark:hover:bg-meta-4 ${
                           (pathname === '/' ||
                             pathname.includes('dashboard')) &&
-                          'bg-graydark dark:bg-meta-4'
+                          'bg-green-700 dark:bg-meta-4'
                         }`}
                         
                       >
@@ -143,8 +144,8 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <li>
                 <NavLink
                   to="clients"
-                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname.includes('clients') && 'bg-graydark dark:bg-meta-4'
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-white duration-300 ease-in-out hover:bg-green-700 dark:hover:bg-meta-4 ${
+                    pathname.includes('clients') && 'bg-green-700 dark:bg-meta-4'
                   }`}
                 >
                   <svg
@@ -175,47 +176,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                    <li>
                 <NavLink
                   to="/payments"
-                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname.includes('cobranza') &&
-                    'bg-graydark dark:bg-meta-4'
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-white duration-300 ease-in-out hover:bg-green-700 dark:hover:bg-meta-4 ${
+                    pathname.includes('payments') &&
+                    'bg-green-700 dark:bg-meta-4'
                   }`}
                 >
-      <svg
-    className="fill-current mr-1"
-     width="25"
-    height="25"
-    viewBox="0 0 36 38"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <g>
-      {/* Rectángulo representando el billete */}
-      <rect
-        x="6"
-        y="10"
-        width="24"
-        height="16"
-        fill="none"
-        stroke='white'
-        
-        rx="4"
-      />
-      {/* Detalles del billete (líneas) */}
-      <line x1="6" y1="14" x2="30" y2="14" stroke="white" strokeWidth="2" />
-      <line x1="6" y1="22" x2="30" y2="22" stroke="white" strokeWidth="2" />
-      {/* Signo de dólar en el centro */}
-      <text
-        x="18"
-        y="20"
-        textAnchor="middle"
-        fontSize="10"
-        fill="white"
-        fontWeight="bold"
-      >
-        $
-      </text>
-    </g>
-  </svg>
-
+                
+                  <MoneyBillAlt></MoneyBillAlt>
 
                   Cobranza
                 </NavLink>
@@ -224,9 +191,9 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <li>
                 <NavLink
                   to="/calendar"
-                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-white duration-300 ease-in-out hover:bg-green-700 dark:hover:bg-meta-4 ${
                     pathname.includes('calendar') &&
-                    'bg-graydark dark:bg-meta-4'
+                    'bg-green-700 dark:bg-meta-4'
                   }`}
                 >
                   <svg
@@ -248,17 +215,14 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               <li>
                 <NavLink
                   to="/settings"
-                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
-                    pathname.includes('settings') && 'bg-graydark dark:bg-meta-4'
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-white duration-300 ease-in-out hover:bg-green-700 dark:hover:bg-meta-4 ${
+                    pathname.includes('settings') && 'bg-green-700 dark:bg-meta-4'
                   }`}
                 >
-                  <svg
-                    className="fill-current"
-                    width="18"
-                    height="18"
-                    viewBox="0 0 18 18"
-                    fill="none">
-                  </svg>
+                  <ToolOutlined
+                  width={18}
+                  height={18}
+                  ></ToolOutlined>
                   Configuración
 
                   

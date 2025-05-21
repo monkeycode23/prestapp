@@ -1,6 +1,3 @@
-
-
-
 import React, { useState } from 'react'
 import Modal from "../../components/Modal"
 import { useModal } from '../../components/Modal'
@@ -27,8 +24,6 @@ function IncompleteModal({payment,button}) {
 
 function FormModal({payment}) {
 
-    console.log(payment)
-
     const dispatch = useDispatch()
    // const {setPayments} = useTodayPayments()
     const {setNotification,showNotification} = useNotification()
@@ -38,11 +33,7 @@ function FormModal({payment}) {
     const paymentsCount = useSelector((state)=>state.payments.paymentsCount)
      async function onClick(e) {
         e.preventDefault()
-        console.log("asdasd")
-        console.log(payment)
-        console.log(monto)
         
-
 
         
         await window.database.models.Payments.updatePayment({

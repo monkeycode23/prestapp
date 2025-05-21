@@ -16,7 +16,7 @@ const Step2 = () => {
       enableNext()
       // Registra el callback para este paso
       registerOnNext(async () => {
-        console.log("Callback ejecutado desde Step1");
+        ////console.log("Callback ejecutado desde Step1");
   
         const isValidate = await validate({
           installments: {
@@ -34,7 +34,7 @@ const Step2 = () => {
         
 
 
-        console.log("isValidate:----------------------------->",isValidate)
+        ////console.log("isValidate:----------------------------->",isValidate)
         if (isValidate) nextStep()
         else return 
   
@@ -79,7 +79,7 @@ const Step2 = () => {
                   setField({ type: "set", field: "installments", value: cuotas })
   
   
-                  console.log(formData)
+                  //console.log(formData)
                 }}
                 className='text-sm p-2  border border-stroke  text-center cursor-pointer rounded-lg'
               >

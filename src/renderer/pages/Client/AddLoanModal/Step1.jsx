@@ -16,7 +16,7 @@ const Step1 = () => {
       enableNext()
       // Registra el callback para este paso
       registerOnNext(async () => {
-        console.log("Callback ejecutado desde Step1");
+        //console.log("Callback ejecutado desde Step1");
   
         const errors = await validate({
           amount: {
@@ -45,7 +45,7 @@ const Step1 = () => {
           },
         })
 
-        console.log("errors:----------------------------->",errors)
+        //console.log("errors:----------------------------->",errors)
         if(errors){
           nextStep()
         }else return 

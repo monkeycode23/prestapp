@@ -33,7 +33,6 @@ const selectedSlice = createSlice({
         },  
         
         updateItem   : (state, action) => {
-            console.log(action.payload.item)
             state.items = state.items.map(item => item.id === action.payload.id ? action.payload.item : item);
         },
         deleteItem: (state, action) => {

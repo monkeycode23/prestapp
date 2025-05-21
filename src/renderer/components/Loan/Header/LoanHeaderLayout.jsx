@@ -29,6 +29,7 @@ import { setProgressPercentage, setPaidPayments, setTotalPayments } from "../../
 //import AddLoanModal from '../../../pages/Client/AddLoanModal'
 //funcs 
 import { formatAmount,formatDateCriollo } from "../../../common/funcs";
+import ProgressBar from "./ProgressBar";
 
 
 
@@ -72,24 +73,12 @@ const LoanHeaderLayout = () => {
   const chartSeries = paymentData.map(item => item.value);
 
   const handlePayInterest = (payment) => {
-    const interest = payment.amount * 0.3; // 30% del monto del pago
-    console.log(`Pago de interés: $${interest}`);
     // Aquí puedes agregar la lógica para procesar el pago del interés
   };
 
   useEffect(() => {
 
-    const  paymentsData = window.database.models.Payments.getPayments({
-      select: `COUNT(*) AS totalCount,
-    SUM(CASE WHEN status = 'paid' THEN 1 ELSE 0 END) AS paidCount,
-    SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pendingCount,
-    SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END) AS expiredCount,
-    SUM(CASE WHEN status = 'incomplete' THEN 1 ELSE 0 END) AS incompleteCount`,
-      
-      where: `loan_id = '${loan?.id}'`
-  })
-
-  console.log("ASDASDASDASDASD",paymentData)
+   
  /*  console.log("paymentsData",paymentsData)
     dispatch(setProgressPercentage(progressPercentage));
     dispatch(setPaidPayments(paidPayments));
@@ -137,22 +126,8 @@ const LoanHeaderLayout = () => {
         <InformationLoanHeader /> 
 
         {/* Progress Bar */}
-        <div className="mt-4">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700">Progreso del préstamo</span>
-            <span className="text-sm font-medium text-gray-700">{progressPercentage.toFixed(1)}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-primary h-2.5 rounded-full transition-all duration-300" 
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-          <div className="flex justify-between items-center mt-1">
-            <span className="text-xs text-gray-500">Cuotas pagadas: {paidPayments}</span>
-            <span className="text-xs text-gray-500">Total cuotas: {totalPayments}</span>
-          </div>
-        </div>
+        <ProgressBar></ProgressBar>
+      
       </div>
 
       <div className="xl:col-span-4 xl:block xsm:col-span-12 sm:col-span-12 md:col-span-12 row-span-2">

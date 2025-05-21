@@ -6,7 +6,6 @@ export const getLoan = async (loanId) => {
       where: `loans.id = ${loanId}`,
     });
 
-    console.log("loan---a>>", loan);
     return loan[0];
   } catch (error) {}
 
@@ -15,7 +14,6 @@ export const getLoan = async (loanId) => {
 
 
 export const deleteLoanDb = async (loanId) => {
-    console.log("loanId---a>>", loanId);
     try {
         await window.database.models.Loans.deleteLoan(loanId)
         await window.database.models.Payments.deleteMany({
@@ -28,7 +26,6 @@ export const deleteLoanDb = async (loanId) => {
         return true
 
     } catch (error) {
-        console.log("error---a>>", error);
         return false
     }
     
@@ -40,8 +37,6 @@ export const getPayments = async (loanId, filtro) => {
 
    
     function setDatesQuery(filter){
-
-      console.log("filter2:----------------------------->",filter)
 
       let  query =filter.dates?.from || filter.dates?.to ? 'AND payments.payment_date ' : ''
 
@@ -56,7 +51,6 @@ export const getPayments = async (loanId, filtro) => {
             query += `<= '${filter.dates.to}'`
          }
       }
-      console.log("query23123:----------------------------->",query)
       return query
    }
 
@@ -68,15 +62,11 @@ export const getPayments = async (loanId, filtro) => {
     const keys = statusKeys.filter((status, index) => statusValues[index]).map(status => `'${status}'`).join(',');
     statusQuery = keys.length > 0 ? `AND payments.status IN (${keys})` : "";
 
-    console.log("statusQuery:----------------------------->", statusQuery);
     return statusQuery;
   } 
 
-  console.log("filtrooooooooooooo>>>>>>",filtro)
-
   const statusQuery = statusFilter(filtro)
   const datesQuery = setDatesQuery(filtro)
-  console.log(statusQuery)
   try {
     const payments = await window.database.models.Payments.getPayments({
       where: `loan_id = ${loanId} ${statusQuery}`,
@@ -89,13 +79,9 @@ export const getPayments = async (loanId, filtro) => {
       where: `loan_id = ${loanId} ${statusQuery}`     
         })    
 
-    //console.log("payments---a>>", payments);
-
     return {payments,total:total[0].total};
 
   } catch (error) {
-    //console.log("error---a>>", error);
-
     return {payments:[],total:0};
   }
 }
@@ -110,27 +96,18 @@ export const getTotalPayments = async (loanId) => {
     });
     return total[0].total;
   } catch (error) {
-    console.log("error---a>>", error);
     return 0;
   }
 }
 
 export const getPaymentsGains = async (loanId) => {
 
-  //console.log(loanId)
   try {
     const payments = await window.database.models.Payments.getPayments({
       where: `loan_id = ${loanId} AND status = 'paid' `,
       select: "sum(amount) as net_gains,sum(gain) as brute_gains",
     });
 
-    console.log("payments---a>>", payments);
-
-    /* const gains = payments.reduce((acc, payment) => {
-            acc.net_gains += payment.net_gains
-            acc.brute_gains += payment.brute_gains
-            return acc
-        }, { net_gains: 0, brute_gains: 0 }) */
     return payments[0];
   } catch (error) {}
 };
@@ -143,7 +120,6 @@ export const isLoanCompletedPaid = async (id) => {
 
     return payments.length === 0;
   } catch (error) {
-    console.error("Error checking loan completion:", error);
     return false;
   }
 };
@@ -157,8 +133,6 @@ export const payPayment = async (paymentId, loan) => {
     const month = (now.getMonth() + 1).toString().padStart(2, '0');  // Añade un 0 al mes si es menor que 10
     const day = now.getDate().toString().padStart(2, '0');  // Añade un 0 al día si es menor que 10
     
-    console.log("paymentId---a>>", paymentId);
-
     await window.database.models.Payments.updatePayment({
       id: paymentId,
       status: "paid",
@@ -166,8 +140,6 @@ export const payPayment = async (paymentId, loan) => {
     });
 
    const payment = await window.database.models.Payments.getPaymentById(paymentId)
-
-   console.log(payment)
 
     const isCompleted = await isLoanCompletedPaid(loan.id);
 
@@ -180,7 +152,6 @@ export const payPayment = async (paymentId, loan) => {
 
     return isCompleted;
   } catch (error) {
-    console.log("error---a>>", error);
     return false;
   }
 };
@@ -190,10 +161,8 @@ export const getNotes = async (id, type) => {
     const notes = await window.database.models.Notes.getNote({
       where: `${type}_id = ${id} `,
     });
-    console.log("notes---a>>", notes);
     return notes;
   } catch (error) {
-    console.log("error---a>>", error);
     return [];
   }
 };
@@ -213,13 +182,11 @@ export const checkAndUpdateActiveLoans = async () => {
           id: loan.id,
           status: "completed"
         });
-        console.log(`Loan ${loan.id} updated to completed status`);
       }
     }
 
     return true;
   } catch (error) {
-    console.error("Error checking active loans:", error);
     return false;
   }
 };

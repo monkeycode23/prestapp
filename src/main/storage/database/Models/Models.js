@@ -24,12 +24,12 @@ class Models {
     async insert( data) {  
     
 
-        console.log("data:----------------------------->",data);
+        //console.log("data:----------------------------->",data);
         try {
           const query = `INSERT INTO ${this.tableName} (${Object.keys(data).join(',')}) VALUES (${Object.values(data).map(() => '?').join(',')})`;
           const params = Object.values(data);
     
-          console.log("query:----------------------------->",query);
+          //console.log("query:----------------------------->",query);
           this.db.runQuery(query,params)
           logger.info(`Datos insertados en la tabla ${this.tableName}`);
     
@@ -44,7 +44,7 @@ class Models {
             ...data
           }
 
-          if (this.MongoModel) {
+          /* if (this.MongoModel) {
               try {
                   // Prepare data for MongoDB, ensuring sqlite_id is included
                   const mongoData = { ...data, sqlite_id: sqliteId };
@@ -64,12 +64,12 @@ class Models {
                   const codigoAcceso = generarCodigoAcceso();
                   const createdDocument = await this.MongoModel.create({...mongoData, codigoAcceso});
                   logger.info(`Document created in MongoDB for ${this.tableName} with sqlite_id: ${sqliteId}, mongo_id: ${createdDocument._id}`);
-                  console.log("MongoDB document created:", createdDocument);
+                  //console.log("MongoDB document created:", createdDocument);
               } catch (mongoError) {
                   logger.error(`Error creating document in MongoDB for ${this.tableName} (sqlite_id: ${sqliteId}):`, mongoError);
                   // Decide on error handling: throw, log, or specific recovery
               }
-          }
+          } */
           return resultForCaller;
         } catch (error) {
           logger.error(`Error al insertar datos en la tabla ${this.tableName}:`, error);
@@ -89,13 +89,13 @@ class Models {
             
             LIMIT 1
             `
-        console.log("query1:----------------------------->",query)
+        //console.log("query1:----------------------------->",query)
         return this.db.query(query,filter.params)
     }
 
     getAll(filter){
 
-       console.log("filter:----------------------------->",filter)
+       //console.log("filter:----------------------------->",filter)
         const query=`SELECT ${filter.select ? filter.select : '*'} FROM ${this.tableName} ${filter.joins ? filter.joins : ''} 
             ${filter.where ? `WHERE ${filter.where}` : ''} 
             ${filter.groupBy ? `GROUP BY ${filter.groupBy} ` : ''} 
@@ -122,7 +122,7 @@ class Models {
              ${Object.keys(data).filter(key => key !== 'id').map(key => `${key} = ${data[key]==='NULL' || data[key] === null ? 'NULL' : `'${data[key]}'`}`).join(',')}
         WHERE id = '${data.id}'`,[],{type:"run"}); // Ensure data.id is the SQLite ID
 
-        if (this.MongoModel && data.id) { // data.id is the sqlite_id for matching
+        /* if (this.MongoModel && data.id) { // data.id is the sqlite_id for matching
             try {
                 // Prepare data for MongoDB update, excluding sqlite_id from $set if it's immutable or handled differently
                 const updateData = { ...data };
@@ -135,7 +135,7 @@ class Models {
                 );
                 if (mongoUpdateResult) {
                     logger.info(`Document updated in MongoDB for ${this.tableName} with sqlite_id: ${data.id}`);
-                    console.log("MongoDB document updated:", mongoUpdateResult);
+                    //.log("MongoDB document updated:", mongoUpdateResult);
                 } else {
                     logger.warn(`No document found in MongoDB for ${this.tableName} with sqlite_id: ${data.id} to update.`);
                     // Potentially create it if an update implies it should exist (upsert: true would handle this)
@@ -143,9 +143,13 @@ class Models {
             } catch (mongoError) {
                 logger.error(`Error updating document in MongoDB for ${this.tableName} (sqlite_id: ${data.id}):`, mongoError);
             }
-        }
+        } */
         return sqliteResult; // Or whatever the original update returned
     }
+
+    /*
+     
+     */
     updateMany(data){
         return this.db.query(`UPDATE ${this.tableName} SET
              ${Object.keys(data).map(key => `${key} = ${data[key]=='NULL' ? null : `'${data[key]}'`}`).join(',')}
@@ -160,7 +164,7 @@ class Models {
         const query = `UPDATE ${this.tableName} SET ${Object.keys(filter.data).map(key => `${key} = ${filter.data[key]=='NULL' ? null : `'${filter.data[key]}'`}`).join(',')}
         ${filter.where ? ` WHERE ${filter.where}` : ''}`
 
-        console.log("query:----------------------------->",query)
+        //console.log("query:----------------------------->",query)
         return this.db.query(query,[],{type:"run"})
     }
     
@@ -168,27 +172,26 @@ class Models {
         logger.info(`Deleting from SQLite ${this.tableName} with id: ${id}`);
         const sqliteResult = this.db.query(`DELETE FROM ${this.tableName} WHERE id = ?`,[id],{type:"run"});
 
-        if (this.MongoModel && id) {
+        /* if (this.MongoModel && id) {
             try {
                 const mongoDeleteResult = await this.MongoModel.findOneAndDelete({ sqlite_id: id });
                 if (mongoDeleteResult) {
                     logger.info(`Document deleted from MongoDB for ${this.tableName} with sqlite_id: ${id}`);
-                    console.log("MongoDB document deleted:", mongoDeleteResult);
+                    //console.log("MongoDB document deleted:", mongoDeleteResult);
                 } else {
                     logger.warn(`No document found in MongoDB for ${this.tableName} with sqlite_id: ${id} to delete.`);
                 }
             } catch (mongoError) {
                 logger.error(`Error deleting document in MongoDB for ${this.tableName} (sqlite_id: ${id}):`, mongoError);
             }
-        }
+        } */
         return sqliteResult; // Or whatever the original delete returned
     }
 
     deleteQuery(data){
         const query = `DELETE FROM ${this.tableName} WHERE ${data.where ? data.where : `id=${data.id}`}`
-        console.log("query:----------------------------->",query)
+        //console.log("query:----------------------------->",query)
         return this.db.query(query,[],{type:"run"})
-
     }
    
     createTable(schema){

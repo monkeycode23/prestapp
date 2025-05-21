@@ -25,7 +25,7 @@ export function AddLoanModal({button}) {
 
 const client = useSelector(state => state.clients.client)
 
-console.log("client ASASDASD",client)
+//console.log("client ASASDASD",client)
   return (
     <Modal buttonLabel={"dar prestamo"} button={button} title={"Otorgar Prestamo"}>
 

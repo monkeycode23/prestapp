@@ -23,7 +23,6 @@ const clientsSlice = createSlice({
             state.bruteGains = action.payload;
         },
         setClient: (state, action) => {
-            console.log("action.payload:----------------------------->",action.payload)
             state.client = action.payload;
         },
        
@@ -40,14 +39,10 @@ const clientsSlice = createSlice({
             state.error = action.payload;
         },
         addClient: (state, action) => {
-            console.log("action.payload:----------------------------->",action.payload)
-            console.log("state.clients:----------------------------->",state)
             state.clients=[
                 action.payload,
                 ...state.clients
             ]
-
-            console.log("state.clients:----------------------------->",state)
 
             state.totalClients++;
         },
@@ -55,7 +50,6 @@ const clientsSlice = createSlice({
             state.clients = state.clients.map(client => client.id === action.payload.id ? action.payload : client);
         },
         deleteClient: (state, action) => {
-            console.log("action.payload:----------------------------->",action.payload)
             state.clients = state.clients.filter(client => client.id !== action.payload.id);
         },
         

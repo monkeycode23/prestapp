@@ -66,8 +66,6 @@ const Payments = () => {
         limit:limit.payments.limit,
       });
 
-      console.log("data:----------------------------->",data);
-
       dispatch(setPayments(data.payments));
 
       dispatch(setTotalResults(data.total));
@@ -95,9 +93,6 @@ const Payments = () => {
         date:new Date(),
       });
 
-      console.log("gains  -------->>>>",gains);
-
-      
       dispatch(setNetGains(gains.netGains));
       dispatch(setBruteGains(gains.gains));
       /*  setTodayGains(gains.gains)
@@ -214,8 +209,6 @@ const Payments = () => {
             <h2 className="text-lg font-semibold text-white mb-4">Calendario</h2>
             <CalendarApp
               onClick={async (date) => {
-                console.log("event date---->",date);
-
                 const data = await getTodayPaymentsDate(date,{
                   filter: {
                     search: search,

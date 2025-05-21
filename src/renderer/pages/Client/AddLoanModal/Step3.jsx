@@ -13,7 +13,7 @@ const Step3 = () => {
       enableNext()
       // Registra el callback para este paso
       registerOnNext(async () => {
-        console.log("Callback ejecutado desde Step1");
+        ////console.log("Callback ejecutado desde Step1");
   
         const errors = await validate({
           loan_date: {
