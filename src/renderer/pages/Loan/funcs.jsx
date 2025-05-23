@@ -167,6 +167,21 @@ export const getNotes = async (id, type) => {
   }
 };
 
+export  const getLeftMoney =async(id)=>{
+
+  try {
+    const leftmoney= await window.database.models.Payments.getPayments({
+      select:`sum(payments.amount) as total_left`,
+      where:  `loan_id=${id} AND payments.status in ('pending','expired','incomplete')`
+    });
+
+    console.log(leftmoney)
+    
+    return leftmoney.length ? leftmoney[0].total_left : 0 
+  } catch (error) {
+    return 0
+  }
+}
 export const checkAndUpdateActiveLoans = async () => {
   try {
     // Obtener todos los préstamos activos

@@ -18,12 +18,17 @@ const initialState = {
         incomplete: 0,
         expired: 0,
     },
+    notes:''
 }
 
 const paymentsSlice = createSlice({
     name: 'payments',
     initialState,
     reducers: {
+        setNotes:(state, action) => {
+            state.notes = action.payload;
+        },
+
         setPaidPayments : (state, action) => {
             state.paidPayments = action.payload;
         },

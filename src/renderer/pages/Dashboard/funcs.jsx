@@ -19,6 +19,24 @@ export const getTotalLoans = async () => {
 }
 
 
+
+export const getUnpaidPayments = async () => {
+    try {
+        const payments = await window.database.models.Payments.getPayments({
+            select: `SUM(CASE WHEN status IN ('pending', 'expired', 'incomplete') THEN payments.amount ELSE 0 END) as total_unpaid`,
+        })
+
+        console.log("payments:----------------------------->",payments)
+        return payments[0].total_unpaid
+
+        
+    } catch (error) {
+        console.log(error)
+        return 0
+    }
+}
+
+
 export const getTotalPaidPaymentsMoney = async () => {
     try {
         const payments = await window.database.models.Payments.getPayments({
@@ -26,7 +44,7 @@ export const getTotalPaidPaymentsMoney = async () => {
             SUM(payments.gain) as gains,
             SUM(payments.net_amount) as net_gains`,
             joins: 'JOIN loans l ON payments.loan_id = l.id ',
-            where: `payments.status = 'paid' AND l.status IN ('active')`
+            where: `payments.status = 'paid' AND l.status IN ('active','completed')`
         })
 
         //console.log("asdasdasdasdasdasdpayments:----------------------------->",payments)

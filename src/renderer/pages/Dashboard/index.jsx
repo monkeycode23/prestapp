@@ -13,11 +13,11 @@ import { useDispatch } from 'react-redux';
 import { setTotalLoans,setTotalClients,setTotalPayments,
   setTotalLoansMoney,setTotalPaidPaymentsMoney,
   setTotalLoansGains,setTotalPaidPaymentsGains,
-  setTotalPaidPaymentsNetGains,setTotalLoansCompleted } from '../../redux/reducers/dashboard';
+  setTotalPaidPaymentsNetGains,setTotalLoansCompleted,setTotalUnpaidPayments } from '../../redux/reducers/dashboard';
 import { toLocaleDate } from '../Payments/funcs';
 import ReactApexChart from "react-apexcharts";
 
-
+import { getUnpaidPayments } from './funcs';
 
 const Dashboard = () => {
 
@@ -25,16 +25,11 @@ const Dashboard = () => {
     const loans = useSelector(state => state.loans.loans)
     const [loansByStatus, setLoansByStatus] = useState({ active: 0, completed: 0, cancelled: 0 });
 
-    const totalLoans = useSelector(state => state.dashboard.totalLoans)
-    const totalLoansCompleted = useSelector(state => state.dashboard.totalLoansCompleted)
-    const totalLoansMoney = useSelector(state => state.dashboard.totalLoansMoney)
-    const totalPaidPaymentsMoney = useSelector(state => state.dashboard.totalPaidPaymentsMoney)
-    const totalPaidPaymentsGains = useSelector(state => state.dashboard.totalPaidPaymentsGains)
-    const totalPaidPaymentsNetGains = useSelector(state => state.dashboard.totalPaidPaymentsNetGains)
-   
-   
-   
-   
+  
+   const {totalLoans,totalLoansCompleted,
+    totalLoansMoney,totalPaidPaymentsMoney,
+    totalPaidPaymentsGains,totalPaidPaymentsNetGains,
+    totalUnpaidPayments} = useSelector(state => state.dashboard)
    
     useEffect(() => {
       const init = async () => {
@@ -73,9 +68,15 @@ const Dashboard = () => {
           const fetchTotalPaidPaymentsMoney = await getTotalPaidPaymentsMoney()
           //console.log("totalPaidPaymentsMoney:----------------------------->",fetchTotalPaidPaymentsMoney)
           dispatch(setTotalPaidPaymentsMoney(fetchTotalPaidPaymentsMoney))
-         
+          
+          const fetchTotalUnpaidPayments = await getUnpaidPayments()
+          //console.log("totalUnpaidPayments:----------------------------->",fetchTotalUnpaidPayments)
+          dispatch(setTotalUnpaidPayments(fetchTotalUnpaidPayments))
+
           dispatch(setTotalLoansGains(fetchLoansTotalAmounts.gains))
+          
           dispatch(setTotalPaidPaymentsGains(fetchTotalPaidPaymentsMoney.gains))
+          
           dispatch(setTotalPaidPaymentsNetGains(fetchTotalPaidPaymentsMoney.net_gains))
           /*  const fetchTotalClients = await getTotalClients()
           console.log("totalClients:----------------------------->",fetchTotalClients)
@@ -89,7 +90,7 @@ const Dashboard = () => {
       init()
     },[])
 
-    const chartOptions = {
+    const loansStatusOptions = {
       chart: {
         type: 'bar',
         toolbar: {
@@ -115,15 +116,18 @@ const Dashboard = () => {
         }
       },
       colors: ['#3B82F6', '#10B981', '#EF4444'],
-      labels: ['Activos', 'Completados', 'Cancelados'],
-      legend: {
-        show: false
-      },
       xaxis: {
         categories: ['Activos', 'Completados', 'Cancelados'],
         labels: {
           formatter: function(val) {
-            return val + " préstamos"
+            return val
+          }
+        },
+        tickAmount: 5,
+        forceNiceScale: true,
+        labels: {
+          formatter: function(val) {
+            return Math.round(val)
           }
         }
       },
@@ -138,13 +142,13 @@ const Dashboard = () => {
       tooltip: {
         y: {
           formatter: function(val) {
-            return val + " préstamos"
+            return Math.round(val) + " préstamos"
           }
         }
       }
     };
 
-    const chartSeries = [{
+    const loansStatusSeries = [{
       name: 'Préstamos',
       data: [
         loansByStatus.active || 0,
@@ -173,7 +177,7 @@ const Dashboard = () => {
               width="22"
               height="22"></MoneyWavy>
           </CardDataStats>
-          <CardDataStats title="Total Dinero cirulando" total={"$"+formatAmount(totalLoansMoney - totalPaidPaymentsMoney.total_amount) }  levelUp>
+          <CardDataStats title="Total Dinero cirulando" total={"$"+formatAmount(totalUnpaidPayments) }  levelUp>
            <PeopleMoney20Regular width={"22"} height={"22"}/>
           </CardDataStats>
   
@@ -184,8 +188,25 @@ const Dashboard = () => {
   
       
         <div className="mt-4 grid grid-cols-12 gap-4 md:mt-6 md:gap-6 2xl:mt-7.5 2xl:gap-7.5">
-          <ChartThree /> 
-          <ChartTwo></ChartTwo>
+          <div className="col-span-12 xl:col-span-6">
+            <ChartThree />
+          </div>
+          
+          <div className="col-span-12 xl:col-span-6">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">Estado de Préstamos</h2>
+              <ReactApexChart
+                options={loansStatusOptions}
+                series={loansStatusSeries}
+                type="bar"
+                height={350}
+              />
+            </div>
+          </div>
+
+          <div className="col-span-12 xl:col-span-7">
+            <ChartTwo></ChartTwo>
+          </div>
           
           <div className="col-span-12 xl:col-span-12">
             <ChartOne></ChartOne>

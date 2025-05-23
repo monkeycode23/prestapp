@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 //components
 import CardDataStats from "../../components/CardDataStats";
 import Breadcrumb from "../../components/Breadcrumbs/Breadcrumb";
-import {  MoneyBag, PaymentIcon2,DollarSign, SackDollar } from "../../components/Icons";
+import {  MoneyBag, PaymentIcon2,DollarSign, SackDollar, MoneyBillAlt } from "../../components/Icons";
 import Pagination from "../../components/Pagination";
 import LoanHeaderLayout from "../../components/Loan/Header/LoanHeaderLayout";
 import PaymentsCardsList from "../../components/Payments/Cards/PaymentsCardsList";
@@ -16,7 +16,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
 //redux
-import { setLoan } from "../../redux/reducers/loans";
+import { setLoan,setLeftToPaid } from "../../redux/reducers/loans";
 import {
   setPayments,
   setBruteGains,
@@ -41,6 +41,7 @@ import {
   getTotalPayments,
   checkAndUpdateActiveLoans,
   isLoanCompletedPaid,
+  getLeftMoney
 } from "./funcs";
 
 
@@ -49,6 +50,7 @@ const Loan = () => {
   //redux
   const payments = useSelector((state) => state.payments.payments);
   const loan = useSelector((state) => state.loans.loan);
+  const leftToPaid = useSelector((state) => state.loans.leftToPaid);
   const bruteGains = useSelector((state) => state.payments.bruteGains);
   const netGains = useSelector((state) => state.payments.netGains);
   const totalPayments = useSelector((state) => state.payments.totalPayments);
@@ -106,6 +108,10 @@ const Loan = () => {
         const fetchGains = await getPaymentsGains(id);
         dispatch(setBruteGains(fetchGains.brute_gains));
         dispatch(setNetGains(fetchGains.net_gains));
+
+        const fetchLeftMoney  = await getLeftMoney(id)
+        
+        dispatch(setLeftToPaid(fetchLeftMoney))
       } catch (error) {
         console.log("error---a>>", error);
       }
@@ -160,6 +166,14 @@ const Loan = () => {
             levelUp
           >
             <SackDollar className="fill-primary dark:fill-white" width="22" height="22" />
+          </CardDataStats>
+          <CardDataStats
+            title="Dinero Restante por pagar"
+            total={"$" + Intl.NumberFormat("de-DE").format(leftToPaid)}
+            rate="0.0%"
+            levelUp
+          >
+            <MoneyBillAlt className="fill-primary dark:fill-white" width="22" height="22"></MoneyBillAlt>
           </CardDataStats>
       </div>
 

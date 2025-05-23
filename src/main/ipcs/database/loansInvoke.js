@@ -8,4 +8,4 @@ module.exports = {
     deleteLoan: (id) => ipcRenderer.invoke('database', {model: 'loans', method: 'delete', params: id}),
     deleteQuery: (data) => ipcRenderer.invoke('database', {model: 'loans', method: 'deleteQuery', params: data}),
     getLoan: (filter) => ipcRenderer.invoke('database', {model: 'loans', method: 'getOne', params:filter})
-}
+} 

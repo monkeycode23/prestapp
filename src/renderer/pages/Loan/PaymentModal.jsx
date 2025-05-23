@@ -142,7 +142,7 @@ function PaymentModal({payment,button}) {
             <div className='mt-4 p-4 bg-gray-50 rounded-lg'>
               <span className='text-md font-semibold text-gray-700'>Notas:</span>
               <p className='mt-2 text-gray-600'>
-                {Array.isArray(notes) ? notes.map((e)=>e.notes).join("\n") : notes}
+                {payment.notes}
               </p>
             </div>
           )}

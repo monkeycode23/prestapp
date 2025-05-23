@@ -9,6 +9,7 @@ const initialState = {
     totalLoansGains:0,
     totalPaidPaymentsNetGains:0,
     totalLoansCompleted:0,
+    totalUnpaidPayments:0,
 }
 
 
@@ -17,6 +18,9 @@ const dashboardSlice = createSlice({
     name: 'dashboard',
     initialState,
     reducers: {
+        setTotalUnpaidPayments: (state, action) => {
+            state.totalUnpaidPayments = action.payload;
+        },
         setTotalLoansCompleted: (state, action) => {
             state.totalLoansCompleted = action.payload;
         },
@@ -71,5 +75,5 @@ const dashboardSlice = createSlice({
 
 export const { setTotalLoans,setTotalClients,setTotalPayments,setTotalLoansMoney,
     setTotalPaidPaymentsMoney,setTotalLoansGains,setTotalPaidPaymentsGains,
-    setTotalPaidPaymentsNetGains,setTotalLoansCompleted  } = dashboardSlice.actions;
+    setTotalPaidPaymentsNetGains,setTotalLoansCompleted,setTotalUnpaidPayments  } = dashboardSlice.actions;
 export default dashboardSlice.reducer;

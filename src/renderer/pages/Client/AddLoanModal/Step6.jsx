@@ -2,12 +2,12 @@ import React,{ useState,useEffect } from "react";
 import { useNotification } from "../../../components/Notifications";
 import { useModal } from "../../../components/Modal";
 import { useGuide } from "../../../components/GuidedForm/GuidedForm";
-
+import { setDebt } from "../../../redux/reducers/clients";
 import SelectGroupOne from "../../../components/Forms/SelectGroup/SelectGroupOne";
 
 import { useSelector,useDispatch } from "react-redux";
 import { createPayments } from "../funcs";
-import { setLoans,addLoan, setTotalLoans } from "../../../redux/reducers/loans";
+import { setLoans,addLoan, setTotalLoans,setLeftToPaid } from "../../../redux/reducers/loans";
 import {setPaymentsCount} from "../../../redux/reducers/payments"
 const Step6 = () => {
 
@@ -19,7 +19,8 @@ const Step6 = () => {
     const {setNotification,showNotification} = useNotification()
     const totalLoans = useSelector((state) => state.loans.totalLoans)
     const paymentsCount = useSelector((state) => state.payments.paymentsCount)
-    
+    const leftToPaid = useSelector((state) => state.loans)
+    const debt = useSelector((state) => state.clients.debt)
     
     useEffect(() => {
   
@@ -69,6 +70,9 @@ const Step6 = () => {
               //console.log("loan:----------------------------->",loan)
               dispatch(addLoan(loan))
               dispatch(setTotalLoans(totalLoans+1))
+
+              dispatch(setDebt(debt+(formData.amount.value+gains)))
+
               // //console.log(insert)
              /*  */
     

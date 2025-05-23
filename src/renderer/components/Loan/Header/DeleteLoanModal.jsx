@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 //redux
 import { deleteLoan } from "../../../redux/reducers/loans";
+import { setBruteGains, setNetGains } from "../../../redux/reducers/clients";
 
 //funcs
 
@@ -46,7 +47,7 @@ function FormModal() {
   const {setNotification,showNotification} = useNotification();
   const loan = useSelector((state) => state.loans.loan);
   const client = useSelector((state) => state.clients.client);
-
+  const {netGains,bruteGains} = useSelector((state) => state.clients);
   const {toggleModal} = useModal();
   const dispatch = useDispatch();
 
@@ -66,6 +67,9 @@ function FormModal() {
               message: "Cliente borrado correctamente",
               type: "success",
             });
+
+            dispatch(setBruteGains(bruteGains-loan.gains))
+            dispatch(setNetGains(netGains-loan.amount+loan.gains))
 
             showNotification()
 

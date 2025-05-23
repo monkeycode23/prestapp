@@ -4,8 +4,10 @@ import { useModal } from "../../../components/Modal";
 import { useGuide } from "../../../components/GuidedForm/GuidedForm";
 import { createPayments,insertLoan } from "../funcs";
 import { useDispatch,useSelector } from "react-redux";
-import { addLoan } from "../../../redux/reducers/loans";
+import { addLoan, setLeftToPaid } from "../../../redux/reducers/loans";
 import {setPaymentsCount} from "../../../redux/reducers/payments"
+import { setDebt } from "../../../redux/reducers/clients";
+
 
 const Step5 = ({ setLoans }) => {
     const [notifications, setNotifications] = useState([]);
@@ -18,8 +20,9 @@ const Step5 = ({ setLoans }) => {
    const paymentsCount = useSelector((state) => state.payments.paymentsCount)
    const installments = new Array(Number(formData.installments.value)).fill(0);
    const [pDates, setPDates] = useState(installments.map((e, i) => new Date()))
- 
-   //console.log(formData.installments.value)
+ // const leftToPaid  = useSelector((state) => state.loans)
+  const debt = useState(state=>state.clients.debt)  
+ //console.log(formData.installments.value)
    
    useEffect(() => {
  
@@ -74,7 +77,11 @@ const Step5 = ({ setLoans }) => {
             ...paymentsCount,
             pending:formData.installments.value,
           }))
-         /*  */
+
+
+          dispatch(setDebt(debt+(formData.amount.value+gains)))
+          
+          /*  */
 
       /*      */
       toggleModal();

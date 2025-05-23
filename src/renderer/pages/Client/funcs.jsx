@@ -103,6 +103,24 @@ export const getClientGains = async (clientId) => {
 
 }
 
+
+export const fetchClientDebt = async (clientId) => {
+   try {
+      const data = await window.database.models.Clients.getClients({
+         select: `SUM(payments.amount) as debt`,
+         joins: `JOIN loans ON clients.id = loans.client_id JOIN payments ON loans.id = payments.loan_id`,
+         where: `clients.id = ${clientId} AND payments.status in ('pending','incomplete','expired')`,
+         
+      })
+
+      console.log("data:----------------------------->",data)
+      return data[0];
+   } catch (error) {
+      console.log("error:----------------------------->",error);
+      return []
+   }
+}
+
 export const getClientLoans = async (clientId,filter,page,limit) => {
    
 
@@ -177,6 +195,7 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
       return query
    }
 
+   
 
    function setInterestRateQuery(filter){
 
@@ -340,11 +359,11 @@ export const createPayments = async (loan,sunday) => {
       const payment = await window.database.models.Payments.createPayment({
          label: `Pago ${i+1}`,
          loan_id:id,
-         amount:Math.floor(total_amount/installment_number),
-         gain:Math.floor(gain/installment_number),
+         amount:Math.ceil(total_amount/installment_number),
+         gain:Math.ceil(gain/installment_number),
          payment_date:ndate,
          status:"pending",
-         net_amount:Math.floor(amount/installment_number),
+         net_amount:Math.ceil(amount/installment_number),
          
    
    

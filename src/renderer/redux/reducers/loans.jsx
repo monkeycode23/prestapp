@@ -15,6 +15,7 @@ const initialState = {
     monthly: 0,
     loansTotalAmount: 0,
     paymentsTotalAmount: 0,
+    leftToPaid:0,
     loading: false,
     error: null,
     loan: null,
@@ -24,6 +25,10 @@ const loansSlice = createSlice({
     name: 'loans',
     initialState,
     reducers: {
+
+        setLeftToPaid: (state, action) => {
+               state.leftToPaid = action.payload;
+        },
         setStatics: (state, action) => {
             state.statics = action.payload;
         },
@@ -62,7 +67,7 @@ const loansSlice = createSlice({
     },
 })
 
-export const {setStatics,  setLoans, setTotalLoans, addLoan, updateLoan, deleteLoan, setMonthly, setLoansTotalAmount, setLoan, setLoading, setError } = loansSlice.actions;
+export const {setStatics,  setLoans,setLeftToPaid, setTotalLoans, addLoan, updateLoan, deleteLoan, setMonthly, setLoansTotalAmount, setLoan, setLoading, setError } = loansSlice.actions;
 export default loansSlice.reducer;      
 
 
