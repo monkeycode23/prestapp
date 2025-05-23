@@ -98,9 +98,11 @@ const Client = () => {
 
   useEffect(() => {
     const init = async () => {
+      if(pagination.label!="loans") dispatch(setPage(1));
+  
       dispatch(setLabel("loans"));
-      dispatch(setPage(1));
-
+      
+      
       // Resetear el filtro si viene de la página de pagos
       if (pagination.label === "payments") {
         dispatch(setFilter({
@@ -118,6 +120,7 @@ const Client = () => {
 
       const limit = pagination.limit.loans.limit;
 
+      console.log(pagination.page)
       const fetchLoans = await getClientLoans(
         id,
         pagination.filter,

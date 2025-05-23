@@ -95,9 +95,9 @@ const ClientHeader = () => {
                 <InformationClientHeader />
             </div>
 
-            <div className='xl:col-span-4 xl:block md:hidden xsm:col-span-12 sm:col-span-12 md:col-span-12 row-span-2'>
+            <div className='xl:col-span-4 xl:block  xsm:col-span-12 sm:col-span-12 md:col-span-12 row-span-2'>
                 {/*  */}
-                {/* <Chart></Chart> */}
+                <Chart></Chart> 
             </div>
         </div>
     )

@@ -4,118 +4,88 @@ import ReactApexChart from 'react-apexcharts';
 import { useSelector,useDispatch } from 'react-redux';
  
  const Chart = () => {
+
+
+  const paymentData = [
+    { name: "Pagados", value: 0,color: "#10B981" },
+    { name: "Pendientes", value:0,color: "#3B82F6" },
+    { name: "Vencidos", value:0, color: "#EF4444" },
+    { name: "Incompletos", value: 0,color: "#F59E0B" }
+  ]
         const [state, setState] = React.useState({
           
             series: [],
             options: {
               chart: {
-                width: 80,
-                type: 'donut',
+                type: "pie",
               },
-              plotOptions: {
-            pie: {
-              donut: {
-                size: '30%',
-                labels: {
-                  show: true,
-                  name: {
-                    show: true,
-                    fontSize: '22px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 600,
-                    color: '#373d3f',
-                    offsetY: -10,
-                  },
-                  value: {
-                    show: true,
-                    fontSize: '16px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 400,
-                    color: '#373d3f',
-                    offsetY: 16,
-                  },
-                  total: {
-                    show: true,
-                    label: 'Total',
-                    fontSize: '16px',
-                    fontFamily: 'Helvetica, Arial, sans-serif',
-                    fontWeight: 600,
-                    color: '#373d3f',
-                  }
-                }
-              }
-            }
-          },
-                colors: ['#7BD77E', '#6577F3', '#FF6666', '#FFCC66'],
-
-              labels: ['Pagados', 'Pendientes', 'Vencidos', 'Incompletos'],
+              labels: paymentData.map(item => item.name),
+              colors: paymentData.map(item => item.color),
               legend: {
-                  show: false,
-                  position: 'bottom',
-                },
-              dataLabels: {
-                enabled: false,
+                position: "bottom",
               },
-              responsive: [{
-                breakpoint: 280,
-                options: {
-                  chart: {
-                    width: 50
-                  },
-                  legend: {
-                    show: false
-                  }
-                }
-              }],
-              
-            },
-          
-          
+              tooltip: {
+                y: {
+                  formatter: (value) => `${value} pagos`,
+                },
+              },
+            }
         });
 
         
-        const [payments,setPayments ] = useState([])
+        //const [payments,setPayments ] = useState([])
         const loan = useSelector((state) => state.loans.loan)
-        
-       
-       
+                const payments = useSelector((state) => state.payments)
+
+      /*   ;
+      
+        const chartOptions = {
+          chart: {
+            type: "pie",
+          },
+          labels: paymentData.map(item => item.name),
+          colors: paymentData.map(item => item.color),
+          legend: {
+            position: "bottom",
+          },
+          tooltip: {
+            y: {
+              formatter: (value) => `${value} pagos`,
+            },
+          },
+        }; */
+      
+/*         const chartSeries = paymentData.map(item => item.value);
+ */       
         useEffect(() => {
           
           async function init(){
 
             const payments  = await window.database.models.Payments.getPayments({
-            select: `status,COUNT(*) AS total_payments`,
+            select: `COUNT(*) AS total_payments ,
+              COUNT(CASE status WHEN 'paid' THEN 1 ELSE NULL END) as total_paid,
+              COUNT(CASE status WHEN 'pending' THEN 1 ELSE NULL END) as total_pending,
+              COUNT(CASE status WHEN 'expired' THEN 1 ELSE NULL END) as total_expired,
+              COUNT(CASE status WHEN 'incomplete' THEN 1 ELSE NULL END) as total_incomlete
+            `,
             where: `loan_id ='${loan?.id}' `,
-            groupBy: 'status',
-            orderBy: `CASE status WHEN 'paid' THEN 1 WHEN 'expired' THEN 2 WHEN 'incomplete' THEN 3 WHEN 'pending'   THEN 4 ELSE 5 END`
+           // groupBy: 'status',
+          //  orderBy: `CASE status WHEN 'paid' THEN 1 WHEN 'expired' THEN 2 WHEN 'incomplete' THEN 3 WHEN 'pending'   THEN 4 ELSE 5 END`
         })
           console.log(payments)
 
-          const paymentState = payments.map((val)=>val.total_payments)
-          const total = paymentState.reduce((a, b) => a + b, 0);
+          //const paymentState = payments.map((val)=>val.total_payments)
+         // const total = paymentState.reduce((a, b) => a + b, 0);
 
-          setState({
-              options:{
-                ...state.options,
-                plotOptions: {
-                  pie: {
-                    donut: {
-                      ...state.options.plotOptions.pie.donut,
-                      labels: {
-                        ...state.options.plotOptions.pie.donut.labels,
-                        total: {
-                          ...state.options.plotOptions.pie.donut.labels.total,
-                          formatter: function (w) {
-                            return total;
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              },
-              series:paymentState
-          })
+        setState({
+          ...state,
+          series:[
+            payments[0].total_paid,
+            payments[0].total_pending,
+            payments[0].total_expired,
+            payments[0].total_incomlete
+          ]
+        })
        /*  setPayments(payments)
 
           console.log(payments)
@@ -128,7 +98,7 @@ import { useSelector,useDispatch } from 'react-redux';
           return () => {
             
           }
-        }, [loan?.id, payments, state.options]);
+        }, [loan?.id,payments.paidPayments]);
         
       
         
@@ -138,7 +108,7 @@ import { useSelector,useDispatch } from 'react-redux';
             <div>
                 <div class="chart-wrap">
                   <div id="chart">
-                <ReactApexChart options={state.options} series={state.series} type="donut" width={380} />
+                <ReactApexChart options={state.options} series={state.series} type="pie" width={380} />
               </div>
                 </div>
               

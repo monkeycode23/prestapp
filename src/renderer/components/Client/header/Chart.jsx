@@ -81,7 +81,7 @@ const Chart = ({}) => {
     };
 
     init();
-  }, [client.id, dispatch, loans.totalLoans, state.options]);
+  }, [client.id, dispatch, loans.totalLoans,]);
 
   return (
     <div className="w-full h-[300px]">

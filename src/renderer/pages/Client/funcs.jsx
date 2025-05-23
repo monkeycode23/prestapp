@@ -181,7 +181,7 @@ export const getClientLoans = async (clientId,filter,page,limit) => {
    function setInterestRateQuery(filter){
 
       //console.log("filter2:----------------------------->",filter)
-
+      if(filter.interestRate &&  filter.interestRate == 0) return ''
       let  query =filter.interestRate ? 'AND loans.interest_rate ' : ''
 
       if(filter.interestRate){

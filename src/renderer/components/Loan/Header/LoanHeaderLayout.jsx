@@ -43,11 +43,8 @@ const LoanHeaderLayout = () => {
   //const information = useSelector(state => state.information)
 
   // Calcular el progreso del préstamo
-  const totalPayments = payments.length;
-  const paidPayments = payments.filter(p => p.status === "paid").length;
-  const progressPercentage = totalPayments > 0 ? (paidPayments / totalPayments) * 100 : 0;
-
-  const paymentData = [
+  
+  /* const paymentData = [
     { name: "Pagados", value: payments.filter(p => p.status === "paid").length, color: "#10B981" },
     { name: "Pendientes", value: payments.filter(p => p.status === "pending").length, color: "#3B82F6" },
     { name: "Vencidos", value: payments.filter(p => p.status === "expired").length, color: "#EF4444" },
@@ -71,7 +68,7 @@ const LoanHeaderLayout = () => {
   };
 
   const chartSeries = paymentData.map(item => item.value);
-
+ */
   const handlePayInterest = (payment) => {
     // Aquí puedes agregar la lógica para procesar el pago del interés
   };
@@ -131,14 +128,15 @@ const LoanHeaderLayout = () => {
       </div>
 
       <div className="xl:col-span-4 xl:block xsm:col-span-12 sm:col-span-12 md:col-span-12 row-span-2">
-        <div style={{ width: "100%", height: 300 }}>
+        {/* <div style={{ width: "100%", height: 300 }}>
           <ReactApexChart
             options={chartOptions}
             series={chartSeries}
             type="pie"
             height={300}
           />
-        </div>
+        </div> */}
+        <Chart></Chart>
       </div>
 
       <div className="col-span-12 flex justify-end mt-4">

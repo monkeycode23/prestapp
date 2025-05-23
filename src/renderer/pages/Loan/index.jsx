@@ -64,6 +64,9 @@ const Loan = () => {
   useEffect(() => {
     async function init() {
       try {
+
+        if(pagination.label!="payments") dispatch(setPage(1));
+
         dispatch(setLabel("payments"));
 
         const fetchLoan = await getLoan(id);
