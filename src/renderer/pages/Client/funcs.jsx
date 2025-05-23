@@ -107,14 +107,28 @@ export const getClientGains = async (clientId) => {
 export const fetchClientDebt = async (clientId) => {
    try {
       const data = await window.database.models.Clients.getClients({
-         select: `SUM(payments.amount) as debt`,
+         select: `SUM(payments.amount) as total_paid`,
          joins: `JOIN loans ON clients.id = loans.client_id JOIN payments ON loans.id = payments.loan_id`,
-         where: `clients.id = ${clientId} AND payments.status in ('pending','incomplete','expired')`,
+         where: `clients.id = ${clientId} AND payments.status in ('paid')`,
+         
+      })
+
+
+      const data2 = await window.database.models.Loans.getLoans({
+         select: `SUM(loans.amount+loans.gain) as to_pay,
+         SUM(loans.amount) as total_amount`,
+         where: `client_id = ${clientId} `,
          
       })
 
       console.log("data:----------------------------->",data)
-      return data[0];
+      console.log("data2:----------------------------->",data2)
+
+      return {
+         totalAmount:data2.length ? data2[0].total_amount : 0,
+         totalToPaid:data2.length ? data2[0].to_pay : 0,
+         debt:data.length && data2.length ? data2[0].to_pay- data[0].total_paid : 0
+      };
    } catch (error) {
       console.log("error:----------------------------->",error);
       return []

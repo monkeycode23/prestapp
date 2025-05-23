@@ -111,7 +111,8 @@ const Loan = () => {
 
         const fetchLeftMoney  = await getLeftMoney(id)
         
-        dispatch(setLeftToPaid(fetchLeftMoney))
+        console.log(fetchLeftMoney)
+        dispatch(setLeftToPaid((loan.amount+loan.gain)-fetchLeftMoney))
       } catch (error) {
         console.log("error---a>>", error);
       }
@@ -149,16 +150,8 @@ const Loan = () => {
           >
             <PaymentIcon2 className="fill-primary dark:fill-white" width="22" height="22" />
           </CardDataStats>
-       
-          <CardDataStats
-            title="Ganancia Obtenida del Prestamo"
-            total={"$" + Intl.NumberFormat("de-DE").format(bruteGains)}
-            rate="0.0%"
-            levelUp
-          >
-            <MoneyBag className="fill-primary dark:fill-white" width="22" height="22" />
-          </CardDataStats>
 
+          
           <CardDataStats
             title="Dinero Recaudado"
             total={"$" + Intl.NumberFormat("de-DE").format(netGains)}
@@ -167,6 +160,9 @@ const Loan = () => {
           >
             <SackDollar className="fill-primary dark:fill-white" width="22" height="22" />
           </CardDataStats>
+         
+
+          
           <CardDataStats
             title="Dinero Restante por pagar"
             total={"$" + Intl.NumberFormat("de-DE").format(leftToPaid)}
@@ -174,6 +170,15 @@ const Loan = () => {
             levelUp
           >
             <MoneyBillAlt className="fill-primary dark:fill-white" width="22" height="22"></MoneyBillAlt>
+          </CardDataStats>
+
+          <CardDataStats
+            title="Ganancia Obtenida del Prestamo"
+            total={"$" + Intl.NumberFormat("de-DE").format(bruteGains)}
+            rate="0.0%"
+            levelUp
+          >
+            <MoneyBag className="fill-primary dark:fill-white" width="22" height="22" />
           </CardDataStats>
       </div>
 

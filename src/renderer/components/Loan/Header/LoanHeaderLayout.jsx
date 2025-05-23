@@ -30,6 +30,7 @@ import { setProgressPercentage, setPaidPayments, setTotalPayments } from "../../
 //funcs 
 import { formatAmount,formatDateCriollo } from "../../../common/funcs";
 import ProgressBar from "./ProgressBar";
+import { setUnbalancePayments } from "../../../redux/reducers/loans";
 
 
 
@@ -38,7 +39,9 @@ const LoanHeaderLayout = () => {
   
     const loan = useSelector((state) => state.loans.loan);
     const payments = useSelector((state) => state.payments.payments);
-
+    const unbalancePayments = useSelector((state) => state.loans.unbalancePayments);
+    const dispatch= useDispatch()
+    
    // console.log("loan",loan)
   //const information = useSelector(state => state.information)
 
@@ -73,9 +76,38 @@ const LoanHeaderLayout = () => {
     // Aquí puedes agregar la lógica para procesar el pago del interés
   };
 
+  async function detectUnbancePayments(id){
+    
+     const fetchPayments = await window.database.models.Payments.getPayments({
+      where:`loan_id = ${id}`,
+     })
+
+     console.log(fetchPayments)
+     const total  = fetchPayments.reduce((ac,current,)=>ac+current.amount,0)
+     
+     console.log(total, loan.amount+loan.gain)
+
+     return total > loan.amount+loan.gain-100 &&total < loan.amount+loan.gain+100
+  }
+
   useEffect(() => {
 
-   
+    const init = async ()=>{
+
+      const fetchUnbalance = await detectUnbancePayments(loan.id)
+
+      dispatch(setUnbalancePayments(fetchUnbalance))
+/* 
+       
+         */
+
+    
+     
+
+
+    }
+
+    init()
  /*  console.log("paymentsData",paymentsData)
     dispatch(setProgressPercentage(progressPercentage));
     dispatch(setPaidPayments(paidPayments));
@@ -92,8 +124,31 @@ const LoanHeaderLayout = () => {
           <SackDollar className="w-10 h-10" />
         </h1>
         <h1 className="text-xl font-bold text-gray-600">{loan ? loan.label : "Prestamo"}</h1>
-        <h1 className='text-4xl font-bold pb-3 mt-6'>${formatAmount(loan?.amount)}</h1>
-
+        <h1 className='text-4xl font-bold  mt-6'>${formatAmount(loan?.amount)}</h1>
+        <h1 className='text-3xl p-0 m-0 text-success font-bold'>(${formatAmount(loan?.gain)})</h1>
+        
+        {
+          !unbalancePayments ? (<>
+          
+          
+          <button className="p-1 bg-danger rounded-lg text-white">
+          <svg
+            className="fill-primary dark:fill-white inline"
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
+              fill="currentColor"
+            />
+          </svg>
+              ajustar pagos
+          </button>
+          </>) :(<></>)
+        }
         {/*  <AddLoanModal loan={loan}
           button={
             <button className='mt-4 bg-primary text-white p-2 rounded-xl border border-gray-300 font-bold'>

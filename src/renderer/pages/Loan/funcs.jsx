@@ -172,7 +172,7 @@ export  const getLeftMoney =async(id)=>{
   try {
     const leftmoney= await window.database.models.Payments.getPayments({
       select:`sum(payments.amount) as total_left`,
-      where:  `loan_id=${id} AND payments.status in ('pending','expired','incomplete')`
+      where:  `loan_id=${id} AND payments.status in ('paid')`
     });
 
     console.log(leftmoney)

@@ -32,9 +32,12 @@ import {
 
 import { setBruteGains, setNetGains } from "../../../redux/reducers/payments";
 
+//hooks
+import { useNotification } from "../../Notifications";
+
 //FUNCS
 import { payPayment, getNotes } from "../../../pages/Loan/funcs";
-import { setNotes } from "../../../redux/reducers/payments";
+import { setNotes,deletePayment } from "../../../redux/reducers/payments";
 
 const PaymentCard = ({ payment }) => {
   const [hasNotes, setHasNotes] = useState(false);
@@ -43,7 +46,7 @@ const PaymentCard = ({ payment }) => {
   const payments = useSelector((state) => state.payments);
   const leftToPaid = useSelector((state) => state.loans.leftToPaid);
   const dispatch = useDispatch();
-
+  const {showNotification,setNotification} = useNotification()
   //console.log("payment", payment);
 
   useEffect(() => {
@@ -324,18 +327,43 @@ shadow-2xl
 
           <button
             onClick={async () => {
-              showNotification();
-              dispatch(deletePayment(id));
-              dispatch(
-                setLoan({
-                  ...loan,
-                  installment_number: loan.installment_number - 1,
-                })
-              );
-              await window.database.models.Loans.updateLoan({
-                id: loan.id,
-                installment_number: loan.installment_number - 1,
-              });
+
+              try{
+
+
+                const a =await window.database.models.Payments.deletePayment(payment.id);
+                
+                console.log(a)
+
+                await window.database.models.Loans.updateLoan({
+                  id: loan.id,
+                  installment_number: loan.installment_number> 0 ?  loan.installment_number  - 1 : 0,
+                });
+  
+                
+                
+                dispatch(deletePayment(payment.id));
+                dispatch(
+                  setLoan({
+                    ...loan,
+                    installment_number: loan.installment_number> 0 ?  loan.installment_number  - 1 : 0,
+                  })
+                );
+                setNotification({
+                  type:"success",
+                  message:"Pago eliminado con exito"
+                });
+                showNotification();
+
+              }catch(error){
+                setNotification({
+                  type:"danger",
+                  message:"Algo salio mal "+error
+                });
+                showNotification();
+              }
+              
+              
             }}
             className="flex w-full items-center gap-2 text-black rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray dark:hover:bg-meta-4"
           >

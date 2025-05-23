@@ -6,6 +6,8 @@ const initialState = {
     totalClients: 0,
     loading: false,
     error: null,
+    totalLendMoney:0,
+    totalToPay:0,
     netGains: 0,
     bruteGains: 0,
     debt: 0,
@@ -16,7 +18,14 @@ const initialState = {
 const clientsSlice = createSlice({
     name: 'clients',
     initialState,
+    
     reducers: {
+        setTotalToPay: (state, action) => {
+            state.totalToPay= action.payload;
+        },
+        setTotalLendMoney: (state, action) => {
+            state.totalLendMoney= action.payload;
+        },
         setNetGains: (state, action) => {
             state.netGains = action.payload;
         },
@@ -61,5 +70,5 @@ const clientsSlice = createSlice({
     },
 })
 
-export const { setNetGains, setBruteGains, setDebt, setClient, setClients, setTotalClients, setLoading, setError, addClient, updateClient, deleteClient } = clientsSlice.actions;
+export const { setNetGains, setBruteGains,setTotalLendMoney,setTotalToPay, setDebt, setClient, setClients, setTotalClients, setLoading, setError, addClient, updateClient, deleteClient } = clientsSlice.actions;
 export default clientsSlice.reducer;

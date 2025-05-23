@@ -65,14 +65,16 @@ const Header = (props) => {
         </div>
 
         <div className="hidden sm:block">
-        <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-        <button onClick={()=>{
+        <h2 className="  ">
+        <button className='rounded-full px-2 bg-success text-white text-md font-bold hover:bg-green-600' onClick={()=>{
           
           navigate(-1)
 
         
 
-        }}>&lt; </button>   <button onClick={()=>navigate(+1)}>&gt;</button> 
+        }}>&lt; </button>   <button
+        className='rounded-full px-2 bg-success text-white text-md font-bold hover:bg-green-600'
+        onClick={()=>navigate(+1)}>&gt;</button> 
       </h2>
         </div>
 

@@ -16,6 +16,7 @@ import {
   WalletIcon,
   MoneyBag,
   MoneyBillAlt,
+  SackDollar
 } from "../../components/Icons";
 import ClientHeader from "../../components/Client/header/ClientHeader";
 import LoanCardsList from "../../components/Loan/LoanCards/LoanCardsList";
@@ -39,6 +40,8 @@ import {
   setNetGains,
   setBruteGains,
   setDebt,
+  setTotalLendMoney
+  ,setTotalToPay
 } from "../../redux/reducers/clients";
 import { setPaymentsCount } from "../../redux/reducers/payments";
 import {
@@ -76,6 +79,8 @@ const Client = () => {
   //redux states
   //client
   const client = useSelector((state) => state.clients.client);
+  const totalLendMoney = useSelector((state) => state.clients.totalLendMoney);
+
   //loan
   const loans = useSelector((state) => state.loans.loans);
   const totalLoans = useSelector((state) => state.loans.totalLoans);
@@ -175,7 +180,14 @@ const Client = () => {
 
       //deb 
       const debt = await fetchClientDebt(id);
+      
+      console.log(debt)
+      dispatch(setTotalToPay(debt.totalToPaid))
+
       dispatch(setDebt(debt.debt));
+      dispatch(setTotalLendMoney(debt.totalAmount));
+
+
     };
     init();
 
@@ -184,7 +196,7 @@ const Client = () => {
       dispatch(setLoans([]));
       dispatch(setTotalLoans(0));
     };
-  }, [id, pagination.page, pagination.limit.loans.limit, pagination.label]);
+  }, [id, pagination.page, pagination.limit.loans.limit, pagination.label,pagination.filter]);
 
   // Efecto separado para resetear el filtro solo cuando cambia el ID del cliente
 /*   useEffect(() => {
@@ -215,15 +227,14 @@ const Client = () => {
         </CardDataStats>
 
         <CardDataStats
-          title="Ganancias brutas"
-          total={"$ " + formatAmount(bruteGains)}
-          rate="0.0"
-          levelUp
-        >
-        <MoneyBillAlt className="fill-primary dark:fill-white" width="22" height="22" />
-
-        </CardDataStats>
-
+            title="Total de Dinero Prestado"
+            total={"$" + Intl.NumberFormat("de-DE").format(totalLendMoney)}
+            rate="0.0%"
+            levelUp
+          >
+            <SackDollar className="fill-primary dark:fill-white" width="22" height="22" />
+          </CardDataStats>
+        
         <CardDataStats
           title="Dinero recaudado del cliente"
           total={"$ " + formatAmount(netGains)}
@@ -258,6 +269,16 @@ const Client = () => {
           >
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
           </svg>
+        </CardDataStats>
+
+        <CardDataStats
+          title="Ganancias Obtenidas"
+          total={"$ " + formatAmount(bruteGains)}
+          rate="0.0"
+          levelUp
+        >
+        <MoneyBillAlt className="fill-primary dark:fill-white" width="22" height="22" />
+
         </CardDataStats>
 
       </div>

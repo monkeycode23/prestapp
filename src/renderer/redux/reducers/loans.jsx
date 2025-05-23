@@ -13,6 +13,7 @@ const initialState = {
         redunded: 0,
     },
     monthly: 0,
+    unbalancePayments:false,
     loansTotalAmount: 0,
     paymentsTotalAmount: 0,
     leftToPaid:0,
@@ -24,8 +25,13 @@ const initialState = {
 const loansSlice = createSlice({
     name: 'loans',
     initialState,
+    
+    
     reducers: {
 
+        setUnbalancePayments: (state, action) => {
+            state.unbalancePayments = action.payload;
+     },
         setLeftToPaid: (state, action) => {
                state.leftToPaid = action.payload;
         },
@@ -67,7 +73,7 @@ const loansSlice = createSlice({
     },
 })
 
-export const {setStatics,  setLoans,setLeftToPaid, setTotalLoans, addLoan, updateLoan, deleteLoan, setMonthly, setLoansTotalAmount, setLoan, setLoading, setError } = loansSlice.actions;
+export const {setStatics,setUnbalancePayments,  setLoans,setLeftToPaid, setTotalLoans, addLoan, updateLoan, deleteLoan, setMonthly, setLoansTotalAmount, setLoan, setLoading, setError } = loansSlice.actions;
 export default loansSlice.reducer;      
 
 
