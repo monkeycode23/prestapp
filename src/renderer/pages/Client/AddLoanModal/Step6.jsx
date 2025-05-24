@@ -2,7 +2,7 @@ import React,{ useState,useEffect } from "react";
 import { useNotification } from "../../../components/Notifications";
 import { useModal } from "../../../components/Modal";
 import { useGuide } from "../../../components/GuidedForm/GuidedForm";
-import { setDebt } from "../../../redux/reducers/clients";
+import { setDebt,setTotalLendMoney } from "../../../redux/reducers/clients";
 import SelectGroupOne from "../../../components/Forms/SelectGroup/SelectGroupOne";
 
 import { useSelector,useDispatch } from "react-redux";
@@ -21,7 +21,8 @@ const Step6 = () => {
     const paymentsCount = useSelector((state) => state.payments.paymentsCount)
     const leftToPaid = useSelector((state) => state.loans)
     const debt = useSelector((state) => state.clients.debt)
-    
+    const clients = useSelector((state) => state.clients)
+
     useEffect(() => {
   
       enableNext()
@@ -72,6 +73,8 @@ const Step6 = () => {
               dispatch(setTotalLoans(totalLoans+1))
 
               dispatch(setDebt(debt+(formData.amount.value+gains)))
+
+              dispatch(setTotalLendMoney(clients.totalLendMoney+loan.amount))
 
               // //console.log(insert)
              /*  */

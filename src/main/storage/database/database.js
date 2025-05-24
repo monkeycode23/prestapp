@@ -67,16 +67,7 @@ class DatabaseManager {
 
 
 
-  addColumn(table,col){
-    try {
-      const query = `ALTER TABLE ${table} ADD COLUMN ${col}`;
-      this.db.exec(query);
-      logger.info(`Tabla ${table} modificada`);
-    } catch (error) {
-      logger.error("Error al crear la tabla:", error);
-      throw error;
-    }
-  }
+  
 
   runQuery(sql, params = []) {
     try {

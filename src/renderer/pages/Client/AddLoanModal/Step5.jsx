@@ -6,7 +6,7 @@ import { createPayments,insertLoan } from "../funcs";
 import { useDispatch,useSelector } from "react-redux";
 import { addLoan, setLeftToPaid } from "../../../redux/reducers/loans";
 import {setPaymentsCount} from "../../../redux/reducers/payments"
-import { setDebt } from "../../../redux/reducers/clients";
+import { setDebt, setTotalLendMoney } from "../../../redux/reducers/clients";
 
 
 const Step5 = ({ setLoans }) => {
@@ -16,6 +16,8 @@ const Step5 = ({ setLoans }) => {
    const { formData, disableNext, nextStep, handleChange, enableNext, registerOnNext, validate, setField } = useGuide()
    const dispatch = useDispatch()
    const client = useSelector((state) => state.clients.client)
+   const clients = useSelector((state) => state.clients)
+
    const {id} = client
    const paymentsCount = useSelector((state) => state.payments.paymentsCount)
    const installments = new Array(Number(formData.installments.value)).fill(0);
@@ -80,6 +82,7 @@ const Step5 = ({ setLoans }) => {
 
 
           dispatch(setDebt(debt+(formData.amount.value+gains)))
+          dispatch(setTotalLendMoney(clients.totalLendMoney+loan.amount))
           
           /*  */
 

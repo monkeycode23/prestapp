@@ -56,13 +56,11 @@ const ChartThree= ({payments}) => {
       pending:10,
       incomplete:1,
      })
-  
+
+     const [show, setShow] = useState(true)
   
     const [state, setState] = useState({
-    series: [
-      12,4,12,22
-         
-    ],
+    series: [],
   });
 
   async function  getPaymentsData(period){
@@ -96,7 +94,11 @@ const ChartThree= ({payments}) => {
     }
 
     //console.log("p:----------------------------->",p)
-    return  [ 
+    return  p.paid ==0 && p.pending==0 && p.expired == 0 && p.incomplete ==0 ? 
+    
+    []
+    :
+    [ 
         p.paid,
         p.pending,
         p.expired,
@@ -116,6 +118,7 @@ const ChartThree= ({payments}) => {
 
 
         const series = parseData(data)
+        setShow(series.length ? true :false )
         setState((prevState) => {
           return {
             ...prevState,
@@ -239,7 +242,10 @@ const ChartThree= ({payments}) => {
  
  
 
-return (
+return (<>
+  {
+    show ? (        <div className="col-span-12 xl:col-span-6">
+
     <div className="sm:px-7.5 col-span-12 rounded-sm border border-stroke bg-white px-5 pb-5 pt-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-5">
       <div className="mb-3 justify-between gap-4 sm:flex">
         <div>
@@ -336,8 +342,9 @@ return (
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div></div>): (<></>)
+  }
+</>);
 };
 
 export default ChartThree;

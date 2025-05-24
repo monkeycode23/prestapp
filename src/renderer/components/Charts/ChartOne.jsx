@@ -5,6 +5,8 @@ import { getYearPaymentsTotalAmountDate } from '../../pages/Payments/funcs';
 import { formatAmount } from '../../common/funcs';
 
 const ChartOne = () => {
+
+  const [show, setShow] = useState(true)
   const [visibleSeries, setVisibleSeries] = useState({
     net: true,
     brute: true,
@@ -147,7 +149,8 @@ const ChartOne = () => {
   });
 
   function setMonthValues(r) {
-    const netMonths = Array(12).fill(0);
+    const netMonths =Array(12).fill(0);
+    //
     const bruteMonths = Array(12).fill(0);
 
     for (const month of r) {
@@ -203,6 +206,8 @@ const ChartOne = () => {
   });
 
   return (
+    <div className="col-span-12 xl:col-span-12">
+
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-12">
       <div className="flex items-start justify-between gap-3">
         <div className="flex w-full flex-wrap gap-2 sm:gap-5">
@@ -248,6 +253,7 @@ const ChartOne = () => {
           height={350}
         />
       </div>
+    </div>
     </div>
   );
 };

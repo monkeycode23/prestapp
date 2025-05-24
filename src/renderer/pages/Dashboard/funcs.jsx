@@ -3,11 +3,13 @@ export const getTotalLoans = async () => {
         const loans = await window.database.models.Loans.getLoans({
             select: `
                 COUNT(CASE WHEN status = 'active' THEN 1 END) as active_total,
-                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_total
+                COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_total,
+                COUNT(CASE WHEN status = 'canceled' THEN 1 END) as canceled_total
+
             `
         })
 
-        console.log("loans:----------------------------->",loans)
+        //console.log("loans:----------------------------->",loans)
         return {
             active: loans[0].active_total || 0,
             completed: loans[0].completed_total || 0

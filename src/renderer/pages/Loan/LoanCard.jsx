@@ -37,31 +37,7 @@ export const LoanCard = () => {
         <div className="max-w-sm bg-white shadow-lg rounded-lg p-6 border border-gray-200">
           {/* Header */}
           <div className="flex justify-start mb-4">
-            <DropdownDefault>
-              <EditLoanModal
-                loan={loan}
-                label={"Editar prestamo"}
-                button={
-                  <button className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                    <EditIcon className="w-4 h-4" />
-                    Editar Prestamo
-                  </button>
-                }
-              />
-              <button
-                onClick={async () => {
-                  try {
-                    await deleteLoanDb(loan.id);
-                    handleBack();
-                  } catch (error) {
-                  }
-                }}
-                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-300 rounded-md hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                <DeleteIcon className="w-4 h-4" />
-                Borrar Prestamo
-              </button>
-            </DropdownDefault>
+            
           </div>
 
           <div className="flex justify-center items-center">

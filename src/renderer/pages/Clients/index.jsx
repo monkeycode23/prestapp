@@ -20,7 +20,7 @@ import PaginationModal from "../../components/PaginationModal.jsx";
 import { useDispatch, useSelector } from "react-redux";
 
 //redux actions
-import { setClients, setTotalClients } from "../../redux/reducers/clients";
+import { setClients, setTotalClients,setStatics } from "../../redux/reducers/clients";
 import { setLoans } from "../../redux/reducers/loans";
 import {
   setLabel,
@@ -67,6 +67,8 @@ const Clients = () => {
   //pagination
 
   useEffect(() => {
+    if(pagination.label!="clients") dispatch(setPage(1));
+
     dispatch(setLabel("clients"));
 
     const init = async () => {

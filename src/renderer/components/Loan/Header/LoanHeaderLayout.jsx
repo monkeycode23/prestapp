@@ -21,6 +21,7 @@ import {
   CalendarDateIcon
 } from "../../../components/Icons";
 
+import FixUnbalanceModal from './FixUnbalanceModal'
 import Chart from "./chart";
 
 //redux
@@ -42,68 +43,34 @@ const LoanHeaderLayout = () => {
     const unbalancePayments = useSelector((state) => state.loans.unbalancePayments);
     const dispatch= useDispatch()
     
-   // console.log("loan",loan)
-  //const information = useSelector(state => state.information)
 
-  // Calcular el progreso del préstamo
-  
-  /* const paymentData = [
-    { name: "Pagados", value: payments.filter(p => p.status === "paid").length, color: "#10B981" },
-    { name: "Pendientes", value: payments.filter(p => p.status === "pending").length, color: "#3B82F6" },
-    { name: "Vencidos", value: payments.filter(p => p.status === "expired").length, color: "#EF4444" },
-    { name: "Incompletos", value: payments.filter(p => p.status === "incomplete").length, color: "#F59E0B" }
-  ];
-
-  const chartOptions = {
-    chart: {
-      type: "pie",
-    },
-    labels: paymentData.map(item => item.name),
-    colors: paymentData.map(item => item.color),
-    legend: {
-      position: "bottom",
-    },
-    tooltip: {
-      y: {
-        formatter: (value) => `${value} pagos`,
-      },
-    },
-  };
-
-  const chartSeries = paymentData.map(item => item.value);
- */
-  const handlePayInterest = (payment) => {
-    // Aquí puedes agregar la lógica para procesar el pago del interés
-  };
 
   async function detectUnbancePayments(id){
+
+      if(id){
+        const fetchPayments = await window.database.models.Payments.getPayments({
+          where:`loan_id = ${id}`,
+         })
     
-     const fetchPayments = await window.database.models.Payments.getPayments({
-      where:`loan_id = ${id}`,
-     })
-
-     console.log(fetchPayments)
-     const total  = fetchPayments.reduce((ac,current,)=>ac+current.amount,0)
+         console.log(fetchPayments)
+         const total  = fetchPayments.reduce((ac,current,)=>ac+current.amount,0)
+         
+         console.log(total, loan.amount+loan.gain)
+    
+         return total > loan.amount+loan.gain-100 &&total < loan.amount+loan.gain+100
      
-     console.log(total, loan.amount+loan.gain)
+      }
 
-     return total > loan.amount+loan.gain-100 &&total < loan.amount+loan.gain+100
-  }
+        return false
+    }
 
   useEffect(() => {
 
     const init = async ()=>{
 
-      const fetchUnbalance = await detectUnbancePayments(loan.id)
+      const fetchUnbalance = await detectUnbancePayments(loan?.id)
 
-      dispatch(setUnbalancePayments(fetchUnbalance))
-/* 
-       
-         */
-
-    
-     
-
+      dispatch(setUnbalancePayments(fetchUnbalance))     
 
     }
 
@@ -128,25 +95,13 @@ const LoanHeaderLayout = () => {
         <h1 className='text-3xl p-0 m-0 text-success font-bold'>(${formatAmount(loan?.gain)})</h1>
         
         {
-          !unbalancePayments ? (<>
+          unbalancePayments ? (<>
+          
+          <FixUnbalanceModal>
+
+          </FixUnbalanceModal>
           
           
-          <button className="p-1 bg-danger rounded-lg text-white">
-          <svg
-            className="fill-primary dark:fill-white inline"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"
-              fill="currentColor"
-            />
-          </svg>
-              ajustar pagos
-          </button>
           </>) :(<></>)
         }
         {/*  <AddLoanModal loan={loan}

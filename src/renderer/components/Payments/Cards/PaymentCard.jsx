@@ -30,6 +30,8 @@ import {
   updatePayment,
 } from "../../../redux/reducers/payments";
 
+import { setUnbalancePayments } from "../../../redux/reducers/loans";
+
 import { setBruteGains, setNetGains } from "../../../redux/reducers/payments";
 
 //hooks
@@ -38,6 +40,7 @@ import { useNotification } from "../../Notifications";
 //FUNCS
 import { payPayment, getNotes } from "../../../pages/Loan/funcs";
 import { setNotes,deletePayment } from "../../../redux/reducers/payments";
+import { setTotalResults } from "../../../redux/reducers/_pagination";
 
 const PaymentCard = ({ payment }) => {
   const [hasNotes, setHasNotes] = useState(false);
@@ -349,6 +352,9 @@ shadow-2xl
                     installment_number: loan.installment_number> 0 ?  loan.installment_number  - 1 : 0,
                   })
                 );
+
+                dispatch(setUnbalancePayments(setTotalResults))     
+
                 setNotification({
                   type:"success",
                   message:"Pago eliminado con exito"

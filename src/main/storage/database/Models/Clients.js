@@ -13,10 +13,11 @@ class Clients extends Models {
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`);
+            
+            this.addColumn("notes TEXT")
+
+            this.addColumn("reputation INTEGER default 100")
       }
- 
-     
-       
 
       /* async createClient(client){
         return this.db.insert(this.tableName,client);

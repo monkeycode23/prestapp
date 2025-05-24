@@ -118,6 +118,40 @@ export const getClients = async (filter, limit = 5, page = 1) => {
   }
 }
 
+export const getTopClients = async (limit = 3) => {
+  const query = {
+    select: `clients.id, clients.nickname, SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid` ,
+    joins: `LEFT JOIN loans l ON clients.id = l.client_id LEFT JOIN payments p ON l.id = p.loan_id`,
+    groupBy: 'clients.id',
+    orderBy: 'total_paid DESC',
+    limit: limit
+  };
+  const clients = await window.database.models.Clients.getClients(query);
+  return clients;
+}
+
+export const getClientsWithReputation = async (limit = 3) => {
+  const query = {
+    select: `clients.id, clients.nickname, 
+      SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid,
+      SUM(CASE WHEN p.status = 'expired' THEN 1 ELSE 0 END) as expired,
+      SUM(CASE WHEN p.status = 'incomplete' THEN 1 ELSE 0 END) as incomplete` ,
+    joins: `LEFT JOIN loans l ON clients.id = l.client_id LEFT JOIN payments p ON l.id = p.loan_id`,
+    groupBy: 'clients.id',
+    orderBy: 'total_paid DESC',
+    limit: limit
+  };
+  const clients = await window.database.models.Clients.getClients(query);
+  // Calcular reputación
+  return clients.map(c => {
+    const expired = Number(c.expired) || 0;
+    const incomplete = Number(c.incomplete) || 0;
+    let reputation = 100 - (expired * 10) - (incomplete * 5);
+    if (reputation < 0) reputation = 0;
+    return { ...c, reputation };
+  });
+}
+
 
 
 

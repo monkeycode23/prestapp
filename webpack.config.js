@@ -6,6 +6,7 @@ module.exports = {
   // Modo de desarrollo - puedes cambiarlo a 'production' para producción
   mode: 'development',
 
+  devtool: 'source-map', 
   // Punto de entrada de tu aplicación
   entry: './src/renderer/index.jsx',
 

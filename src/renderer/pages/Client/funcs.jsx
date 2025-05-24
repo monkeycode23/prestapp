@@ -123,7 +123,8 @@ export const fetchClientDebt = async (clientId) => {
 
       console.log("data:----------------------------->",data)
       console.log("data2:----------------------------->",data2)
-
+      const debt =     data.length && data2.length ? data2[0].to_pay- data[0].total_paid : 0
+      console.log(debt)
       return {
          totalAmount:data2.length ? data2[0].total_amount : 0,
          totalToPaid:data2.length ? data2[0].to_pay : 0,
@@ -342,7 +343,6 @@ export const insertLoan = async (loan) => {
 
 export const createPayments = async (loan,sunday) => {
 
-   //nsole.log("loan:----------------------------->",loan)
    const {installment_number,
       total_amount,
       gain,
@@ -350,22 +350,16 @@ export const createPayments = async (loan,sunday) => {
       generate_payments_date,id,
       payment_interval,interest_rate} = loan
 
-
    try {
       const payments=[]
-      //nsole.log("generate_payments_date:----------------------------->",generate_payments_date)
 
       const payDate = new Date(generate_payments_date+ "T00:00:00")
-      //nsole.log("payDate:----------------------------->",payDate)
 
       for (let i = 0; i < installment_number; i++) {
-         
          let ndate 
-
          if(payment_interval === "custom"){
             ndate = loan.dates[i]
          }else{
-            
             ndate = i==0 ? generate_payments_date : calculatePaymentsDate(payDate,payment_interval,sunday)
          }
       
@@ -373,11 +367,11 @@ export const createPayments = async (loan,sunday) => {
       const payment = await window.database.models.Payments.createPayment({
          label: `Pago ${i+1}`,
          loan_id:id,
-         amount:Math.ceil(total_amount/installment_number),
-         gain:Math.ceil(gain/installment_number),
+         amount:Math.floor(total_amount/installment_number),
+         gain:Math.floor(gain/installment_number),
          payment_date:ndate,
          status:"pending",
-         net_amount:Math.ceil(amount/installment_number),
+         net_amount:Math.floor(amount/installment_number),
          
    
    
@@ -385,8 +379,6 @@ export const createPayments = async (loan,sunday) => {
 
        payments.push(payment)
    }
-
-  //onsole.log("payments:----------------------------->",payments)
     return payments
     //return data
    } catch (error) {
