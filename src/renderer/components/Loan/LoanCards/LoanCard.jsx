@@ -6,7 +6,7 @@ import {
   CalendarDateIcon,
   BaselineFactCheck,
   BaselineAssignment,
-  DeleteIcon
+  DeleteIcon,
 } from "../../Icons";
 
 import DropdownDefault from "../../Dropdowns/DropdownDefault";
@@ -17,16 +17,19 @@ import Tooltip from "../../Tooltip";
 import { formatAmount } from "../../../common/funcs";
 import { deleteLoan, setStatics } from "../../../redux/reducers/loans";
 import { setDebt, setTotalLendMoney } from "../../../redux/reducers/clients";
-import { useDispatch,useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNotification } from "../../Notifications";
 import { deleteClientDb } from "../../../pages/Client/funcs";
-import { deleteLoanDb, getLoanCurrentGains, getLoanLeftToPay } from "../../../pages/Loan/funcs";
+import {
+  deleteLoanDb,
+  getLoanCurrentGains,
+  getLoanLeftToPay,
+} from "../../../pages/Loan/funcs";
 
 const LoanCard = ({ loan }) => {
-  
-  const clients = useSelector(state=>state.clients)
-  const dispatch = useDispatch()
-  const {setNotification,showNotification} = useNotification()
+  const clients = useSelector((state) => state.clients);
+  const dispatch = useDispatch();
+  const { setNotification, showNotification } = useNotification();
   return (
     <div
       className={`w-full flex  gap-4 xsm:col-span-12
@@ -89,16 +92,18 @@ shadow-2xl
         </div>
       </div>
 
-     {/*  <span
+      {/*  <span
         className="font-bold text-xl absolute top-0 right-4 
         hover:cursor-pointer text-primary
         "
       >
         ...
       </span> */}
-      <DropdownDefault className={`font-bold text-xl absolute top-0 left-10 p-2 
-        hover:cursor-pointer text-white`}>
-              {/* <EditLoanModal
+      <DropdownDefault
+        className={`font-bold text-xl absolute top-0 left-10 p-2 
+        hover:cursor-pointer text-white`}
+      >
+        {/* <EditLoanModal
                 loan={loan}
                 label={"Editar prestamo"}
                 button={
@@ -108,54 +113,49 @@ shadow-2xl
                   </button>
                 }
               /> */}
-              <button
-              
-                onClick={async () => {
-                  try {
-                    //await deleteLoanDb(loan.id);
-                    //handleBack();
-                    await deleteLoanDb(loan.id)
-                    //await window.database.models.Loans.deleteLoan(loan.id)
-                    dispatch(deleteLoan({id:loan.id}))
+        <button
+          onClick={async () => {
+            try {
+              //await deleteLoanDb(loan.id);
+              //handleBack();
+              await deleteLoanDb(loan.id);
+              //await window.database.models.Loans.deleteLoan(loan.id)
+              dispatch(deleteLoan({ id: loan.id }));
 
+              //dispatch(setDebt(clients.debt-(loan.amount+loan.gain)))
+              const leftToPaid = await getLoanLeftToPay(loan.id);
+              const loanGains = await getLoanCurrentGains(loan.id);
 
-                    
-                    
+              dispatch(
+                setStatics({
+                  totalLoans:
+                    clients.totalLoans > 1 ? clients.totalLoans - 1 : 0,
+                  debt: clients.debt - leftToPaid,
+                  totalLendMoney: clients.totalLendMoney - loan.amount,
+                  bruteGains: clients.bruteGains - loanGains.brute,
+                  netGains: clients.netGains - loanGains.net,
+                })
+              );
 
-                    //dispatch(setDebt(clients.debt-(loan.amount+loan.gain)))
-                    const leftToPaid = await getLoanLeftToPay(loan.id)
-                    const loanGains = await getLoanCurrentGains(loan.id)
-                    
-                    dispatch(setStatics({
-                      totalLoans:clients.totalLoans >1 ? clients.totalLoans -1 : 0,
-                      debt:clients.debt-leftToPaid,
-                      totalLendMoney:clients.totalLendMoney-loan.amount,
-                      bruteGains:clients.bruteGains-loanGains.brute,
-                      netGains:clients.netGains-loanGains.net
-                     }))
-                    
-                    
-                    setNotification({
-                      type:"success",
-                      message:"Prestamo eliminado con exito"
-                    })
-                    showNotification()
-                  } catch (error) {
-
-                    
-                    setNotification({
-                      type:"danger",
-                      message:"Error al borrar el prestamo "+error
-                    })
-                    showNotification()
-                  }
-                }}
-                className="flex items-center gap-2  text-sm font-medium text-black bg-white border  hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-              >
-                <DeleteIcon className="w-4 h-4" />
-                Borrar Prestamo
-              </button>
-            </DropdownDefault>
+              setNotification({
+                type: "success",
+                message: "Prestamo eliminado con exito",
+              });
+              showNotification();
+            } catch (error) {
+              setNotification({
+                type: "danger",
+                message: "Error al borrar el prestamo " + error,
+              });
+              showNotification();
+            }
+          }}
+          className="flex items-center gap-2  text-sm font-medium text-black bg-white border  hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          <DeleteIcon className="w-4 h-4" />
+          Borrar Prestamo
+        </button>
+      </DropdownDefault>
 
       <div className="flex flex-col justify-center  items-center mt-6">
         <span className="text-lg font-bold rounded-full  bg-white text-black p-3">

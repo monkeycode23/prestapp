@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addClient } from '../../redux/reducers/clients';
 import { setClient } from "../../redux/reducers/clients";
 import Tag from "../../components/Tag";
-import ClientCard from "./ClientCard";
+import ClientCard from "../../components/Client/Cards/ClientCard";
 
 const ClientList = () => {
 
@@ -28,7 +28,7 @@ const ClientList = () => {
     <>
     
       {clients.length>0 ?
-       (<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-1  ">
+       (<div className="grid grid-cols-2 gap-3  md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 2xl:grid-cols-2  ">
 
         {
           clients.map((client) =>{

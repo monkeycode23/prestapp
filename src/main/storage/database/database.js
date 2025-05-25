@@ -66,7 +66,15 @@ class DatabaseManager {
   }
 
 
-
+  exec(sql, params = []) {
+    try {
+      return this.db.exec(sql);
+      
+    } catch (error) {
+      logger.error("Error al ejecutar la consulta:", error);
+      throw error;
+    }
+  }
   
 
   runQuery(sql, params = []) {

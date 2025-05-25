@@ -24,15 +24,16 @@ class Models {
 
     addColumn(col){
         try {
-          const query = `ALTER TABLE ${this.table} ADD COLUMN ${col} IF NOT EXISTS`;
+          const query = `ALTER TABLE ${this.tableName} IF NOT EXISTS ADD COLUMN ${col} `;
+          console.log(query)
           this.db.exec(query);
-          logger.info(`Tabla ${this.table} modificada`);
+          logger.info(`Tabla ${this.tableName} modificada`);
         } catch (error) {
           logger.error("Error al crear la tabla:", error);
           throw error;
         }
       }
-
+ 
     async insert( data) {  
     
 

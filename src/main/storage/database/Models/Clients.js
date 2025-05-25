@@ -9,14 +9,16 @@ class Clients extends Models {
         this.createTable(`id INTEGER PRIMARY KEY AUTOINCREMENT,
             nickname TEXT NOT NULL, 
             status TEXT  DEFAULT "activo",
+            notes TEXT,
+            reputation INTEGER DEFAULT 100,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`);
             
-            this.addColumn("notes TEXT")
+            //this.addColumn("notes TEXT")
 
-            this.addColumn("reputation INTEGER default 100")
+            //this.addColumn("reputation INTEGER default 100")
       }
 
       /* async createClient(client){
