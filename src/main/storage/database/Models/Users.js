@@ -12,6 +12,7 @@ class Users {
      username TEXT, email TEXT, password TEXT,
      rol TEXT DEFAULT 'user',
      status TEXT DEFAULT 'activo',
+     
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       `;
