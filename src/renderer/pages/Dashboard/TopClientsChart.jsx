@@ -14,8 +14,8 @@ function TopClientsChart() {
 
         const init = async () => {
          
-        const top = await getClientsWithReputation(3);
-        console.log(top)
+        const top = await getClientsWithReputation(10);
+        console.log("-------------------->",top)
         setShow(top.length ? true :false)
         setTopClientes(top);
           

@@ -42,7 +42,8 @@ import {
   checkAndUpdateActiveLoans,
   isLoanCompletedPaid,
   getLeftMoney,
-  getLoanTotalPaid
+  getLoanTotalPaid,
+  checkCompletedLoan
 } from "./funcs";
 
 
@@ -72,14 +73,28 @@ const Loan = () => {
 
         dispatch(setLabel("payments"));
 
+
         //get loann info
         const fetchLoan = await getLoan(id);
         console.log(fetchLoan)
+
+       // checkCompletedLoan(id,fetchLoan.installment_number)
+
         dispatch(setLoan(fetchLoan));
 
         // Verificar si el préstamo actual está completado
         const isCompleted = await isLoanCompletedPaid(id);
-        
+        if (!isCompleted && fetchLoan.status === 'completed') {
+          await window.database.models.Loans.updateLoan({
+            id: id,
+            status: "active"
+          });
+          dispatch(setLoan({
+            ...fetchLoan,
+            status: "active"
+          }));
+        }
+
         if (isCompleted && fetchLoan.status === 'active') {
           await window.database.models.Loans.updateLoan({
             id: id,

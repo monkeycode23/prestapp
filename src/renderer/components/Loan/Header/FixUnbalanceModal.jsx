@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import Modal from '../../Modal';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { updatePayment, deletePayment } from '../../../redux/reducers/payments';
+import { adjustLoanAmount, adjustUnpaidInstallments, autoGenerateInstallments, completeRemainingInstallments } from './funcs';
 
 const FixUnbalanceModal = () => {
   const dispatch = useDispatch();
   const [error, setError] = useState('');
 
+  const loans = useSelector(state=>state.loans)
   // Estrategia seleccionada por el usuario
   const [strategy, setStrategy] = useState('');
 
   const handleUpdate = () => {
-    const totalLoanAmount = 123123;
+   // const totalLoanAmount = 123123;
 
     // Aquí podrías hacer validaciones según la estrategia seleccionada
     if (!strategy) {
@@ -19,6 +21,11 @@ const FixUnbalanceModal = () => {
       return;
     }
 
+    if(strategy=="adjustLoanAmount")  adjustLoanAmount(loans.loan)
+    if(strategy=="completeRemainingInstallments") completeRemainingInstallments(loans.loan)
+    if(strategy=="adjustUnpaidInstallments")  adjustUnpaidInstallments(loans.loan)
+    if(strategy=="autoGenerateInstallments") autoGenerateInstallments(loans.loan)
+    
     // dispatch(updatePayment({ id: paymentId, strategy }));
     // onClose();
   };
@@ -46,20 +53,11 @@ const FixUnbalanceModal = () => {
             />
           </svg>
           ajustar pagos
+
         </button>
       }
     >
-      <h2 className="text-xl font-semibold mb-4">Ajustar Pago</h2>
-
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-1">Monto Ajustado:</label>
-        <input
-          type="number"
-          value={12312}
-          onChange={() => {}}
-          className="w-full border rounded px-3 py-2"
-        />
-      </div>
+      <h2 className="text-xl font-semibold mb-4">Corregir Incongruencia de pagos</h2>
 
       <div className="mb-4">
         <label className="block text-sm font-medium mb-1">Estrategia de corrección:</label>
@@ -82,7 +80,7 @@ const FixUnbalanceModal = () => {
           onClick={handleUpdate}
           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
         >
-          Actualizar Pago
+          Corregir
         </button>
         <button
           onClick={handleDelete}

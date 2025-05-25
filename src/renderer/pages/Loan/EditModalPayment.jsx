@@ -1,19 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Modal from "../../components/Modal";
-
 import Select from "../../components/Forms/SelectGroup/Select";
-
 import { useNotification } from "../../components/Notifications";
 import { useModal } from "../../components/Modal";
 import { useDispatch, useSelector } from "react-redux";
 import { updatePayment, setBruteGains, setNetGains } from "../../redux/reducers/payments";
-import { updateLoan,setLoan } from "../../redux/reducers/loans";
-
-
+import { updateLoan, setLoan } from "../../redux/reducers/loans";
 
 function EditModalPayment({ payment, button }) {
-  // console.log(payment)P
-
   return (
     <Modal buttonLabel={"edit"} title={"Editar Pago"} button={button}>
       <EditPaymentForm payment={payment}></EditPaymentForm>
@@ -21,19 +15,18 @@ function EditModalPayment({ payment, button }) {
   );
 }
 
-function EditPaymentForm({ payment, button }) {
-
+function EditPaymentForm({ payment }) {
   const { setNotification, showNotification } = useNotification();
   const { toggleModal } = useModal();
   const dispatch = useDispatch();
-  const loan = useSelector(state=>state.loans.loan)
-  const bruteGains = useSelector(state=>state.payments.bruteGains)
-  const netGains = useSelector(state=>state.payments.netGains)
-  const currentStatus = payment.status
+  const loan = useSelector((state) => state.loans.loan);
+  const bruteGains = useSelector((state) => state.payments.bruteGains);
+  const netGains = useSelector((state) => state.payments.netGains);
+  const currentStatus = payment.status;
 
   const [formData, setFormData] = useState({
     amount: {
-      value: typeof payment.amount == "object" ? "" : payment.amount,
+      value: typeof payment.amount === "object" ? "" : payment.amount,
       error: "",
     },
     payment_date: {
@@ -50,35 +43,54 @@ function EditPaymentForm({ payment, button }) {
     },
   });
 
+  // Estados extra para monto abonado, fecha pagada y método de pago
+  const [amountPaid, setAmountPaid] = useState(payment.amount_paid || 0);
+  const [amountPaidError, setAmountPaidError] = useState("");
+  const [paidDateInput, setPaidDateInput] = useState(payment.paid_date || "");
+  const [paymentMethod, setPaymentMethod] = useState(payment.payment_method || "efectivo");
+
   useEffect(() => {
-    return () => {};
-  }, [formData]);
+    // Reset inputs si el estado cambia a otro distinto
+    if (formData.status.value !== "incomplete") {
+      setAmountPaid(0);
+      setAmountPaidError("");
+    }
+    if (formData.status.value !== "paid") {
+      setPaidDateInput("");
+      setPaymentMethod("efectivo"); // reset método pago si no está pagado
+    }
+  }, [formData.status.value]);
 
   function setField({ type, field, value }) {
-    if (type == "set") {
-      setFormData((prev) => {
-        return {
-          ...prev,
-          [field]: {
-            ...formData[field],
-            value: value,
-          },
-        };
-      });
+    if (type === "set") {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          value,
+        },
+      }));
     }
-
-    if (type == "error") {
-      setFormData((prev) => {
-        return {
-          ...prev,
-          [field]: {
-            ...formData[field],
-            error: value,
-          },
-        };
-      });
+    if (type === "error") {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: {
+          ...prev[field],
+          error: value,
+        },
+      }));
     }
   }
+
+  const handleAmountPaidChange = (e) => {
+    const value = Number(e.target.value);
+    if (value > formData.amount.value) {
+      setAmountPaidError("El monto abonado no puede ser mayor al monto total.");
+    } else {
+      setAmountPaidError("");
+      setAmountPaid(value);
+    }
+  };
 
   return (
     <div>
@@ -91,9 +103,8 @@ function EditPaymentForm({ payment, button }) {
             step={1000}
             name="label"
             type="text"
-            min={5000}
             placeholder="Ingresa el monto del pago"
-            className={`w-full rounded-lg border border-stroke  focus:text-black  bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+            className={`w-full rounded-lg border border-stroke focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             onChange={(e) =>
               setField({ type: "set", field: "label", value: e.target.value })
             }
@@ -101,19 +112,20 @@ function EditPaymentForm({ payment, button }) {
             value={formData.label.value}
           />
         </div>
+
         <div className="mb-4">
           <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
             Monto
           </label>
           <input
             step={1000}
-            name="monto"
+            name="amount"
             type="number"
             min={5000}
             placeholder="Ingresa el monto del pago"
-            className={`w-full rounded-lg border border-stroke  focus:text-black  bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+            className={`w-full rounded-lg border border-stroke focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             onChange={(e) =>
-              setField({ type: "set", field: "amount", value: e.target.value })
+              setField({ type: "set", field: "amount", value: Number(e.target.value) })
             }
             defaultValue={formData.amount.value}
             value={formData.amount.value}
@@ -126,12 +138,12 @@ function EditPaymentForm({ payment, button }) {
             Fecha del Pago
           </label>
           <input
-            name="date"
+            name="payment_date"
             type="date"
             placeholder="fecha del pago"
-            className={`w-full rounded-lg border border-stroke  focus:text-black  bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+            className={`w-full rounded-lg border border-stroke focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
             onChange={(e) =>
-              setField({ type: "set", field: "date", value: e.target.value })
+              setField({ type: "set", field: "payment_date", value: e.target.value })
             }
             defaultValue={formData.payment_date.value}
             value={formData.payment_date.value}
@@ -147,153 +159,151 @@ function EditPaymentForm({ payment, button }) {
             {
               label: "pagado",
               value: "paid",
-              selected: payment.status == "paid",
+              selected: payment.status === "paid",
             },
             {
               label: "vencido",
               value: "expired",
-              selected: payment.status == "expired",
+              selected: payment.status === "expired",
             },
             {
               label: "pendiente",
               value: "pending",
-              selected: payment.status == "pending",
+              selected: payment.status === "pending",
             },
             {
               label: "incompleto",
               value: "incomplete",
-              selected: payment.status == "incomplete",
+              selected: payment.status === "incomplete",
             },
           ]}
-        ></Select>
+        />
+
+        {/* Mostrar input para monto abonado si está incompleto */}
+        {formData.status.value === "incomplete" && (
+          <div className="mb-4">
+            <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
+              Monto abonado
+            </label>
+            <input
+              type="number"
+              min={0}
+              max={formData.amount.value}
+              step={100}
+              value={amountPaid}
+              onChange={handleAmountPaidChange}
+              className={`w-full rounded-lg border border-stroke focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+            />
+            {amountPaidError && (
+              <p className="text-red-600 mt-1 text-sm">{amountPaidError}</p>
+            )}
+          </div>
+        )}
+
+        {/* Mostrar input para fecha pagada si está pagado */}
+        {formData.status.value === "paid" && (
+          <>
+            <div className="mb-4">
+              <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
+                Fecha del pago realizado
+              </label>
+              <input
+                type="date"
+                value={paidDateInput}
+                onChange={(e) => setPaidDateInput(e.target.value)}
+                className={`w-full rounded-lg border border-stroke focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
+                Método de pago
+              </label>
+              <select
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                className={`w-full rounded-lg border border-stroke focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+              >
+                <option value="cash">Efectivo</option>
+                <option value="transfer">Transferencia</option>
+                <option value="credit card">Tarjeta Credito</option>
+              </select>
+            </div>
+          </>
+        )}
 
         <button
           onClick={async () => {
-
-            let gains = payment.gain
-            
-            if(payment.amount != formData.amount.value){
-             gains =Math.round( formData.amount.value*30 /100)
+            // Validación monto abonado
+            if (formData.status.value === "incomplete" && amountPaid > formData.amount.value) {
+              setAmountPaidError("El monto abonado no puede ser mayor al monto total.");
+              return;
             }
 
-            let paid_date = payment.status == "paid" && formData.status.value != "paid" ?
-             'NULL': payment.paid_date;
+            let gains = payment.gain;
+            if (payment.amount !== formData.amount.value) {
+              gains = Math.round((formData.amount.value * 30) / 100);
+            }
 
-            window.database.models.Payments.updatePayment( {
-                id: payment.id,
+            let paid_date =
+              payment.status === "paid" && formData.status.value !== "paid"
+                ? null
+                : paidDateInput;
+
+            // Actualizar en base de datos
+            await window.database.models.Payments.updatePayment({
+              id: payment.id,
               amount: formData.amount.value,
               payment_date: formData.payment_date.value,
               label: formData.label.value,
               status: formData.status.value,
               gain: gains,
               net_amount: formData.amount.value - gains,
-              paid_date: paid_date
+              paid_date:formData.status.value === "paid" ? paid_date : null,
+              incomplete_amount: formData.status.value === "incomplete" ? amountPaid : null,
+              payment_method: formData.status.value === "paid" ? paymentMethod : "cash",
             });
 
+            // Actualizar redux
+            dispatch(
+              updatePayment({
+                id: payment.id,
+                payment: {
+                  ...payment,
+                  amount: formData.amount.value,
+                  payment_date: formData.payment_date.value,
+                  label: formData.label.value,
+                  status: formData.status.value,
+                  gain: gains,
+                  net_amount: formData.amount.value - gains,
+                  paid_date:formData.status.value === "paid" ? paid_date : null,
+              incomplete_amount: formData.status.value === "incomplete" ? amountPaid : null,
+              payment_method: formData.status.value === "paid" ? paymentMethod : "cash"
+                },
+              })
+            );
 
-           
-
-              
-            dispatch(updatePayment({id:payment.id,payment:{
-              ...payment,
-              amount: formData.amount.value,
-              payment_date: formData.payment_date.value,
-              label: formData.label.value,
-              status: formData.status.value,
-              paid_date:paid_date
+            // Actualizar el préstamo si monto cambia
+            if (payment.amount !== formData.amount.value) {
+              const newLoanAmount = loan.amount - payment.amount + formData.amount.value;
+              dispatch(updateLoan({ id: loan.id, loan: { ...loan, amount: newLoanAmount } }));
+              dispatch(setLoan({ ...loan, amount: newLoanAmount }));
             }
+
+            // Actualizar ganancias globales
+            if (payment.gain !== gains) {
+              dispatch(setBruteGains(bruteGains - payment.gain + gains));
+              dispatch(setNetGains(netGains - payment.net_amount + (formData.amount.value - gains)));
             }
-        ));
-              
 
-          if(currentStatus == "paid" && formData.status.value != "paid"){
-
-            await window.database.models.Loans.updateLoan({
-              id:payment.loan_id,
-              status:"active"
-             
-            })
-
-            dispatch(setLoan({
-              ...loan,
-              status:"active"
-            }))
-
-            dispatch(setBruteGains(bruteGains - payment.gain))
-            dispatch(setNetGains(netGains - payment.amount))
-          }
-
-          if(currentStatus != "paid" && formData.status.value == "paid"){
-            dispatch(setBruteGains(bruteGains + payment.gain))
-            dispatch(setNetGains(netGains + payment.amount))
-          }
-
-
-          toggleModal();
-
-          setNotification({
+            toggleModal();
+            setNotification({
               type: "success",
-              message: "Pago actualizado con exito",
+              message: "Pago actualizado con éxito",
             });
-
-          showNotification();
-              
-
-
-           /*  
-            
-            // console.log(payment)
-            updatePayments(
-              payments.map((p) =>
-                p.id == payment.id
-                  ? {
-                      ...p,
-                      amount: formData.amount.value,
-                      notes: formData.notes.value,
-                      label: formData.label.value,
-                      payment_date: formData.date.value,
-                      state: formData.state.value,
-                    }
-                  : p
-              )
-            );
-
-            if (
-              payment.state != "expired" &&
-              formData.state.value == "expired"
-            ) {
-              setExpired((prev) => prev + 1);
-            }
-            if (
-              payment.state == "expired" &&
-              formData.state.value != "expired"
-            ) {
-              console.log(expired);
-              setExpired((prev) => prev - 1);
-            }
-
-            if (
-              payment.state == "payed" &&
-              formData.state.value != payment.state
-            ) {
-              setPayed((prev) => prev - 1);
-            }
-
-            const unpayed = payments.filter((p) => p.state != "payed");
-
-            setState(unpayed.length == 0 ? "active" : "completed");
-
-            console.log(loanId);
-            const state = await window.sqlite.query(
-              "SELECT state from loans where id=" + loanId
-            );
-            if (unpayed.length == 0 && state[0].state == "completed") {
-              await window.sqlite.query(
-                "UPDATE loans SET state='active' WHERE id=" + loanId
-              );
-            } */
+            showNotification();
           }}
-          className="p-3 bg-primary text-white"
+          className="p-3 bg-primary text-white rounded"
         >
           editar
         </button>
@@ -302,51 +312,4 @@ function EditPaymentForm({ payment, button }) {
   );
 }
 
-/* 
-
-function Amount() {
-    
-  return (
-    <div className="mb-4">
-    <h3 className=" text-xl font-semibold p-3  pb-7 block text-black dark:text-white text-center ">
-        Cunato dinero  deseas prestar?
-    </h3>
-    <div className="relative">
-        <input
-            step={1000}
-            name="monto"
-            type="number"
-            min={5000}
-            placeholder="Ingresa el monto del prestamo"
-            className={`w-full rounded-lg border border-stroke  focus:text-black  bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-            onChange={ (e)=>setField({type:"set",field:"monto",value:e.target.value})}
-            defaultValue={10000}
-            value={formData.monto.value}
-        />
-
-        <div className='flex  mt-5 mb-5 gap-2'>
-            {
-                montos.map((e) => <span
-
-                    onClick={(e) => {
-                       setField({type:"set",field:"monto",value:Number(e.target.innerText)})  
-                    }}
-                    className='text-sm p-2  border border-stroke  text-center cursor-pointer rounded-lg'
-                >
-                    {e}</span>)
-            }
-        </div>
-
-        <p className="text-center text-red ">
-    {
-      formData.monto.error ? formData.monto.error : ""
-    }
-  </p>
-
-    </div>
-</div>
-  )
-}
-
-export default EditModalPayment */
 export default EditModalPayment;

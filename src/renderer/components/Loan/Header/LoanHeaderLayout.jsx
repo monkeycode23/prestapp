@@ -290,6 +290,30 @@ export const InformationLoanHeader = () => {
 };
 
 
+const ReputationBar = ({ reputation }) => {
+  if (reputation == null) return null;
+
+  const percentage = Math.max(0, Math.min(100, reputation));
+  let color = "bg-success";
+  if (percentage < 40) color = "bg-danger";
+  else if (percentage < 70) color = "bg-warning";
+
+  return (
+    <div className="mt-4 w-full">
+      <div className="flex justify-between text-sm text-gray-600 mb-1">
+        <span>Reputación</span>
+        <span className="font-semibold">{percentage}%</span>
+      </div>
+      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden">
+        <div
+          className={`h-full ${color}`}
+          style={{ width: `${percentage}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+};
+
 
 
 export const InformationItem = ({ icon, label, value }) => {

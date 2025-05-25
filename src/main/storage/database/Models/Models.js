@@ -1,5 +1,5 @@
 const logger = require("../../../logger");
-const db = require("../database")
+const db = require("../database");
 const ClienteMongo = require("../../mongo_models/cliente.js");
 const PagoMongo = require("../../mongo_models/pago.js");
 const PrestamoMongo = require("../../mongo_models/prestamo.js");
@@ -14,50 +14,65 @@ const mongoModelMap = {
 };
 
 class Models {
-    constructor(tableName) {
-        this.tableName = tableName
-        this.db = db
-        this.MongoModel = mongoModelMap[tableName]; // Get the corresponding Mongoose model
+  constructor(tableName) {
+    this.tableName = tableName;
+    this.db = db;
+    this.MongoModel = mongoModelMap[tableName]; // Get the corresponding Mongoose model
+  }
+
+  addColumn(column) {
+    // Obtener la info de las columnas existentes
+    const columnas = db.query(`PRAGMA table_info(${tabla});`,[],'all')
+
+    // Verificar si la columna ya existe
+    const existe = columnas.some((col) => col.name === column);
+
+    // Agregar la columna si no existe
+    if (!existe) {
+      db.prepare(`ALTER TABLE ${this.tableName} ADD COLUMN ${column} INTEGER;`).run();
+      console.log(`Columna "${columna}" agregada a la tabla "${this.tableName}".`);
+    } else {
+      console.log(`La columna "${column}" ya existe en la tabla "${this.tableName}".`);
     }
+    /* try {
+      const query = `ALTER TABLE ${this.tableName} IF NOT EXISTS ADD COLUMN ${col} `;
+      console.log(query);
+      this.db.exec(query);
+      logger.info(`Tabla ${this.tableName} modificada`);
+    } catch (error) {
+      logger.error("Error al crear la tabla:", error);
+      throw error;
+    } */
+  }
 
+  async insert(data) {
+    //console.log("data:----------------------------->",data);
+    try {
+      const query = `INSERT INTO ${this.tableName} (${Object.keys(data).join(
+        ","
+      )}) VALUES (${Object.values(data)
+        .map(() => "?")
+        .join(",")})`;
+      const params = Object.values(data);
 
+      //console.log("query:----------------------------->",query);
+      this.db.runQuery(query, params);
+      logger.info(`Datos insertados en la tabla ${this.tableName}`);
 
-    addColumn(col){
-        try {
-          const query = `ALTER TABLE ${this.tableName} IF NOT EXISTS ADD COLUMN ${col} `;
-          console.log(query)
-          this.db.exec(query);
-          logger.info(`Tabla ${this.tableName} modificada`);
-        } catch (error) {
-          logger.error("Error al crear la tabla:", error);
-          throw error;
-        }
+      const lastIdResult = this.db.query(
+        `SELECT id FROM ${this.tableName} ORDER BY id DESC LIMIT 1`
+      );
+      if (!lastIdResult || lastIdResult.length === 0) {
+        throw new Error("Could not retrieve last inserted ID from SQLite.");
       }
- 
-    async insert( data) {  
-    
+      const sqliteId = lastIdResult[0].id;
 
-        //console.log("data:----------------------------->",data);
-        try {
-          const query = `INSERT INTO ${this.tableName} (${Object.keys(data).join(',')}) VALUES (${Object.values(data).map(() => '?').join(',')})`;
-          const params = Object.values(data);
-    
-          //console.log("query:----------------------------->",query);
-          this.db.runQuery(query,params)
-          logger.info(`Datos insertados en la tabla ${this.tableName}`);
-    
-           const lastIdResult = this.db.query(`SELECT id FROM ${this.tableName} ORDER BY id DESC LIMIT 1`)
-          if (!lastIdResult || lastIdResult.length === 0) {
-              throw new Error("Could not retrieve last inserted ID from SQLite.");
-          }
-          const sqliteId = lastIdResult[0].id;
-          
-          const resultForCaller = {
-           id: sqliteId,
-            ...data
-          }
+      const resultForCaller = {
+        id: sqliteId,
+        ...data,
+      };
 
-          /* if (this.MongoModel) {
+      /* if (this.MongoModel) {
               try {
                   // Prepare data for MongoDB, ensuring sqlite_id is included
                   const mongoData = { ...data, sqlite_id: sqliteId };
@@ -83,59 +98,77 @@ class Models {
                   // Decide on error handling: throw, log, or specific recovery
               }
           } */
-          return resultForCaller;
-        } catch (error) {
-          logger.error(`Error al insertar datos en la tabla ${this.tableName}:`, error);
-          throw error;
-        }
+      return resultForCaller;
+    } catch (error) {
+      logger.error(
+        `Error al insertar datos en la tabla ${this.tableName}:`,
+        error
+      );
+      throw error;
     }
+  }
 
-    getById(id){    
-        return this.db.query(`SELECT * FROM ${this.tableName} WHERE id = ?`,[id])
-    }
-    getOne(filter){
-       // console.log("filter:----------------------------->",filter)
-        const query=`SELECT ${filter.select ? filter.select : '*'}
+  getById(id) {
+    return this.db.query(`SELECT * FROM ${this.tableName} WHERE id = ?`, [id]);
+  }
+  getOne(filter) {
+    // console.log("filter:----------------------------->",filter)
+    const query = `SELECT ${filter.select ? filter.select : "*"}
              FROM ${this.tableName}
-              ${filter.joins ? filter.joins : ''}
-            ${filter.where ? `WHERE ${filter.where}` : ''}
+              ${filter.joins ? filter.joins : ""}
+            ${filter.where ? `WHERE ${filter.where}` : ""}
             
             LIMIT 1
-            `
-        //console.log("query1:----------------------------->",query)
-        return this.db.query(query,filter.params)
-    }
+            `;
+    //console.log("query1:----------------------------->",query)
+    return this.db.query(query, filter.params);
+  }
 
-    getAll(filter){
+  getAll(filter) {
+    //console.log("filter:----------------------------->",filter)
+    const query = `SELECT ${filter.select ? filter.select : "*"} FROM ${
+      this.tableName
+    } ${filter.joins ? filter.joins : ""} 
+            ${filter.where ? `WHERE ${filter.where}` : ""} 
+            ${filter.groupBy ? `GROUP BY ${filter.groupBy} ` : ""} 
+            ${filter.orderBy ? `ORDER BY ${filter.orderBy} ` : ""} 
 
-       //console.log("filter:----------------------------->",filter)
-        const query=`SELECT ${filter.select ? filter.select : '*'} FROM ${this.tableName} ${filter.joins ? filter.joins : ''} 
-            ${filter.where ? `WHERE ${filter.where}` : ''} 
-            ${filter.groupBy ? `GROUP BY ${filter.groupBy} ` : ''} 
-            ${filter.orderBy ? `ORDER BY ${filter.orderBy} ` : ''} 
+            ${filter.limit ? `LIMIT ${filter.limit}` : ""}
+            ${filter.offset ? `OFFSET ${filter.offset} ` : ""}
+            `;
+    console.log("query:----------------------------->", query);
 
-            ${filter.limit ? `LIMIT ${filter.limit}` : ''}
-            ${filter.offset ? `OFFSET ${filter.offset} ` : ''}
-            `
-        console.log("query:----------------------------->",query)
-       
-        const result = this.db.query(query,filter.params)
-       // console.log("result:----------------------------->",result)
-        return result
-    }
+    const result = this.db.query(query, filter.params);
+    // console.log("result:----------------------------->",result)
+    return result;
+  }
 
-    /**
-     * Actualiza un registro en la tabla SQLite y en MongoDB
-     * @param {Object} data - Los datos a actualizar
-     * @returns {Promise<Object>} - El resultado de la actualización en SQLite
-     */
-    async update(data){
-        logger.info(`Updating SQLite ${this.tableName} with data:`, data);
-        const sqliteResult = this.db.query(`UPDATE ${this.tableName} SET
-             ${Object.keys(data).filter(key => key !== 'id').map(key => `${key} = ${data[key]==='NULL' || data[key] === null ? 'NULL' : `'${data[key]}'`}`).join(',')}
-        WHERE id = '${data.id}'`,[],{type:"run"}); // Ensure data.id is the SQLite ID
+  /**
+   * Actualiza un registro en la tabla SQLite y en MongoDB
+   * @param {Object} data - Los datos a actualizar
+   * @returns {Promise<Object>} - El resultado de la actualización en SQLite
+   */
+  async update(data) {
+    logger.info(`Updating SQLite ${this.tableName} with data:`, data);
+    const sqliteResult = this.db.query(
+      `UPDATE ${this.tableName} SET
+             ${Object.keys(data)
+               .filter((key) => key !== "id")
+               .map(
+                 (key) =>
+                   `${key} = ${
+                     data[key] === "NULL" || data[key] === null
+                       ? "NULL"
+                       : `'${data[key]}'`
+                   }`
+               )
+               .join(",")}
+        WHERE id = '${data.id}'`,
+      [],
+      { type: "run" }
+    ); // Ensure data.id is the SQLite ID
 
-        /* if (this.MongoModel && data.id) { // data.id is the sqlite_id for matching
+    /* if (this.MongoModel && data.id) { // data.id is the sqlite_id for matching
             try {
                 // Prepare data for MongoDB update, excluding sqlite_id from $set if it's immutable or handled differently
                 const updateData = { ...data };
@@ -157,35 +190,52 @@ class Models {
                 logger.error(`Error updating document in MongoDB for ${this.tableName} (sqlite_id: ${data.id}):`, mongoError);
             }
         } */
-        return sqliteResult; // Or whatever the original update returned
-    }
+    return sqliteResult; // Or whatever the original update returned
+  }
 
-    /*
+  /*
      
      */
-    updateMany(data){
-        return this.db.query(`UPDATE ${this.tableName} SET
-             ${Object.keys(data).map(key => `${key} = ${data[key]=='NULL' ? null : `'${data[key]}'`}`).join(',')}
-        WHERE id IN (${data.ids.map(id => `'${id}'`).join(',')})`,
-        
-        [],{type:"run"})
-    } 
+  updateMany(data) {
+    return this.db.query(
+      `UPDATE ${this.tableName} SET
+             ${Object.keys(data)
+               .map(
+                 (key) =>
+                   `${key} = ${data[key] == "NULL" ? null : `'${data[key]}'`}`
+               )
+               .join(",")}
+        WHERE id IN (${data.ids.map((id) => `'${id}'`).join(",")})`,
 
-     
-    updateFilter(filter){
+      [],
+      { type: "run" }
+    );
+  }
 
-        const query = `UPDATE ${this.tableName} SET ${Object.keys(filter.data).map(key => `${key} = ${filter.data[key]=='NULL' ? null : `'${filter.data[key]}'`}`).join(',')}
-        ${filter.where ? ` WHERE ${filter.where}` : ''}`
+  updateFilter(filter) {
+    const query = `UPDATE ${this.tableName} SET ${Object.keys(filter.data)
+      .map(
+        (key) =>
+          `${key} = ${
+            filter.data[key] == "NULL" ? null : `'${filter.data[key]}'`
+          }`
+      )
+      .join(",")}
+        ${filter.where ? ` WHERE ${filter.where}` : ""}`;
 
-        //console.log("query:----------------------------->",query)
-        return this.db.query(query,[],{type:"run"})
-    }
-    
-    async delete(id){
-        logger.info(`Deleting from SQLite ${this.tableName} with id: ${id}`);
-        const sqliteResult = this.db.query(`DELETE FROM ${this.tableName} WHERE id = ?`,[id],{type:"run"});
+    //console.log("query:----------------------------->",query)
+    return this.db.query(query, [], { type: "run" });
+  }
 
-        /* if (this.MongoModel && id) {
+  async delete(id) {
+    logger.info(`Deleting from SQLite ${this.tableName} with id: ${id}`);
+    const sqliteResult = this.db.query(
+      `DELETE FROM ${this.tableName} WHERE id = ?`,
+      [id],
+      { type: "run" }
+    );
+
+    /* if (this.MongoModel && id) {
             try {
                 const mongoDeleteResult = await this.MongoModel.findOneAndDelete({ sqlite_id: id });
                 if (mongoDeleteResult) {
@@ -198,28 +248,32 @@ class Models {
                 logger.error(`Error deleting document in MongoDB for ${this.tableName} (sqlite_id: ${id}):`, mongoError);
             }
         } */
-        return sqliteResult; // Or whatever the original delete returned
-    }
+    return sqliteResult; // Or whatever the original delete returned
+  }
 
-    deleteQuery(data){
-        const query = `DELETE FROM ${this.tableName} WHERE ${data.where ? data.where : `id=${data.id}`}`
-        //console.log("query:----------------------------->",query)
-        return this.db.query(query,[],{type:"run"})
-    }
-   
-    createTable(schema){
-        return this.db.createTable(this.tableName,schema)
-    }
-    getLastId(){
-        return this.db.query(`SELECT MAX(id) FROM ${this.tableName}`)
-    }
-    getTotal(){ 
-        return this.db.query(`SELECT COUNT(*) as total FROM ${this.tableName}`)
-    }
+  deleteQuery(data) {
+    const query = `DELETE FROM ${this.tableName} WHERE ${
+      data.where ? data.where : `id=${data.id}`
+    }`;
+    //console.log("query:----------------------------->",query)
+    return this.db.query(query, [], { type: "run" });
+  }
 
-    getLastId(){
-        return this.db.query(`SELECT id as id FROM ${this.tableName} ORDER BY id DESC LIMIT 1`)
-    }
+  createTable(schema) {
+    return this.db.createTable(this.tableName, schema);
+  }
+  getLastId() {
+    return this.db.query(`SELECT MAX(id) FROM ${this.tableName}`);
+  }
+  getTotal() {
+    return this.db.query(`SELECT COUNT(*) as total FROM ${this.tableName}`);
+  }
+
+  getLastId() {
+    return this.db.query(
+      `SELECT id as id FROM ${this.tableName} ORDER BY id DESC LIMIT 1`
+    );
+  }
 }
 
-module.exports = Models;  
+module.exports = Models;

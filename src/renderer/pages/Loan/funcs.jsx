@@ -29,6 +29,8 @@ export const deleteLoanDb = async (loanId) => {
 };
 
 export const getPayments = async (loanId, filtro) => {
+
+  console.log(filtro)
   function setDatesQuery(filter) {
     let query =
       filter.dates?.from || filter.dates?.to
@@ -68,6 +70,7 @@ export const getPayments = async (loanId, filtro) => {
   try {
     const payments = await window.database.models.Payments.getPayments({
       where: `loan_id = ${loanId} ${statusQuery}`,
+      orderBy:"id "+filtro.order,
       limit: filtro.limit,
       offset: filtro.offset,
     });
@@ -184,9 +187,31 @@ export const getLoanCurrentGains = async (id) => {
   }
 };
 
+
+export const checkCompletedLoan=async(id,installments)=>{
+  try {
+    const payments = await window.database.models.Payments.getPayments({
+      select: `COUNT(CASE WHEN status='paid' THEN amount ELSE 0 END) as total_paid`,
+      where: `loan_id = ${id}`,
+    });
+
+    console.log(payments);
+    if(payments.length && payments[0].total_paid < installments  ){
+      const payments = await window.database.models.Loans.updateLoan({
+        id,
+        status:"active"
+      });
+    }
+    
+  } catch (error) {
+    console.log(error);
+  }
+  
+}
+
 export const getLoanTotalPaid = async (id) => {
   try {
-    const payments = await window.database.modes.Payments.getPayments({
+    const payments = await window.database.models.Payments.getPayments({
       select: `SUM(CASE WHEN status='paid' THEN amount ELSE 0 END) as total_paid`,
       where: `loan_id = ${id}`,
     });

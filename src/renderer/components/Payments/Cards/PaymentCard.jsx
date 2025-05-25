@@ -162,10 +162,39 @@ shadow-2xl
         <Link to={`/loans/${payment.id}`}>
           <p className="text-lg font-bold text-gray-200 z-2">{payment.label}</p>
         </Link>
-        <h1 className="text-4xl font-bold pb-3">
-          ${formatAmount(payment.amount)}
-        </h1>
-        <div className="flex flex-row gap-2 justify-between">
+        {payment.status === "incomplete" ? (
+  <div className="pb-1">
+    <div className="flex items-end ">
+      <h1 className="text-2xl font-semibold line-through text-gray-300">
+        ${formatAmount(payment.amount)}
+      </h1>
+      <h1 className="text-4xl font-bold text-white">
+        ${formatAmount(payment.amount - payment.incomplete_amount)}
+      </h1>
+    </div>
+    <span className="inline-block  text-xs px-3 py-1 rounded-full bg-gray-700 text-gray-100 font-medium">
+      Abonado: ${formatAmount(payment.incomplete_amount)}
+    </span>
+  </div>
+) : (
+  <h1 className="text-4xl font-bold pb-3">
+    ${formatAmount(payment.amount)}
+  </h1>
+)}
+
+{/*         {payment.status === "incomplete" && (
+  <div className="text-sm text-white flex flex-col gap-1">
+    <p>
+      <span className="font-semibold text-green-300">Abonado:</span>{" "}
+      ${formatAmount(payment.incomplete_amount)}
+    </p>
+    <p>
+      <span className="font-semibold text-red-300">Restante:</span>{" "}
+      ${formatAmount(payment.amount - payment.incomplete_amount)}
+    </p>
+  </div>
+)}
+      */}   <div className="flex flex-row gap-2 justify-between">
           <div className=" flex flex-row gap-2 items-center">
             <CalendarDateIcon width={20} height={20} />
             <p className="text-sm">{payment.payment_date}</p>

@@ -16,7 +16,7 @@ export default function PaymentsFilter () {
 
     //const f = filter?.status
     if(Object.keys(filter).length>0 && !Object.keys(filter.status).includes("pending") ){
-      console.log("asdasdasd");
+     // console.log("asdasdasd");
       dispatch(setFilter({
         status: {
           pending: true,
@@ -24,6 +24,7 @@ export default function PaymentsFilter () {
           expired:true,
           incomplete:true,
         },
+        order:'asc',
         dates: {
           from: '',
           to: '',
@@ -41,6 +42,34 @@ export default function PaymentsFilter () {
       <h1 className="text-xl font-bold mb-3">Filtros</h1>
 
       <StateFilter />
+
+      <div className="flex flex-col mb-3">
+        <h2 className="text-sm font-bold ">Orden</h2>
+        <div className="flex flex-col p-2">
+          
+      
+         
+         <select
+          name="orden"
+          // <-- valor actual del filtro
+
+          onChange={(e)=>{
+            dispatch(
+              setFilter({
+                ...filter,
+                order: e.target.value,
+              })
+            )
+            
+          }}
+         >
+          <option value="asc">acendente</option>
+          <option value="desc">decendente</option>
+
+         </select>
+          
+        </div>
+      </div>
       <div className="flex flex-col mb-3">
         <h2 className="text-sm font-bold ">Fecha</h2>
         <div className="flex flex-col p-2">

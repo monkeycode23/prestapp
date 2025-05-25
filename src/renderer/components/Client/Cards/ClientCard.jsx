@@ -1,191 +1,105 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import React from "react";
+import { Link } from "react-router-dom";
 import {
-  Payment10,
   PaymentIcon,
-  PaymentIcon2,
-  SackDollar,
   UserIcon,
+  SackDollar,
+  StarIcon,
 } from "../../Icons";
 
-import { Link } from "react-router-dom";
-
+const getReputationInfo = (score) => {
+  if (score >= 90) return { color: "bg-green-600", label: "Buena" };
+  if (score >= 70) return { color: "bg-yellow-400", label: "Aceptable" };
+  if (score >= 50) return { color: "bg-orange-400", label: "Regular" };
+  if (score >= 30) return { color: "bg-red-500", label: "Mala" };
+  console.log(score)
+  if(score==0) return 'sin reputacion'
+  return { color: "bg-red-900", label: "Basura" };
+};
 
 const ClientCard = ({ client }) => {
-  useEffect(() => {
-    console.log(client);
+  const reputation = getReputationInfo(client.reputation || 0);
 
-    return () => {};
-  }, []);
+  const renderPaymentStat = (count, bgColor, tooltip) => (
+    <div className="flex flex-col items-center text-white" title={tooltip}>
+      <PaymentIcon
+        className={`${bgColor} rounded-full p-1 mb-1 cursor-help`} // cursor para indicar tooltip
+        width={20}
+        height={20}
+      />
+      <span className="font-semibold text-sm">{count}</span>
+    </div>
+  );
 
   return (
-    <div
-      className={` flex justify-between items-center 
-shadow-2xl
-   p-4 rounded-xl
-  relative
-  bg-primary
-  `}
-    >
-      <div className="flex">
-        <div className="w-17 flex flex-row gap-2 justify-center items-center ">
-          <div className="bg-blue-500 text-white w-15 h-15 flex flex-row justify-center items-center rounded-full">
-            <UserIcon></UserIcon>
+    <div className="flex justify-between items-start bg-primary p-4 rounded-2xl shadow-xl relative">
+      {/* Izquierda: avatar, nombre, reputación */}
+      <div className="flex items-start gap-4">
+        <div className="flex flex-col items-center">
+          <div
+            className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center"
+            title={`Reputación del cliente: ${client.reputation || 0}`}
+          >
+            <UserIcon />
           </div>
-        </div>
-        <div className="flex flex-col ">
-          <span className="text-white text-xl font-bold ">
-          <Link to={`/clients/${client.id}`}>
-       
-            {client.nickname}
-          
-        </Link>
-          </span>
-          <div className="mt-3 flex justify-between items-center  f-full">
-            <div className="flex">
-              <span className="flex flex-col justify-center items-center mr-2">
-                <PaymentIcon
-                  className="bg-danger text-white rounded-full p-2"
-                  width={30}
-                  height={30}
-                >
-                  {" "}
-                </PaymentIcon>
-                <span className="font-bold text-white text-md">
-                  {client.total_expired_payments}
-                </span>
-              </span>
-              <span className="flex flex-col justify-center items-center mr-2">
-                <PaymentIcon
-                  className="bg-success text-white rounded-full p-2"
-                  width={30}
-                  height={30}
-                >
-                  {" "}
-                </PaymentIcon>
-                <span className="font-bold text-white text-md">
-                  {client.total_paid_payments}
-                </span>
-              </span>
-              <span className="flex flex-col justify-center items-center mr-2">
-                <PaymentIcon
-                  className="bg-primary text-white rounded-full p-2 border border-stroke"
-                  width={30}
-                  height={30}
-                >
-                  {" "}
-                </PaymentIcon>
-                <span className="font-bold text-white text-lg">
-                  {client.total_pending_payments}
-                </span>
-              </span>
-              <span className="flex flex-col justify-center items-center mr-2">
-                <PaymentIcon
-                  className="bg-warning text-white rounded-full p-2 "
-                  width={30}
-                  height={30}
-                >
-                  {" "}
-                </PaymentIcon>
-                <span className=" text-white text-md">
-                  {client.total_incomplete_payments}
-                </span>
-              </span>
+
+          {/* Reputación */}
+          <div className="mt-2 flex flex-col items-center cursor-help" title={`Reputación del cliente: ${client.reputation || 0}`}>
+            <div className="flex items-center gap-1 text-white text-sm">
+              <StarIcon className="text-yellow-300" width={14} height={14} />
+              <span>{reputation.label}</span>
+            </div>
+            <span className="text-white/70 text-xs font-mono mt-1">
+              {client.reputation || 0}
+            </span>
+            <div className="w-20 h-2 rounded-full bg-white/30 mt-1 overflow-hidden">
+              <div
+                className={`${reputation.color} h-full`}
+                style={{ width: `${client.reputation || 0}%` }}
+              />
             </div>
           </div>
         </div>
-      </div>
 
-      <div>
-        <span className="flex  justify-center items-center mr-3 p-2 rounded-full bg-white">
-          <SackDollar
-            className="text-black"
-            width={16}
-            height={16}
-          ></SackDollar>{" "}
-          <span className="font-bold text-black text-xl ml-1">
-            {client.total_loans}
-          </span>
-        </span>
-      </div>
-      {/* <div className="absolute top-0 left-20 w-full h-full flex justify-center items-center opacity-20 z-0">
-      {loan.status === "active" ? (
-        <BaselineAssignment width={200} height={200} />
-      ) : loan.status === "completed" ? (
-        <BaselineFactCheck width={200} height={200} />
-      ) : (
-        <BaselineAssignment width={200} height={200} />
-      )}
-    </div> */}
-      {/* <div className="w-full flex flex-col gap-2 z-10">
-      <Link to={`/loans/${loan.id}`}>
-        <p className="text-lg font-bold text-gray-200 z-2">{loan.label}</p>
-      </Link>
-      <h1 className="text-4xl font-bold pb-3">
-        ${formatAmount(loan.amount)}
-      </h1>
-      <div className="flex flex-row gap-2 justify-between">
-        <div className=" flex flex-row gap-2 items-center">
-          <CalendarDateIcon width={20} height={20} />
-          <p className="text-sm">{loan?.loan_date}</p>
+        {/* Nombre y pagos */}
+        <div className="flex flex-col justify-between">
+          <Link
+            to={`/clients/${client.id}`}
+            className="text-md font-bold text-white "
+          >
+            {client.nickname}
+          </Link>
+
+          <div className="mt-3 flex gap-3">
+            {renderPaymentStat(client.total_expired_payments ?? 0, "bg-danger", "Pagos vencidos")}
+            {renderPaymentStat(client.total_paid_payments ?? 0, "bg-success", "Pagos pagados")}
+            {renderPaymentStat(client.total_pending_payments ?? 0, "bg-primary border border-white", "Pagos pendientes")}
+            {renderPaymentStat(client.total_incomplete_payments ?? 0, "bg-warning", "Pagos incompletos")}
+          </div>
+
+          <div className="mt-4 flex items-center gap-2 text-white text-sm">
+            <span className="font-semibold">Próximo pago:</span>
+            <span className="opacity-90">
+              {client.next_payment_date || "Sin fecha"}
+            </span>
+          </div>
         </div>
-        <span className="text-sm flex flex-row gap-2 items-center">
-          {loan.status === "active" ? (
-            <span className="text-md font-bold bg-sky-800 text-white rounded-md p-1 z-1">
-              activo
-            </span>
-          ) : loan.status === "completed" ? (
-            <span className="text-md font-bold bg-green-700 text-white rounded-md p-1 z-1">
-              completado
-            </span>
-          ) : (
-            <span className="text-md font-bold bg-danger text-white rounded-md p-1 z-1">
-              cancelado
-            </span>
-          )}
-        </span>
       </div>
-    </div> */}
 
-      {/*  <span
-      className="font-bold text-xl absolute top-0 right-4 
-      hover:cursor-pointer text-primary
-      "
-    >
-      ...
-    </span> */}
-
-      {/* <div className="flex flex-col justify-center  items-center mt-6">
-      <span className="text-lg font-bold rounded-full  bg-white text-black p-3">
-        <span className="text-sm font-bold text-success">
-          {loan?.paid ? loan?.paid : 0}
-        </span>
-        /{loan?.installment_number}
-      </span>
-      <br></br>
-      <div className="flex flex-row gap-2">
-        {loan.expired > 0 && (
-          <Tooltip
-            text={` pagos vencidos: ${loan.expired}`}
-            position="bottom"
-          >
-            <span className="rounded-full bg-danger p-2 text-xs px-2 py-1">
-              {loan.expired}
-            </span>
-          </Tooltip>
-        )}
-        {loan.incomplete > 0 && (
-          <Tooltip
-            text={` pagos incompletos: ${loan.incomplete}`}
-            position="bottom"
-          >
-            <span className="rounded-full bg-warning p-2 text-xs px-2 py-1">
-              {loan.incomplete}
-            </span>
-          </Tooltip>
-        )}
+      {/* Derecha: préstamos compactos */}
+      <div
+        className="flex flex-col items-center bg-white text-black rounded-lg p-1 shadow-md cursor-help"
+        title="Préstamos"
+      >
+        <SackDollar className="text-primary" width={24} height={24} />
+        <div className="mt-1 text-sm font-semibold">
+          {client.total_completed_loans ?? 0} / {client.total_loans}
+        </div>
+        <div className="flex flex-col justify-center items-center text-xs text-gray-700">
+          {client.total_active_loans ?? 0} 
+          <span>activos</span>
+        </div>
       </div>
-    </div> */}
     </div>
   );
 };
