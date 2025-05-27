@@ -18,6 +18,9 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Provider } from 'react-redux';
 import store from './redux/store'
+import { SocketProvider } from './context/socketContext';
+import ChatRoom from './pages/chat';
+
 function App() {
   const navigate = useNavigate();
   
@@ -43,7 +46,9 @@ function App() {
           <Route path="signup" element={<SignUp />} />
         </Route>
         {/*  */}
-        <Route path="/" element={<PrivateRoute><DefaultLayout/></PrivateRoute> } >
+        <Route path="/" element={
+          <SocketProvider>
+          <PrivateRoute><DefaultLayout/></PrivateRoute></SocketProvider> } >
           <Route index path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Profile />} />
           <Route path="profile" element={<Profile />} />
@@ -54,6 +59,8 @@ function App() {
           <Route path="calendar" element={<Calendar />} />
           <Route path="settings" element={<Settings />} />
           <Route path="payments" element={<Payments />} />
+          <Route path="chat" element={<ChatRoom></ChatRoom>} />
+
           {/*  <Route path="loans" element={<Loans />} /> */}
         </Route>
 

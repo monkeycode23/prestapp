@@ -133,17 +133,19 @@ export const validateRules = {
 export async function validateUserName(username) {
   //const user= await window.sqlite.query("SELECT * FROM users WHERE username=?",fields.username.value)
   
-  const user = await window.database.models.Users.getUser({username:username}  );
+  const user = await window.database.models.Users.getUser({username:username});
 
-  
-  return user.length>0 ||  user != undefined ? user[0] : false;
+  console.log(user)
+  return   user  ? user[0] : false;
 
  
 }
 
 export async function validateUserEmail(email) {
+  console.log(user)
+
   const user = await window.database.models.Users.getUser({email: email});
-  return user.length>0 ||  user != undefined ? user[0] : false;
+  return   user ? user[0] : false;
 }
 
 
@@ -154,34 +156,39 @@ export async function comparePassword(password, hash) {
 }
 
 
-export function generateToken(obj, expirationDate) {
+export async function generateToken(obj, expirationDate) {
 
   if(!expirationDate){
     expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días a partir de ahora
   }
 
   
-  const  tokenObject ={
+const  tokenObject ={
     ...obj,
     expirationDate:expirationDate.getTime()
   }
-  const jsonString = JSON.stringify(tokenObject);
+  /*   const jsonString = JSON.stringify(tokenObject);
   
 
-  const base64Encoded = btoa(jsonString);
-  
-  return base64Encoded;
+  const base64Encoded = btoa(jsonString); */
+
+    const token  =await window.jwt.generate(tokenObject)
+  console.log(token)
+  return token;
 }
 
 
 export function decodeToken(token) {
   // Decodificar el token de Base64
-  const decodedData = atob(token);
+ /*  const decodedData = atob(token);
 
   // Convertir la cadena JSON de nuevo a un objeto
-  const obj = JSON.parse(decodedData);
+  const obj = JSON.parse(decodedData); */
+
+  const decoded  = window.jwt.decode({token})
+
  
-  return { ...obj };
+  return decoded;
 }
 
 async function generateHash(message) {

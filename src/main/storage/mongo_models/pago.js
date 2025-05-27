@@ -13,7 +13,7 @@ const pagoSchema = new mongoose.Schema({
   },
   sqlite_id: {
     type: Number,
-    //required: true
+    required: true
   },
   gain: {
     type: Number,
@@ -41,7 +41,8 @@ const pagoSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pendiente', 'Procesando', 'Completado','Incompleto', 'Fallido', 'Reembolsado', 'Cancelado'],
+    enum: ['Pendiente',
+      'pending','expired','paid','incomplete','Procesando', 'Completado','Incompleto', 'Fallido', 'Reembolsado', 'Cancelado'],
     default: 'Pendiente'
   },
   paid_date: {
@@ -53,7 +54,7 @@ const pagoSchema = new mongoose.Schema({
   },
   payment_method: {
     type: String,
-    enum: ['Efectivo', 'Transferencia', 'Tarjeta', 'Cheque', 'Mercado Pago', 'Otro'],
+    enum: ['Efectivo', 'Transferencia', 'Tarjeta', 'Cheque', 'Mercado Pago', 'Otro','cash','credit_card','transfer'],
     default: 'Efectivo'
   },
   // Campos adicionales

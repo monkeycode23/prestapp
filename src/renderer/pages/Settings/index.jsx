@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Moon, Sun, Upload, LayoutGrid, List, RefreshCw } from 'lucide-react'; // Ejemplo con íconos opcionales
+import CommentThread from './Comments';
 
 const Settings = () => {
   const [file, setFile] = useState(null);
@@ -20,6 +21,17 @@ const Settings = () => {
 
   const toggleDarkMode = () => setDarkMode(!darkMode);
   const toggleLayout = () => setLayout(layout === 'grid' ? 'list' : 'grid');
+
+
+  useEffect(() => {
+    
+    console.log(window.mongo.models.Client.getModel())
+  
+    return () => {
+      
+    }
+  }, [])
+  
 
   return (
     <div className={`max-w-3xl mx-auto mt-10 p-6 rounded-xl shadow-md border ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}>
@@ -87,6 +99,10 @@ const Settings = () => {
           Buscar
         </button>
       </div>
+
+
+      <CommentThread></CommentThread>
+
     </div>
   );
 };

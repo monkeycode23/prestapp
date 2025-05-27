@@ -1,152 +1,182 @@
-import { useDispatch } from 'react-redux';
-import { login } from '../../redux/reducers/auth';
-import { useNavigate } from 'react-router-dom';
-import React,{ useState,useEffect } from 'react';
+import { useDispatch } from "react-redux";
+import { login } from "../../redux/reducers/auth";
+import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 
-import Logo from '../../images/logo/logo.svg';
-import LogoDark from '../../images/logo/logo-dark.svg';
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import useValidate from '../../hooks/useValidate';
-import Person from './ImagSvg';
-import { Eye, EyeOff } from '../../components/Icons';
-import { validateRules,validateUserName,validateUserEmail,initFields,comparePassword,generateToken,   } from './funcs';
-import { GoogleIcon } from '../../components/Icons';
+import Logo from "../../images/logo/logo.svg";
+import LogoDark from "../../images/logo/logo-dark.svg";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import useValidate from "../../hooks/useValidate";
+import Person from "./ImagSvg";
+import { Eye, EyeOff } from "../../components/Icons";
+import {
+  validateRules,
+  validateUserName,
+  validateUserEmail,
+  initFields,
+  comparePassword,
+  generateToken,
+} from "./funcs";
+import { GoogleIcon } from "../../components/Icons";
 
-const SignIn= () => {
+const SignIn = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { user, token } = useSelector((state) => state.auth);
 
-    const dispatch = useDispatch();
-    const navigate = useNavigate();
-    const {user,token} = useSelector(state=>state.auth)
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
-    const [rememberMe, setRememberMe] = useState(false);
-    const [showPassword, setShowPassword] = useState(false);
- 
+  const { validate, fields, setField, errors } = useValidate(initFields);
 
-    const {validate,fields,setField,errors} = useValidate(initFields)
-  
-    useEffect(()=>{
-        if(token){
-            navigate("/dashboard")
-        }
-    },[token])
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [token]);
 
-    const togglePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
-  
-    const submit = async(e,formData)=>{
-      e.preventDefault()
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const submit = async (e, formData) => {
+    e.preventDefault();
+
+    const isValidated = validate(validateRules);
+
+    if (!isValidated) {
+      return;
+    }
+
+    function togglErr(err) {
+      if (err) {
+        setField({
+          type: "error",
+          field: "username",
+          error: "Informacion de usuario incorrecta",
+        });
+        setField({
+          type: "error",
+          field: "password",
+          error: "Informacion de usuario incorrecta",
+        });
+      } else {
+        setField({ type: "validate", field: "username" });
+        setField({ type: "validate", field: "password" });
+      }
+    }
+
+    let user;
+    if (fields.username.value.includes("@")) {
+      user = await validateUserEmail(fields.username.value);
+    } else {
+      user = await validateUserName(fields.username.value);
+    }
+
+    if (!user) {
+      togglErr(true);
+      return;
+    }
+
+    const compare = await comparePassword(fields.password.value, user.password);
+
+    if (!compare) {
+      togglErr(true);
+      return;
+    }
+
+    setField({ type: "validate", field: "username" });
+    setField({ type: "validate", field: "password" });
+
+    
+    try {
+      const mongo_user =await window.mongo.findOne("User", { sqlite_id: user.id });
       
+      console.log(mongo_user)
+      
+      console.log(window.database.models.Users)
+      
+      await window.database.models.Users.updateUser({
+        id: user.id,
+        mongo_id: mongo_user._id,
+      });
 
-    const isValidated = validate(validateRules)
-
-    if(!isValidated){
-          return 
-    }
+      const token = await generateToken(
+        user,
+        rememberMe
+          ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
+          : new Date(Date.now() + 2 * 60 * 60 * 1000)
+      );
   
-    function togglErr(err){
-        if(err){
-        setField({type:"error",field:"username",error:"Informacion de usuario incorrecta"})
-        setField({type:"error",field:"password",error:"Informacion de usuario incorrecta"})
-        }
-        else{
-            setField({type:"validate",field:"username"})
-            setField({type:"validate",field:"password"})
-        }
+      //console.log(token);
+      dispatch(login({ user: user, token: token }));
   
+    } catch (error) {
+      console.log(error);
     }
 
-    let user 
-    if(fields.username.value.includes("@")){
-         user =await  validateUserEmail(fields.username.value)
-    }else{
-        user =await  validateUserName(fields.username.value)
-    }
-    
-    if(!user){
-        
-        togglErr(true)
-        return 
-    }
+    navigate("/dashboard");
+  };
 
-    const compare = await comparePassword(fields.password.value,user.password)
-    
-   
-    if(!compare){
-        
-        togglErr(true)
-        return 
-    }
+  return (
+    <>
+      <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
+        <div className="flex flex-wrap items-center">
+          <div className="hidden w-full xl:block xl:w-1/2">
+            <div className="py-17.5 px-26 text-center">
+              <Link className="mb-5.5 inline-block" to="/">
+                <img className="hidden dark:block" src={Logo} alt="Logo" />
+                <img className="dark:hidden" src={LogoDark} alt="Logo" />
+              </Link>
 
-    setField({type:"validate",field:"username"})
-    setField({type:"validate",field:"password"})
-
-
-    const token = await generateToken(user,rememberMe? 
-        new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
-        : new Date(Date.now() + 2 * 60 * 60 * 1000)) 
-    
-
-    dispatch(login({user:user,token:token}))
-    
-     
-    navigate("/dashboard")
-
-    }
-   
-  
-  
-    return (
-      <>
-     
-        <div className="rounded-sm border border-stroke bg-white shadow-default dark:border-strokedark dark:bg-boxdark">
-          <div className="flex flex-wrap items-center">
-            <div className="hidden w-full xl:block xl:w-1/2">
-              <div className="py-17.5 px-26 text-center">
-                <Link className="mb-5.5 inline-block" to="/">
-                  <img className="hidden dark:block" src={Logo} alt="Logo" />
-                  <img className="dark:hidden" src={LogoDark} alt="Logo" />
-                </Link>
-  
-                <p className="2xl:px-20">
-                    <Link to="/">
+              <p className="2xl:px-20">
+                <Link to="/">
                   Lorem ipsum dolor sit amet, consectetur adipiscing elit
                   suspendisse.
-                    </Link>
-                </p>
-  
-                <span className="mt-15 inline-block">
-                 <Person></Person>
-                </span>
-              </div>
+                </Link>
+              </p>
+
+              <span className="mt-15 inline-block">
+                <Person></Person>
+              </span>
             </div>
-  
-            <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
-              <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
-                <span className="mb-1.5 block font-medium">Start for free</span>
-                <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
-                  Inicia sesión en tu cuenta
-                </h2>
-  
-                <form onSubmit={submit} >
-                  <div className="mb-4">
-                    <label className="mb-2.5 block font-medium text-black dark:text-white">
-                      Usuario
-                    </label>
-                    <div className="relative">
-                      <input
-                      
-                        name="username"
-                        type="text"
-                        placeholder="Ingresa tu nombre de usuario"
-                        className={`w-full rounded-lg border  ${!fields.username.isValid ? 'border-red text-red': 'border-stroke'} focus:text-black  bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-                        onChange={(e)=>setField({type:"set",field:"username",value:e.target.value})}
-                        defaultValue={fields.username.value }
-                        value={fields.username.value}
-                 />
-  
-                      <span className="absolute right-4 top-4">
+          </div>
+
+          <div className="w-full border-stroke dark:border-strokedark xl:w-1/2 xl:border-l-2">
+            <div className="w-full p-4 sm:p-12.5 xl:p-17.5">
+              <span className="mb-1.5 block font-medium">Start for free</span>
+              <h2 className="mb-9 text-2xl font-bold text-black dark:text-white sm:text-title-xl2">
+                Inicia sesión en tu cuenta
+              </h2>
+
+              <form onSubmit={submit}>
+                <div className="mb-4">
+                  <label className="mb-2.5 block font-medium text-black dark:text-white">
+                    Usuario
+                  </label>
+                  <div className="relative">
+                    <input
+                      name="username"
+                      type="text"
+                      placeholder="Ingresa tu nombre de usuario"
+                      className={`w-full rounded-lg border  ${
+                        !fields.username.isValid
+                          ? "border-red text-red"
+                          : "border-stroke"
+                      } focus:text-black  bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                      onChange={(e) =>
+                        setField({
+                          type: "set",
+                          field: "username",
+                          value: e.target.value,
+                        })
+                      }
+                      defaultValue={fields.username.value}
+                      value={fields.username.value}
+                    />
+
+                    <span className="absolute right-4 top-4">
                       <svg
                         className="fill-current"
                         width="22"
@@ -166,40 +196,51 @@ const SignIn= () => {
                           />
                         </g>
                       </svg>
-  
-                      </span>
-                    </div>
-                    {
-                      fields.username.error.length==0 ? (<></>) : (<div className='text-center text-red '>{fields.username.error}</div> )
-                    }
-                  
+                    </span>
                   </div>
-  
-                  <div className="mb-6">
-                    <label className="mb-2.5 block font-medium text-black dark:text-white">
-                      Contraseña
-                    </label>
-                    <div className="relative">
-                      <input
-                        onChange={(e)=>setField({type:"set",field:"password",value:e.target.value})}
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        placeholder="6+ Characters, 1 Capital letter"
-                        defaultValue={fields.password.value}
-                        value={fields.password.value}
-                        className={`w-full rounded-lg border  ${fields.password.error ? 'border-red text-red': 'border-stroke'} focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-                       
-                      />
-  
-  <span className="flex gap-1 absolute right-4 top-4" >
-                      <span  onClick={togglePasswordVisibility} >
-                      {showPassword ? (
-                        <Eye opacity="0.5" width={22} height={22}></Eye>
-                      ) : (
-                        <EyeOff opacity="0.5" width={22} height={22}></EyeOff>
-                      )}
+                  {fields.username.error.length == 0 ? (
+                    <></>
+                  ) : (
+                    <div className="text-center text-red ">
+                      {fields.username.error}
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-6">
+                  <label className="mb-2.5 block font-medium text-black dark:text-white">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <input
+                      onChange={(e) =>
+                        setField({
+                          type: "set",
+                          field: "password",
+                          value: e.target.value,
+                        })
+                      }
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="6+ Characters, 1 Capital letter"
+                      defaultValue={fields.password.value}
+                      value={fields.password.value}
+                      className={`w-full rounded-lg border  ${
+                        fields.password.error
+                          ? "border-red text-red"
+                          : "border-stroke"
+                      } focus:text-black bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                    />
+
+                    <span className="flex gap-1 absolute right-4 top-4">
+                      <span onClick={togglePasswordVisibility}>
+                        {showPassword ? (
+                          <Eye opacity="0.5" width={22} height={22}></Eye>
+                        ) : (
+                          <EyeOff opacity="0.5" width={22} height={22}></EyeOff>
+                        )}
                       </span>
-                   
+
                       <svg
                         className="fill-current"
                         width="22"
@@ -220,54 +261,59 @@ const SignIn= () => {
                         </g>
                       </svg>
                     </span>
+                  </div>
+
+                  {fields.password.error.length == 0 ? (
+                    <></>
+                  ) : (
+                    <div className="text-center text-red ">
+                      {fields.password.error}
                     </div>
-  
-                    {
-                      fields.password.error.length==0 ? (<></>) : (<div className='text-center text-red '>{fields.password.error}</div> )
-                    }
-                    
-                  </div>
-  
-                  <div className="mb-5">
-                    <input
-                      type="submit"
-                      value="Sign In"
-                      className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
-                    />
-                  </div>
-  
-                 
-                </form>
+                  )}
+                </div>
 
-                <div className="mb-5 flex items-center">
-                    <input className='mr-2 p-2 accent-primary' type="checkbox" checked={rememberMe} onChange={(e)=>setRememberMe(e.target.checked)} />
-                    <label className="font-medium text-black dark:text-white">Recordar mi session</label>
-                  </div>
+                <div className="mb-5">
+                  <input
+                    type="submit"
+                    value="Sign In"
+                    className="w-full cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90"
+                  />
+                </div>
+              </form>
 
-                <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
-                    <span>
-                      <GoogleIcon></GoogleIcon>
-                    </span>
-                    Registrate con  tu cuenta de Google
-                  </button> 
-  
-                  <div className="mt-6 text-center">
-                    <p>
-                     No tienes una cuenta?{' '}
-                      <Link to="/auth/signup" className="text-primary">
-                        Registrate
-                      </Link>
-                    </p>
-                  </div>
+              <div className="mb-5 flex items-center">
+                <input
+                  className="mr-2 p-2 accent-primary"
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label className="font-medium text-black dark:text-white">
+                  Recordar mi session
+                </label>
+              </div>
+
+              <button className="flex w-full items-center justify-center gap-3.5 rounded-lg border border-stroke bg-gray p-4 hover:bg-opacity-50 dark:border-strokedark dark:bg-meta-4 dark:hover:bg-opacity-50">
+                <span>
+                  <GoogleIcon></GoogleIcon>
+                </span>
+                Registrate con tu cuenta de Google
+              </button>
+
+              <div className="mt-6 text-center">
+                <p>
+                  No tienes una cuenta?{" "}
+                  <Link to="/auth/signup" className="text-primary">
+                    Registrate
+                  </Link>
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </>
-    );
-  };  
-
-
-
+      </div>
+    </>
+  );
+};
 
 export default SignIn;

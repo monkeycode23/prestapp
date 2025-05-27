@@ -2,6 +2,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const database = require('../ipcs/database');
 
+const mongoObjects = require('../ipcs/mongo')
 
 /* 
     Expose the database to the preload set invoke methods for database
@@ -11,6 +12,23 @@ contextBridge.exposeInMainWorld('database', {
     models: {
         ...database
     }
+  });
+
+
+  
+  contextBridge.exposeInMainWorld('mongo', {
+    findOne: (modelName,query) => ipcRenderer.invoke("model-findOne", {modelName,query}),
+
+    findAll: (modelName,query) => ipcRenderer.invoke("model-findAll", {modelName,query}),
+    create: (modelName, data) => ipcRenderer.invoke("model-create", { modelName, data }),
+    update: (modelName, id, data) => ipcRenderer.invoke("model-update", { modelName, id, data }),
+    delete: (modelName, id) => ipcRenderer.invoke("model-delete", { modelName, id }),
+  });
+
+  contextBridge.exposeInMainWorld('jwt', {
+    generate: (data) => ipcRenderer.invoke("tokens", {func:"generate",data}),
+    decode: (token) => ipcRenderer.invoke("tokens", { func:"decode", token }),
+    
   });
 
   contextBridge.exposeInMainWorld('electron', {

@@ -22,21 +22,22 @@ class Models {
 
   addColumn(column) {
     // Obtener la info de las columnas existentes
-    const columnas = db.query(`PRAGMA table_info(${tabla});`,[],'all')
+    const columnas = db.exec(`PRAGMA table_info(${this.tableName});`,[],'all')
 
+    console.log(columnas)
     // Verificar si la columna ya existe
-    const existe = columnas.some((col) => col.name === column);
-
+    const existe =columnas.length ? columnas.some((col) => col.name === column):  false;
+ 
     // Agregar la columna si no existe
     if (!existe) {
-      db.prepare(`ALTER TABLE ${this.tableName} ADD COLUMN ${column} INTEGER;`).run();
-      console.log(`Columna "${columna}" agregada a la tabla "${this.tableName}".`);
+      //db.exec(`ALTER TABLE ${this.tableName} ADD COLUMN ${column} INTEGER;`);
+      //console.log(`Columna "${columna}" agregada a la tabla "${this.tableName}".`);
     } else {
       console.log(`La columna "${column}" ya existe en la tabla "${this.tableName}".`);
     }
     /* try {
       const query = `ALTER TABLE ${this.tableName} IF NOT EXISTS ADD COLUMN ${col} `;
-      console.log(query);
+      //console.log(query);
       this.db.exec(query);
       logger.info(`Tabla ${this.tableName} modificada`);
     } catch (error) {
@@ -46,8 +47,11 @@ class Models {
   }
 
   async insert(data) {
-    //console.log("data:----------------------------->",data);
+    ////console.log("data:----------------------------->",data);
     try {
+
+
+      
       const query = `INSERT INTO ${this.tableName} (${Object.keys(data).join(
         ","
       )}) VALUES (${Object.values(data)
@@ -55,7 +59,7 @@ class Models {
         .join(",")})`;
       const params = Object.values(data);
 
-      //console.log("query:----------------------------->",query);
+      ////console.log("query:----------------------------->",query);
       this.db.runQuery(query, params);
       logger.info(`Datos insertados en la tabla ${this.tableName}`);
 
@@ -72,7 +76,7 @@ class Models {
         ...data,
       };
 
-      /* if (this.MongoModel) {
+       if (this.MongoModel) {
               try {
                   // Prepare data for MongoDB, ensuring sqlite_id is included
                   const mongoData = { ...data, sqlite_id: sqliteId };
@@ -84,20 +88,20 @@ class Models {
                   // you might want to explicitly map fields here.
                   // Example: const mappedData = { nickname: data.nickname, sqlite_id: sqliteId, ... };
                   
+                  
                   const generarCodigoAcceso = () => {
                     return Math.floor(10000 + Math.random() * 90000).toString();
                   };
-
                   delete mongoData.user_id
                   const codigoAcceso = generarCodigoAcceso();
                   const createdDocument = await this.MongoModel.create({...mongoData, codigoAcceso});
                   logger.info(`Document created in MongoDB for ${this.tableName} with sqlite_id: ${sqliteId}, mongo_id: ${createdDocument._id}`);
-                  //console.log("MongoDB document created:", createdDocument);
+                  ////console.log("MongoDB document created:", createdDocument);
               } catch (mongoError) {
                   logger.error(`Error creating document in MongoDB for ${this.tableName} (sqlite_id: ${sqliteId}):`, mongoError);
                   // Decide on error handling: throw, log, or specific recovery
               }
-          } */
+          } 
       return resultForCaller;
     } catch (error) {
       logger.error(
@@ -136,10 +140,10 @@ class Models {
             ${filter.limit ? `LIMIT ${filter.limit}` : ""}
             ${filter.offset ? `OFFSET ${filter.offset} ` : ""}
             `;
-    console.log("query:----------------------------->", query);
+    //console.log("query:----------------------------->", query);
 
     const result = this.db.query(query, filter.params);
-    // console.log("result:----------------------------->",result)
+    // //console.log("result:----------------------------->",result)
     return result;
   }
 
@@ -223,11 +227,13 @@ class Models {
       .join(",")}
         ${filter.where ? ` WHERE ${filter.where}` : ""}`;
 
-    //console.log("query:----------------------------->",query)
+    ////console.log("query:----------------------------->",query)
     return this.db.query(query, [], { type: "run" });
   }
 
   async delete(id) {
+
+
     logger.info(`Deleting from SQLite ${this.tableName} with id: ${id}`);
     const sqliteResult = this.db.query(
       `DELETE FROM ${this.tableName} WHERE id = ?`,
@@ -235,19 +241,19 @@ class Models {
       { type: "run" }
     );
 
-    /* if (this.MongoModel && id) {
+     if (this.MongoModel && id) {
             try {
                 const mongoDeleteResult = await this.MongoModel.findOneAndDelete({ sqlite_id: id });
                 if (mongoDeleteResult) {
                     logger.info(`Document deleted from MongoDB for ${this.tableName} with sqlite_id: ${id}`);
-                    //console.log("MongoDB document deleted:", mongoDeleteResult);
+                    ////console.log("MongoDB document deleted:", mongoDeleteResult);
                 } else {
                     logger.warn(`No document found in MongoDB for ${this.tableName} with sqlite_id: ${id} to delete.`);
                 }
             } catch (mongoError) {
                 logger.error(`Error deleting document in MongoDB for ${this.tableName} (sqlite_id: ${id}):`, mongoError);
             }
-        } */
+        }
     return sqliteResult; // Or whatever the original delete returned
   }
 
@@ -255,7 +261,7 @@ class Models {
     const query = `DELETE FROM ${this.tableName} WHERE ${
       data.where ? data.where : `id=${data.id}`
     }`;
-    //console.log("query:----------------------------->",query)
+    ////console.log("query:----------------------------->",query)
     return this.db.query(query, [], { type: "run" });
   }
 

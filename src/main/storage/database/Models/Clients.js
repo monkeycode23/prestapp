@@ -16,7 +16,7 @@ class Clients extends Models {
             user_id INTEGER,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE`);
             
-            //this.addColumn("notes TEXT")
+            this.addColumn("access_code TEXT")
 
             //this.addColumn("reputation INTEGER default 100")
       }

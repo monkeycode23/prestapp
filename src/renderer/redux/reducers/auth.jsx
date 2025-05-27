@@ -13,7 +13,9 @@ const setToken = ()=>{
             
             return null
         }
-        return decodedToken
+
+        
+        return token
     }
     return null
 }
@@ -21,6 +23,7 @@ const setToken = ()=>{
 const initialState = {
     user: null,
     sessionExpired:false,
+    isAuthenticated:true,
     token:setToken(),
     loading: false,
     error: null
@@ -31,10 +34,11 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         login: (state, action) => {
-            state.user = action.payload.user;
-            state.token = action.payload.token;
-            //console.log(action.payload)
 
+            console.log(action.payload)
+            state.user = action.payload.user;
+            if(typeof action.payload.token == "string") state.token = action.payload.token;
+            //console.log(action.payload)
            localStorage.setItem("auth_token", action.payload.token);
         },
         logout: (state) => {

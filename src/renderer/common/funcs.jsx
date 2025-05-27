@@ -1,4 +1,10 @@
 
+const isElectron = () => {
+  return typeof window !== 'undefined' &&
+         typeof window.process === 'object' &&
+         window.process.type === 'renderer';
+};
+
 
 
 export function formatDateCriollo(fecha){
@@ -209,29 +215,18 @@ export  function formatDateDifference(date) {
 
 export function generateToken(obj, expirationDate) {
   // Convertir el objeto a una cadena JSON
-  const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días a partir de ahora
-
-  const  tokenObject ={
-    ...obj,
-    expirationDate:date.getTime()
-  }
-  const jsonString = JSON.stringify(tokenObject);
   
+  const token = window.jwt.generate({obj,expirationDate})
 
-  const base64Encoded = btoa(jsonString);
-  
-  return base64Encoded;
+  return token
 }
 
 
 export function decodeToken(token) {
   // Decodificar el token de Base64
-  const decodedData = atob(token);
+  const decodedData = window.jwt.decode({token})
 
-  // Convertir la cadena JSON de nuevo a un objeto
-  const obj = JSON.parse(decodedData);
- 
-  return { ...obj };
+  return decodedData
 }
 
 async function generateHash(message) {

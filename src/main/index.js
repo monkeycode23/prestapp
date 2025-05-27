@@ -4,14 +4,14 @@ const logger = require('./logger.js');
 const {checkForUpdates} = require('./updater');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
-
+const jwt = require("jsonwebtoken")
     
    
 dotenv.config();
 
 // MongoDB Connection
 const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/test'; // Use environment variable or placeholder
-/* 
+
 mongoose.connect(MONGO_URI)
   .then(() => {
     logger.info('MongoDB connected successfully');
@@ -22,18 +22,110 @@ mongoose.connect(MONGO_URI)
     console.error('MongoDB connection error:', err);
     // Optionally, you might want to quit the app or show an error to the user
     // if MongoDB connection is critical
-  }); */
+  });
  
+  const models = require("./storage/mongo_models");
+
+
+ // / 🔁 Función auxiliar para obtener el modelo dinámicamente
+function getModel(name) {
+  const model = models[name];
+  if (!model) throw new Error(`Modelo "${name}" no encontrado.`);
+  return model;
+}
+
+function sanitizeMongoDoc(doc) {
+  if (Array.isArray(doc)) {
+    return doc.map(sanitizeMongoDoc);
+  }
+
+  if (doc && typeof doc === "object") {
+    const sanitized = {};
+
+    for (const key in doc) {
+      if (key === "__v") continue; // opcional: eliminar __v
+      const value = doc[key];
+
+      // Convertir _id a string
+      if (key === "_id" && value && typeof value === "object" && typeof value.toString === "function") {
+        sanitized[key] = value.toString();
+      } else {
+        sanitized[key] = sanitizeMongoDoc(value);
+      }
+    }
+
+    return sanitized;
+  }
+
+  return doc;
+}
+
+ipcMain.handle("model-findOne", async (_, { modelName, query }) => {
+  const Model = getModel(modelName);
+  const res = await Model.findOne(query).lean();
+
+  return res ? sanitizeMongoDoc(res) : null;
+});
+// 🧩 Handlers genéricos
+ipcMain.handle("model-findAll", async (_, {modelName,query}) => {
+  const Model = getModel(modelName);
+  return await Model.find(query).lean();
+});
+
+ipcMain.handle("model-create", async (_, { modelName, data }) => {
+  const Model = getModel(modelName);
+  const doc = new Model(data);
+  await doc.save();
+  return doc.toObject();
+});
+
+ipcMain.handle("model-update", async (_, { modelName, id, data }) => {
+  const Model = getModel(modelName);
+  const updated = await Model.findByIdAndUpdate(id, data, { new: true }).lean();
+  return updated;
+});
+
+ipcMain.handle("model-delete", async (_, { modelName, id }) => {
+  const Model = getModel(modelName);
+  await Model.findByIdAndDelete(id);
+  return { success: true };
+});
 /* 
  ipcMain.on('check-for-updates', () => {
     checkForUpdates();
 });   
  
  */
- 
+const SECRET_KEY = "tu_clave_secreta_super_segura"; // ¡NO compartas esto con el frontend!
 
+ipcMain.handle("tokens", async (_, {func,data }) => {
+  // Simulación de login real
+  try {
+  if(func=="generate"){
+    const token = jwt.sign(
+      data,
+      SECRET_KEY,
+      { expiresIn: "2h" }
+    );
+
+    return token;
+
+  }
+  if (func=="decode") {
+      const decoded = jwt.decode(data)
+      return  decoded  
+    } 
+
+  } catch (error) {
+    console.log(error)
+  }
+});
+ 
 const DatabaseIpcMain = require('./ipcs/database/ipcmain');
 ipcMain.handle('database', DatabaseIpcMain);
+
+const MongoIpcMain = require('./ipcs/mongo/ipcmain');
+ipcMain.handle('mongo', MongoIpcMain);
 
 /*
 const {generateCSV} = require('./helpers/index');
@@ -48,7 +140,7 @@ const {generateCSV} = require('./helpers/index');
 }); */
 
 
-const {parseDatabase} = require('./helpers/parseDatabase');
+/* const {parseDatabase} = require('./helpers/parseDatabase');
 
 // Manejar un evento IPC desde el renderer
 ipcMain.handle('upload-file', async(event, filePath) => {
@@ -65,7 +157,7 @@ ipcMain.handle('upload-file', async(event, filePath) => {
 
   //event.reply('file-received', `Archivo ${filePath} recibido correctamente`);
 });
-
+ */
  
   let mainWindow;
 
@@ -106,7 +198,10 @@ ipcMain.handle('upload-file', async(event, filePath) => {
       mainWindow = null;
     });
   }
-  app.whenReady().then(createWindow).then(checkForUpdates);
+
+  
+  app.whenReady().then(createWindow)
+  /* .then(checkForUpdates); */
   
   app.on('window-all-closed', () => {
     if (process.platform !== 'darwin') {

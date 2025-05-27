@@ -81,6 +81,9 @@ module.exports = {
       resourceRegExp: /typescript\/lib\/typescript\.js/,
       contextRegExp: /node_modules/,
     }), 
+    new webpack.DefinePlugin({
+      'process.env.REACT_APP_SOCKET_URL': JSON.stringify('http://localhost:3000')
+    })
 
   ],
   ignoreWarnings: [

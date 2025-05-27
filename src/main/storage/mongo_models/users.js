@@ -1,12 +1,19 @@
-import mongoose from 'mongoose'
-import bcrypt from 'bcrypt'
+
+const mongoose = require("mongoose")
+const  bcrypt= require('bcrypt')
 
 const userSchema = new mongoose.Schema({
+    sqlite_id:Number,
     username: String,
     email: String,
     password: String,
+    avatar:String,
     number: String,
     address: String,
+    role:{
+      type:String,
+      enum:["ADMIN","MOD","USER"]  
+    },
     city: String,
     state: String,
     zip: String,
@@ -36,4 +43,4 @@ userSchema.methods.comparePassword = async function (password) {
 
 const User = mongoose.model('User', userSchema)
 
-export default User
+module.exports= User

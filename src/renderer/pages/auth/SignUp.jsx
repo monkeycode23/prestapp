@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 
-import { useDispatch } from 'react-redux';
-import { register } from '../../redux/reducers/auth';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import useValidate from '../../hooks/useValidate';
+import { useDispatch } from "react-redux";
+import { register } from "../../redux/reducers/auth";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import useValidate from "../../hooks/useValidate";
 
-import Logo from '../../images/logo/logo.svg';
-import LogoDark from '../../images/logo/logo-dark.svg';
-import { Link } from 'react-router-dom';
-import Person from './ImagSvg';
-import { initFields2, validateRules2, insertUser, generateToken, validateUserName, validateUserEmail, decodeToken  } from './funcs';
-import { Eye, EyeOff } from '../../components/Icons';
+import Logo from "../../images/logo/logo.svg";
+import LogoDark from "../../images/logo/logo-dark.svg";
+import { Link } from "react-router-dom";
+import Person from "./ImagSvg";
+import {
+  initFields2,
+  validateRules2,
+  insertUser,
+  generateToken,
+  validateUserName,
+  validateUserEmail,
+  decodeToken,
+} from "./funcs";
+import { Eye, EyeOff } from "../../components/Icons";
 
 const SignUp = () => {
   const dispatch = useDispatch();
@@ -21,7 +29,7 @@ const SignUp = () => {
   const { validate, fields, setField } = useValidate(initFields2);
   const [showPassword, setShowPassword] = useState(false);
   const [showRPassword, setShowRPassword] = useState(false);
-    
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -29,29 +37,28 @@ const SignUp = () => {
   const toggleRPasswordVisibility = () => {
     setShowRPassword(!showRPassword);
   };
-  
+
   const submit = async (e) => {
     e.preventDefault();
 
     const isValidated = validate({
-        ...validateRules2,
-        rpassword:{
-            ...validateRules2.password,
-            match:{
-                param:fields.password.value,
-                message:"Las contraseñas no coinciden"
-            }
-        }
+      ...validateRules2,
+      rpassword: {
+        ...validateRules2.password,
+        match: {
+          param: fields.password.value,
+          message: "Las contraseñas no coinciden",
+        },
+      },
     });
 
     if (!isValidated) {
       return;
     }
 
-  
     const user = await validateUserName(fields.username.value);
     //console.log("user",user)
-    
+
     if (user) {
       setField({
         type: "error",
@@ -72,18 +79,31 @@ const SignUp = () => {
       return;
     }
 
-    
     setField({ type: "validate", field: "password" });
     setField({ type: "validate", field: "rpassword" });
 
-    const newUser = await insertUser(fields);
-    console.log(newUser)
+    try {
+      
+      let mongo_user =await window.mongo.create("User",fields);
+      
+      
+      console.log(mongo_user);
+      
+      mongo_user.save()
+
+      const newUser = await insertUser({
+        mongo_id:mongo_user.id,
+        ...fields});
+      console.log(newUser);
+
       const token = await generateToken(newUser);
 
-  console.log(token)
-    dispatch(register({user:newUser,token:token}));
-
-    navigate("/"); 
+      console.log(token);
+      dispatch(register({ user: newUser, token: token }));
+    } catch (error) {
+      console.log(error);
+    }
+    navigate("/dashboard");
   };
 
   return (
@@ -121,11 +141,13 @@ const SignUp = () => {
                   </label>
                   <div className="relative">
                     <input
-                     autoComplete="username"
+                      autoComplete="username"
                       type="text"
                       placeholder="Nombre de usuario"
                       className={`w-full rounded-lg border  bg-transparent  ${
-                        fields.username.error ? "border-red text-red" : "border-stroke"
+                        fields.username.error
+                          ? "border-red text-red"
+                          : "border-stroke"
                       }  py-4 pl-6 pr-10 text-black outline-none
                        focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
                        dark:bg-form-input dark:text-white dark:focus:border-primary`}
@@ -175,11 +197,13 @@ const SignUp = () => {
                   </label>
                   <div className="relative">
                     <input
-                    autoComplete="email"
+                      autoComplete="email"
                       type="email"
                       placeholder="Correo electronico"
                       className={`w-full rounded-lg border  bg-transparent  ${
-                        fields.email.error ? "border-red text-red" : "border-stroke"
+                        fields.email.error
+                          ? "border-red text-red"
+                          : "border-stroke"
                       }  py-4 pl-6 pr-10 text-black outline-none
                        focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
                        dark:bg-form-input dark:text-white dark:focus:border-primary`}
@@ -190,7 +214,6 @@ const SignUp = () => {
                           value: e.target.value,
                         })
                       }
-                     
                     />
 
                     <span className="absolute right-4 top-4">
@@ -226,10 +249,12 @@ const SignUp = () => {
                   </label>
                   <div className="relative">
                     <input
-                       type={showPassword ? "text" : "password"}
+                      type={showPassword ? "text" : "password"}
                       placeholder="Contraseña"
                       className={`w-full rounded-lg border  bg-transparent  ${
-                        fields.password.error ? "border-red text-red" : "border-stroke"
+                        fields.password.error
+                          ? "border-red text-red"
+                          : "border-stroke"
                       }  py-4 pl-6 pr-10 text-black outline-none
                        focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
                        dark:bg-form-input dark:text-white dark:focus:border-primary`}
@@ -242,15 +267,15 @@ const SignUp = () => {
                       }
                     />
 
-<span className="flex gap-1 absolute right-4 top-4" >
-                      <span  onClick={togglePasswordVisibility} >
-                      {showPassword ? (
-                        <Eye opacity="0.5" width={22} height={22}></Eye>
-                      ) : (
-                        <EyeOff opacity="0.5" width={22} height={22}></EyeOff>
-                      )}
+                    <span className="flex gap-1 absolute right-4 top-4">
+                      <span onClick={togglePasswordVisibility}>
+                        {showPassword ? (
+                          <Eye opacity="0.5" width={22} height={22}></Eye>
+                        ) : (
+                          <EyeOff opacity="0.5" width={22} height={22}></EyeOff>
+                        )}
                       </span>
-                   
+
                       <svg
                         className="fill-current"
                         width="22"
@@ -287,10 +312,12 @@ const SignUp = () => {
                   </label>
                   <div className="relative">
                     <input
-                       type={showRPassword ? "text" : "password"}
+                      type={showRPassword ? "text" : "password"}
                       placeholder="Re-enter contraseña"
                       className={`w-full rounded-lg border  bg-transparent  ${
-                        fields.rpassword.error ? "border-red text-red" : "border-stroke"
+                        fields.rpassword.error
+                          ? "border-red text-red"
+                          : "border-stroke"
                       }  py-4 pl-6 pr-10 text-black outline-none
                        focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
                        dark:bg-form-input dark:text-white dark:focus:border-primary`}
@@ -303,15 +330,15 @@ const SignUp = () => {
                       }
                     />
 
-                    <span className="flex gap-1 absolute right-4 top-4" >
-                      <span  onClick={toggleRPasswordVisibility} >
-                      {showRPassword ? (
-                        <Eye opacity="0.5" width={22} height={22}></Eye>
-                      ) : (
-                        <EyeOff opacity="0.5" width={22} height={22}></EyeOff>
-                      )}
+                    <span className="flex gap-1 absolute right-4 top-4">
+                      <span onClick={toggleRPasswordVisibility}>
+                        {showRPassword ? (
+                          <Eye opacity="0.5" width={22} height={22}></Eye>
+                        ) : (
+                          <EyeOff opacity="0.5" width={22} height={22}></EyeOff>
+                        )}
                       </span>
-                   
+
                       <svg
                         className="fill-current"
                         width="22"
@@ -384,7 +411,7 @@ const SignUp = () => {
                       </defs>
                     </svg>
                   </span>
-                  Registrate con  tu cuenta de Google
+                  Registrate con tu cuenta de Google
                 </button>
 
                 <div className="mt-6 text-center">
@@ -403,8 +430,5 @@ const SignUp = () => {
     </>
   );
 };
-  
-
-  
 
 export default SignUp;

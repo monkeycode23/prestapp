@@ -76,7 +76,7 @@ const clienteSchema = new mongoose.Schema({
   }
 });
 
-// Pre-save hook para encriptar contraseña
+/* // Pre-save hook para encriptar contraseña
 clienteSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
   
@@ -100,7 +100,7 @@ clienteSchema.methods.comparePassword = async function(candidatePassword) {
   } catch (error) {
     throw error;
   }
-};
+}; */
 
 const Cliente = mongoose.model('Cliente', clienteSchema);
 

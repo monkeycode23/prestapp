@@ -28,7 +28,7 @@ class Payments extends Models{
          
     //this.db.runQuery(`ALTER TABLE payments ADD COLUMN payment_method TEXT`)
 
-  }
+  } 
 
  
   
