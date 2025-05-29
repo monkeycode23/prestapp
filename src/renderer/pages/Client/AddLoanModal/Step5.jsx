@@ -2,7 +2,7 @@ import React,{ useState,useEffect } from "react";
 import { useNotification } from "../../../components/Notifications";
 import { useModal } from "../../../components/Modal";
 import { useGuide } from "../../../components/GuidedForm/GuidedForm";
-import { createPayments,insertLoan } from "../funcs";
+import { createPayments,insertLoan, insertLoanMongo } from "../funcs";
 import { useDispatch,useSelector } from "react-redux";
 import { addLoan, setLeftToPaid } from "../../../redux/reducers/loans";
 import {setPaymentsCount} from "../../../redux/reducers/payments"
@@ -51,28 +51,31 @@ const Step5 = ({ setLoans }) => {
         //console.log("formData:----------------------------->", formData)
         const gains = Math.floor(Number(formData.amount.value) * Number(formData.interest_rate.value) / 100)
 
-         const loan = await insertLoan({
-            amount: formData.amount.value,
-            label:"label prestamo",
-            gain: gains,
-            status:"active",
-            installment_number: formData.installments.value,
-            total_amount: Number(formData.amount.value) + Number(gains),
-            loan_date: formData.loan_date.value,
-            interest_rate: formData.interest_rate.value,
-            payment_interval: formData.payment_interval.value,
-            generate_payments_date: formData.generated_payments_date.value,
-            client_id: id
-          }) 
+        const loanMap = {
+          amount: formData.amount.value,
+          label:"Prestamo",
+          gain: gains,
+          status:"active",
+          installment_number: formData.installments.value,
+          total_amount: Number(formData.amount.value) + Number(gains),
+          loan_date: formData.loan_date.value,
+          interest_rate: formData.interest_rate.value,
+          payment_interval: formData.payment_interval.value,
+          generate_payments_date: formData.generated_payments_date.value,
+          client_id: id
+        }
+         const loan = await insertLoan(loanMap) 
 
-          //console.log("pDates:----------------------------->",pDates)
-
+        
           const payments = await createPayments({
             ...loan,
             dates:pDates
           },formData.sunday.value)
  
-          //console.log("loan:----------------------------->",loan)
+          insertLoanMongo(loan,payments)
+          console.log("loan:----------------------------->",loan)
+
+          console.log("payments:----------------------------->",payments)
           dispatch(addLoan(loan))
           //console.log("payments:----------------------------->",payments)
           dispatch(setPaymentsCount({

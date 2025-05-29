@@ -10,6 +10,7 @@ class Users extends Models {
     
     this.createTable();
 
+    this.addColumn('mongo_id',"TEXT")
     //this.db.exec("ALTER TABLE users ADD COLUMN mongo_id TEXT")
   } 
   createTable(){
@@ -17,7 +18,7 @@ class Users extends Models {
      username TEXT, email TEXT, password TEXT,
      rol TEXT DEFAULT 'user',
      status TEXT DEFAULT 'activo',
-     
+     mongo_id TEXT,
      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       `;

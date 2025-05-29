@@ -16,6 +16,7 @@ import { useNavigate } from "react-router-dom";
 
 //redux
 import { deleteClient } from "../../../redux/reducers/clients";
+import { deleteClientMongo } from "../../../pages/Client/funcs";
 
 //funcs
 
@@ -54,11 +55,19 @@ function FormModal() {
 
       <div className="flex flex-row gap-2 justify-center">
         <button
-        onClick={() => {
+        onClick={async() => {
 
             window.database.models.Clients.deleteClient(client.id)
-            
             dispatch(deleteClient({id:client.id}))
+            
+           /*  if(navigator.isOnline){ */
+
+         
+           deleteClientMongo(client)           
+              /*  } */
+            
+            
+
 
             setNotification({
               message: "Cliente borrado correctamente",

@@ -91,17 +91,17 @@ const SignIn = () => {
 
     
     try {
-      const mongo_user =await window.mongo.findOne("User", { sqlite_id: user.id });
+      /* const mongo_user =await window.mongo.findOne("User", { sqlite_id: user.id });
       
       console.log(mongo_user)
       
-      console.log(window.database.models.Users)
+      console.log(window.database.models.Users) 
       
       await window.database.models.Users.updateUser({
         id: user.id,
         mongo_id: mongo_user._id,
       });
-
+ */
       const token = await generateToken(
         user,
         rememberMe

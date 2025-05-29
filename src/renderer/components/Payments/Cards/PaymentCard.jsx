@@ -365,6 +365,8 @@ shadow-2xl
 
                 const a =await window.database.models.Payments.deletePayment(payment.id);
                 
+
+                
                 console.log(a)
 
                 await window.database.models.Loans.updateLoan({

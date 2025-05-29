@@ -1,10 +1,16 @@
 
-const isElectron = () => {
+export const isElectron = () => {
   return typeof window !== 'undefined' &&
          typeof window.process === 'object' &&
          window.process.type === 'renderer';
 };
 
+
+export function uint8ArrayToHexString(uint8Array) {
+  return Array.from(uint8Array)
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 
 export function formatDateCriollo(fecha){

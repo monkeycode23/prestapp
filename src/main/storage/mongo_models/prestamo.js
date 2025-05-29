@@ -120,7 +120,7 @@ const prestamoSchema = new mongoose.Schema({
     ref: 'Pago'
   }],
   sqlite_id: {
-    type: Number,
+    type: String,
     //required: true
   }
 }, {
@@ -144,6 +144,21 @@ prestamoSchema.pre('save', async function(next) {
   next();
 });
 
+/* 
+prestamoSchema.post(['delete','deleteOne'], async function(next) {
+  
+  const Pago = mongoose.model('Pago');
+
+  if(this.payments.length){
+    
+   const deletedPagos = await Promise.all(this.payments.map((pago)=>Pago.deleteOne({_id:pago})))
+
+   console.log(deletePagos)
+  }
+
+
+  next();
+}); */
 const Prestamo = mongoose.model('Prestamo', prestamoSchema);
 
 module.exports = Prestamo; 

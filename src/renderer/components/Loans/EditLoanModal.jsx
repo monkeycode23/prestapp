@@ -257,8 +257,8 @@ function EditLoanForm({ loan }) {
               options={[
                 {
                   label: "Completado",
-                  value: "cmpleted",
-                  selected: status == "competed",
+                  value: "completed",
+                  selected: status == "completed",
                 },
                 {
                   label: "Cancelado",
@@ -328,7 +328,7 @@ function EditLoanForm({ loan }) {
               amount: formData.amount.value,
               total_amount: totalAmount,
               status: formData.status.value,
-                gain:gain,
+              gain:gain,
               payment_interval: formData.payment_interval.value,
               loan_date: formData.loan_date.value,
               installment_number: formData.installment_number.value,

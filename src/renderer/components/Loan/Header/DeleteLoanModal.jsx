@@ -17,6 +17,7 @@ import { useNavigate } from "react-router-dom";
 //redux
 import { deleteLoan } from "../../../redux/reducers/loans";
 import { setBruteGains, setNetGains } from "../../../redux/reducers/clients";
+import { deleteLoanMongo } from "../../../pages/Loan/funcs";
 
 //funcs
 
@@ -57,10 +58,13 @@ function FormModal() {
 
       <div className="flex flex-row gap-2 justify-center">
         <button
-        onClick={() => {
+        onClick={async() => {
 
             window.database.models.Loans.deleteLoan(loan.id)
             
+
+            deleteLoanMongo(loan)
+
             dispatch(deleteLoan({id:loan.id}))
 
             setNotification({

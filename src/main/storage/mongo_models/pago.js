@@ -22,7 +22,7 @@ const pagoSchema = new mongoose.Schema({
   },
   total_amount: {
     type: Number,
-    required: true,
+    //required: true,
     min: 0
   },
   payment_date: {

@@ -27,7 +27,7 @@ function  EditLoanForm({loan}){
         amount,
         id,
         installments,
-        state,
+        status,
         aproved_date:date,
 
     } = loan;
@@ -75,8 +75,8 @@ function  EditLoanForm({loan}){
             value:interval,
             error:"",
         },
-        state:{
-            value:state,
+        status:{
+            value:status,
             error:"",
         }
     }) 
@@ -210,22 +210,22 @@ function  EditLoanForm({loan}){
 
             <div className='flex '>
                 <div className='w-1/2'>
-                <Select  label={"Estado del prestamo"} onChange={(e)=>setField({type:"set",field:"state",value:e.target.value})} 
+                <Select  label={"Estado del prestamo"} onChange={(e)=>setField({type:"set",field:"status",value:e.target.value})} 
             options={[
                 {
                     label:"Completado",
                     value:"cmpleted",
-                    selected:state=="payed"
+                    selected:status=="payed"
                 },
                 {
                     label:"Cancelado",
                     value:"canceled",
-                    selected:state=="expired"
+                    selected:status=="expired"
                 },
                 {
                     label:"Activo",
                     value:"active",
-                    selected:state=="pending"
+                    selected:status=="pending"
                 },
             ]}>
            
@@ -239,17 +239,17 @@ function  EditLoanForm({loan}){
                 {
                     label:"diario",
                     value:"daily",
-                    selected:state=="payed"
+                    selected:status=="daily"
                 },
                 {
                     label:"semanal",
                     value:"weekly",
-                    selected:state=="expired"
+                    selected:status=="weekly"
                 },
                 {
                     label:"mensual",
                     value:"monthly",
-                    selected:state=="pending"
+                    selected:status=="monthly"
                 },
             ]}>
            
@@ -269,7 +269,7 @@ function  EditLoanForm({loan}){
                      loansModel.updateLoan({
                             id:formData.id.value,
                             amount:formData.amount.value,
-                            state:formData.state.value,
+                            status:formData.status.value,
                             installments:formData.installments.value,
                             interval:formData.interval.value,
                             date:formData.date.value,
@@ -303,7 +303,7 @@ function  EditLoanForm({loan}){
                             setLoans((prev)=>prev.map((p)=>p.id==loan.id ? {
                                 ...p,
                                 amount:formData.amount.value,
-                                state:formData.state.value,
+                                status:formData.status.value,
                                 installments:formData.installments.value,
                                 payment_interval:formData.interval.value,
                                 aproved_date:formData.date.value,

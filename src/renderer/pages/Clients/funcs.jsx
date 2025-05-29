@@ -75,7 +75,7 @@ export const getClientReputation=async (id)=>{
     SUM(
       CASE 
         WHEN p.status = 'paid' THEN 1.0
-        WHEN p.status = 'pending' THEN 0.50
+        WHEN p.status = 'pending' THEN 0.95
         WHEN p.status = 'incomplete' THEN 0.5
         WHEN p.status = 'expired' THEN 0.0
         ELSE 0

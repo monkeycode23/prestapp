@@ -5,6 +5,7 @@ const loansIpcs = require('./loansInvoke');
 const paymentsIpcs = require('./paymentsInvoke');
 const notesIpcs = require('./notesInvoke');
 const informationIpcs = require('./information');
+const ActivityIpcs = require('./activityInvoke')
 /* const settingsIpcs = require('./settingsInvoke');
 const reportsIpcs = require('./reportsInvoke'); */
 
@@ -15,6 +16,7 @@ module.exports = {
     Loans:{...loansIpcs},
     Payments:{...paymentsIpcs},
     Notes:{...notesIpcs},
+    ActivityLog:{...ActivityIpcs}
     /* ,
     Wallets:{...walletsIpcs}, */
     /*

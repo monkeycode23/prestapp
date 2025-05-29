@@ -15,11 +15,16 @@ contextBridge.exposeInMainWorld('database', {
   });
 
 
+  contextBridge.exposeInMainWorld('exportdb', {
+    iniciarExportacion: () => ipcRenderer.invoke('iniciar-exportacion'),
+    onProgresoExportacion: (callback) => ipcRenderer.on('progreso-exportacion', (_, mensaje) => callback(mensaje))
+  });
+
   
   contextBridge.exposeInMainWorld('mongo', {
-    findOne: (modelName,query) => ipcRenderer.invoke("model-findOne", {modelName,query}),
+    findOne: (modelName,query,populate) => ipcRenderer.invoke("model-findOne", {modelName,query,populate}),
 
-    findAll: (modelName,query) => ipcRenderer.invoke("model-findAll", {modelName,query}),
+    findAll: (modelName,query,populate) => ipcRenderer.invoke("model-findAll", {modelName,query,populate}),
     create: (modelName, data) => ipcRenderer.invoke("model-create", { modelName, data }),
     update: (modelName, id, data) => ipcRenderer.invoke("model-update", { modelName, id, data }),
     delete: (modelName, id) => ipcRenderer.invoke("model-delete", { modelName, id }),

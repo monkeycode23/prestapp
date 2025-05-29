@@ -6,7 +6,7 @@ import { setDebt,setTotalLendMoney } from "../../../redux/reducers/clients";
 import SelectGroupOne from "../../../components/Forms/SelectGroup/SelectGroupOne";
 
 import { useSelector,useDispatch } from "react-redux";
-import { createPayments } from "../funcs";
+import { createPayments, insertLoanMongo } from "../funcs";
 import { setLoans,addLoan, setTotalLoans,setLeftToPaid } from "../../../redux/reducers/loans";
 import {setPaymentsCount} from "../../../redux/reducers/payments"
 const Step6 = () => {
@@ -69,6 +69,10 @@ const Step6 = () => {
               const payments = await createPayments(loan,formData.sunday.value)
               //console.log("payments:----------------------------->",payments)
               //console.log("loan:----------------------------->",loan)
+             insertLoanMongo(loan,payments)
+          console.log("loan:----------------------------->",loan)
+
+          console.log("payments:----------------------------->",payments)
               dispatch(addLoan(loan))
               dispatch(setTotalLoans(totalLoans+1))
 

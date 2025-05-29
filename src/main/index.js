@@ -10,7 +10,7 @@ const jwt = require("jsonwebtoken")
 dotenv.config();
 
 // MongoDB Connection
-const MONGO_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/test'; // Use environment variable or placeholder
+const MONGO_URI =/*  process.env.MONGODB_URI || */ 'mongodb://localhost:27017/prestaweb'; // Use environment variable or placeholder
 
 mongoose.connect(MONGO_URI)
   .then(() => {
@@ -33,8 +33,39 @@ function getModel(name) {
   if (!model) throw new Error(`Modelo "${name}" no encontrado.`);
   return model;
 }
+ 
+function recursiveIdSanitization(data, populate) {
+  if (!populate || !data) return;
 
-function sanitizeMongoDoc(doc) {
+  const populateArray = Array.isArray(populate) ? populate : [populate];
+
+  for (const pop of populateArray) {
+    const path = pop.path;
+    const nestedPopulate = pop.populate;
+
+    const value = data[path];
+
+    if (Array.isArray(value)) {
+      value.forEach((item) => {
+        if (item && item._id && typeof item._id !== 'string') {
+          item._id = item._id.toString();
+        }
+        if (nestedPopulate) {
+          recursiveIdSanitization(item, nestedPopulate);
+        }
+      });
+    } else if (value && typeof value === 'object') {
+      if (value._id && typeof value._id !== 'string') {
+        value._id = value._id.toString();
+      }
+      if (nestedPopulate) {
+        recursiveIdSanitization(value, nestedPopulate);
+      }
+    }
+  }
+}
+
+/* function sanitizeMongoDoc(doc) {
   if (Array.isArray(doc)) {
     return doc.map(sanitizeMongoDoc);
   }
@@ -59,12 +90,55 @@ function sanitizeMongoDoc(doc) {
 
   return doc;
 }
+ */
+ipcMain.handle("model-findOne", async (_, { modelName, query,populate }) => {
 
-ipcMain.handle("model-findOne", async (_, { modelName, query }) => {
+  try {
+   
   const Model = getModel(modelName);
-  const res = await Model.findOne(query).lean();
+  console.log(Model)
+  const q =Model.findOne(query)
+  if(populate) q.populate(populate)
+  
 
-  return res ? sanitizeMongoDoc(res) : null;
+  
+  let res = await q.lean();
+
+  console.log(res)
+  console.log(query)
+
+  if(res){
+    res._id = res._id.toString()
+   /*  function recursiveIdSanitization(path,populate){
+      if(!path.length) return path
+      
+      else [
+        path.map((path)=>{
+          return {
+            ...path,
+            _id:path._id.toString(),
+            [populate.path]:recursiveIdSanitization(path[populate.path],populate.populate)
+          }
+        })
+      ]
+      
+    }
+
+    if(Array.isArray(res[populate.path]) && res[populate.path].length){
+
+      recursiveIdSanitization(res[populate.path],populate)
+    } */
+
+    //recursiveIdSanitization(res, populate);
+
+    return res ;
+  }
+  return null
+   
+  } catch (error) {
+    console.log(error)
+    return null
+  }
 });
 // 🧩 Handlers genéricos
 ipcMain.handle("model-findAll", async (_, {modelName,query}) => {
@@ -73,11 +147,21 @@ ipcMain.handle("model-findAll", async (_, {modelName,query}) => {
 });
 
 ipcMain.handle("model-create", async (_, { modelName, data }) => {
-  const Model = getModel(modelName);
+  try {
+    const Model = getModel(modelName);
   const doc = new Model(data);
   await doc.save();
-  return doc.toObject();
-});
+ 
+  const plain = doc.toObject();
+    plain._id = plain._id.toString(); // Forzar a string
+
+    return plain;
+  } catch (error) {
+    console.log(error)
+
+    return error.code
+  }
+}); 
 
 ipcMain.handle("model-update", async (_, { modelName, id, data }) => {
   const Model = getModel(modelName);
@@ -86,9 +170,18 @@ ipcMain.handle("model-update", async (_, { modelName, id, data }) => {
 });
 
 ipcMain.handle("model-delete", async (_, { modelName, id }) => {
-  const Model = getModel(modelName);
-  await Model.findByIdAndDelete(id);
+
+  try {
+    const Model = getModel(modelName);
+  const res = await Model.deleteOne({_id:id});
+ 
+
   return { success: true };
+  } catch (error) {
+    console.log(error)
+    return {success:false}
+  }
+  
 });
 /* 
  ipcMain.on('check-for-updates', () => {

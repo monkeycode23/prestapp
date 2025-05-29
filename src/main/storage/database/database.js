@@ -15,7 +15,9 @@ class DatabaseManager {
     ? './'
     : process.resourcesPath;
 
-    console.log("dbPath:----------------------------->",process.env.NODE_ENV);
+    console.log("ENV :----------------------------->",process.env.NODE_ENV);
+    console.log("DB PATH  :----------------------------->",process.resourcesPath);
+
     this.connect()
   }
  
@@ -117,6 +119,7 @@ class DatabaseManager {
 
   query(sql, params = [],options={type:"all"}) {
     try {
+      console.log(sql)
       const stmt = this.db.prepare(sql);
 
       if(options.type == "all"){

@@ -12,6 +12,46 @@ export const getLoan = async (loanId) => {
   // return loan
 };
 
+import { uint8ArrayToHexString } from "../../common/funcs";
+
+export const deleteLoanMongo=async(loan)=>{
+  //console.log(client.id)
+             
+  try {
+     
+     if(!navigator.isOnline){ 
+
+        const loanMongo = await window.mongo.findOne("Prestamo",{sqlite_id:loan.id.toString()},{path:"payments",model:"Pago"})
+
+             console.log("client--->mongo ",loanMongo)
+             if(loanMongo) await window.mongo.delete("Cliente",loanMongo._id)
+             
+             //const prestamos = await window.mongo.find("Cliente",{nickname:client.nickname})
+           if(loanMongo && loanMongo.payments.length)
+           {
+             console.log("---->loasn pmongoasd",loanMongo.payments)
+             await Promise.all(loanMongo.payments.map(async(payment)=>{
+               
+               return window.mongo.delete("Prestamo",uint8ArrayToHexString(payment._id.buffer))
+               
+             }))
+           }
+        }
+
+     await window.database.models.ActivityLog.createActivity({
+        action_type: "DELETE",
+        entity: "Prestamo",
+        entity_id: loan.id,
+        payload: JSON.stringify(loan),
+        synced: navigator.onLine ? 1 : 0,
+      });
+  } catch (error) {
+     console.log(error)
+  }
+  
+          
+}
+
 export const deleteLoanDb = async (loanId) => {
   try {
     await window.database.models.Loans.deleteLoan(loanId);

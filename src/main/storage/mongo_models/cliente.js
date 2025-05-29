@@ -3,9 +3,9 @@ const bcrypt = require('bcrypt');
 
 const clienteSchema = new mongoose.Schema({
   sqlite_id: {
-    type: Number,
-    unique: true,
-    sparse: true
+    type: String,
+    /* unique: true,
+    sparse: true */
   },
   nickname: {
     type: String,
@@ -76,6 +76,26 @@ const clienteSchema = new mongoose.Schema({
   }
 });
 
+
+clienteSchema.post('deleteOne', async function() {
+
+  const Prestamo = mongoose.model('Prestamo');
+  
+  try {
+    const prestamos = await Prestamo.find({client_id:this._id});
+    
+    if(prestamos.length){
+      
+     const p = await Promise.all(prestamos.map((prestamo)=>Prestamo.deleteOne({_id:prestamo._id})))
+
+     console.log(p)
+    }
+    
+  } catch (error) {
+    console.error('Error al actualizar el préstamo después del pago:', error);
+  }
+});
+
 /* // Pre-save hook para encriptar contraseña
 clienteSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
@@ -101,6 +121,8 @@ clienteSchema.methods.comparePassword = async function(candidatePassword) {
     throw error;
   }
 }; */
+
+
 
 const Cliente = mongoose.model('Cliente', clienteSchema);
 
