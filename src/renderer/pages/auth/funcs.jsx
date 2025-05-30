@@ -1,3 +1,7 @@
+import apiService from "../../services/api";
+
+const {authService} = apiService;
+
 export const initFields2 = {
   username: {
     value: "",
@@ -192,19 +196,23 @@ export function decodeToken(token) {
 }
 
 async function generateHash(message) {
-  const encoder = new TextEncoder();
+/*   const encoder = new TextEncoder();
   const data = encoder.encode(message);
   const hash = await crypto.subtle.digest('SHA-256', data);
   return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+ */
+  return await window.hash.hashPassword(message)
 }
 
 async function compareHash(message, hashToCompare) {
-  const encoder = new TextEncoder();
+  /* const encoder = new TextEncoder();
   const data = encoder.encode(message);
   const hash = await crypto.subtle.digest('SHA-256', data);
   const hashArray = Array.from(new Uint8Array(hash));
   const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex === hashToCompare;
+   */
+  
+  return await window.hash.comparePassword(message,hashToCompare);
 }
 
 export async function insertUser(data){
@@ -222,3 +230,83 @@ export async function insertUser(data){
   if(user)return user;
   return false;
 }
+
+
+export async function webAppRegister(username,email,password){
+
+    const response = await authService.register(username,password,email);
+
+    if(response){
+      if(response.includes("Usuario creado correctamente")){
+        return true;
+      }
+
+      if(response.message.includes("password")){
+        return {
+          type:"error",
+          field:"password",
+          message:"La contraseña debe tener al menos 6 caracteres"
+        }
+      }
+      if(response.message.includes("usuario")){
+        return {
+          type:"error",
+          field:"username",
+          message:"El usuario ya existe"
+        }
+      }
+      if(response.message.includes("email")){
+        return {
+          type:"error",
+          field:"email",
+          message:"El email ya existe"
+        }
+      }
+
+      if(response.user && response.token){
+        return {
+          type:"success",
+          message:"Usuario creado correctamente",
+          user:response.user,
+          token:response.token
+        }
+    }
+
+    return false;
+}
+
+}
+
+
+export async function webAppLogin(username,password){
+  const response = await authService.login(username,password);
+
+  if(response.type === "success"){
+    return response;
+  }
+
+  if(response.type === "error"){
+    if(response.message.includes("password")){
+      return {
+        type:"error",
+        field:"password",
+        message:"credenciales incorrectas"
+      }
+    }
+    if(response.message.includes("usuario")){
+      return {
+        type:"error",
+        field:"username",
+        message:"credenciales incorrectas"
+      }
+    }
+
+  }
+
+  return false;
+
+}
+
+
+
+

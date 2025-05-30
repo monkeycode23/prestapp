@@ -66,8 +66,11 @@ const SignIn = () => {
         setField({ type: "validate", field: "password" });
       }
     }
-
     let user;
+    let token;
+    if(window.electron){
+      
+    
     if (fields.username.value.includes("@")) {
       user = await validateUserEmail(fields.username.value);
     } else {
@@ -89,32 +92,34 @@ const SignIn = () => {
     setField({ type: "validate", field: "username" });
     setField({ type: "validate", field: "password" });
 
+     token = await generateToken(
+      user,
+      rememberMe
+        ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
+        : new Date(Date.now() + 2 * 60 * 60 * 1000)
+    );
+    }else{
+
+      const response = await webAppLogin(fields.username.value,fields.password.value);
+
+      if(response.type === "error"){
+        togglErr(true);
+        return;
+      }
+
+      if(response.type === "success"){
+        user = response.user;
+        token = response.token;
+      }
+
+    }
     
-    try {
-      /* const mongo_user =await window.mongo.findOne("User", { sqlite_id: user.id });
+    
       
-      console.log(mongo_user)
-      
-      console.log(window.database.models.Users) 
-      
-      await window.database.models.Users.updateUser({
-        id: user.id,
-        mongo_id: mongo_user._id,
-      });
- */
-      const token = await generateToken(
-        user,
-        rememberMe
-          ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
-          : new Date(Date.now() + 2 * 60 * 60 * 1000)
-      );
   
       //console.log(token);
       dispatch(login({ user: user, token: token }));
   
-    } catch (error) {
-      console.log(error);
-    }
 
     navigate("/dashboard");
   };

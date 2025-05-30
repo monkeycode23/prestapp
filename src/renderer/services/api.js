@@ -1,4 +1,5 @@
 import axios from 'axios';
+import authService from './authService';
 /* import xhrAdapter from 'axios/lib/adapters/xhr';
  */
 /* 
@@ -148,7 +149,8 @@ export interface PagosHistorialResponse {
 }
  */
 // Configuración de axios
-const API_BASE_URL =/*  process.env.REACT_APP_API_URL || */ 'http://localhost:4000/api';
+const API_BASE_URL = 'http://localhost:4000/api';
+/*  process.env.REACT_APP_API_URL || */ 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -176,16 +178,7 @@ api.interceptors.request.use(
 
 // Servicios de API
 const apiService = {
-  // Autenticación
-  login: async (codigoAcceso/* : string */) => {
-    const response = await api.post('/auth/login', { codigoAcceso });
-    return response.data;
-  },
-  
-  verifyToken: async () => {
-    const response = await api.get('/auth/verificar');
-    return response.data;
-  },
+  ...authService,
   
   // Clientes
   getCliente: async (clienteId/* : string */) => {

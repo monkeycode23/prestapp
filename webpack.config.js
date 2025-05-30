@@ -82,8 +82,16 @@ module.exports = {
       contextRegExp: /node_modules/,
     }), 
     new webpack.DefinePlugin({
-      'process.env.REACT_APP_SOCKET_URL': JSON.stringify('http://localhost:3000')
-    })
+      'process.env.JWT_SECRET': JSON.stringify(process.env.JWT_SECRET || 'prestaweb-secret-key'),
+      'process.env.REACT_APP_SOCKET_URL': JSON.stringify(process.env.REACT_APP_SOCKET_URL || 'http://localhost:4000'),
+      'process.env.REACT_APP_API_URL': JSON.stringify(process.env.REACT_APP_API_URL || 'http://localhost:4000'),
+      'process.env.REACT_APP_IS_ELECTRON': JSON.stringify(process.env.REACT_APP_IS_ELECTRON || false),
+      'process.env.REACT_APP_IS_WEB': JSON.stringify(process.env.REACT_APP_IS_WEB || true),
+      'process.env.REACT_APP_IS_MOBILE': JSON.stringify(process.env.REACT_APP_IS_MOBILE || false),
+      'process.env.REACT_APP_IS_DESKTOP': JSON.stringify(process.env.REACT_APP_IS_DESKTOP || false),
+      'process.env.REACT_APP_IS_TABLET': JSON.stringify(process.env.REACT_APP_IS_TABLET || false),
+      
+    }) 
 
   ],
   ignoreWarnings: [

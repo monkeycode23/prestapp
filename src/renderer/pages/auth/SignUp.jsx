@@ -56,54 +56,64 @@ const SignUp = () => {
       return;
     }
 
-    const user = await validateUserName(fields.username.value);
-    //console.log("user",user)
+    if(window.electron){
 
-    if (user) {
-      setField({
-        type: "error",
-        field: "username",
-        error: "Ya existe un usuario con este nombre de usuario",
-      });
+      const user = await validateUserName(fields.username.value);
+      //console.log("user",user)
+  
+      if (user) {
+        setField({
+          type: "error",
+          field: "username",
+          error: "Ya existe un usuario con este nombre de usuario",
+        });
+        return;
+      }
+  
+      const userEmail = await validateUserEmail(fields.email.value);
+  
+      if (userEmail) {
+        setField({
+          type: "error",
+          field: "email",
+          error: "Ya existe un usuario con este email",
+        });
+        return;
+      }
+  
+      setField({ type: "validate", field: "password" });
+      setField({ type: "validate", field: "rpassword" });
+
+      const user2 = await insertUser(fields)
+      if(user2){
+        
+        token = await generateToken(
+          user,
+          rememberMe
+            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
+            : new Date(Date.now() + 2 * 60 * 60 * 1000)
+        );
+        return navigate("/dashboard");
+      }
+    }else{
+
+
+     const response = await webAppRegister({username:fields.username.value,email:fields.email.value,password:fields.password.value});
+
+     if(response.type == "error"){
+      setField({ type: "validate", field: response.field, error: response.message });
       return;
+     }
+
+     if(response.type == "success"){
+      return navigate("/dashboard");
+     }
+
     }
+   
+    return navigate("/dashboard");
 
-    const userEmail = await validateUserEmail(fields.email.value);
-
-    if (userEmail) {
-      setField({
-        type: "error",
-        field: "email",
-        error: "Ya existe un usuario con este email",
-      });
-      return;
-    }
-
-    setField({ type: "validate", field: "password" });
-    setField({ type: "validate", field: "rpassword" });
-
-    try {
-      
-      let mongo_user =await window.mongo.create("User",fields);
-      
-      
-      console.log(mongo_user);
-      
-      mongo_user.save()
-
-      const newUser = await insertUser({
-        mongo_id:mongo_user.id,
-        ...fields});
-      console.log(newUser);
-
-      const token = await generateToken(newUser);
-
-      console.log(token);
-      dispatch(register({ user: newUser, token: token }));
-    } catch (error) {
-      console.log(error);
-    }
-    navigate("/dashboard");
+   
   };
 
   return (

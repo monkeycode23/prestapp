@@ -25,7 +25,7 @@ const Settings = () => {
 
   useEffect(() => {
     
-    console.log(window.mongo.models.Client.getModel())
+   // console.log(window.mongo.models.Client.getModel())
   
     return () => {
       

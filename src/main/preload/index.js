@@ -33,9 +33,12 @@ contextBridge.exposeInMainWorld('database', {
   contextBridge.exposeInMainWorld('jwt', {
     generate: (data) => ipcRenderer.invoke("tokens", {func:"generate",data}),
     decode: (token) => ipcRenderer.invoke("tokens", { func:"decode", token }),
-    
   });
 
+  contextBridge.exposeInMainWorld('hash', {
+    hashPassword: (password) => ipcRenderer.invoke('hash-password', password),
+    comparePassword: (password,hash) => ipcRenderer.invoke('compare-password', password,hash)
+  })
   contextBridge.exposeInMainWorld('electron', {
     exportDatabaseToCSV: (dbname) => ipcRenderer.send('export-csv', dbname),
      

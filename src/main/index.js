@@ -10,7 +10,7 @@ const jwt = require("jsonwebtoken")
 dotenv.config();
 
 // MongoDB Connection
-const MONGO_URI =/*  process.env.MONGODB_URI || */ 'mongodb://localhost:27017/prestaweb'; // Use environment variable or placeholder
+/* const MONGO_URI =process.env.MONGODB_URI || 'mongodb://localhost:27017/prestaweb'; // Use environment variable or placeholder
 
 mongoose.connect(MONGO_URI)
   .then(() => {
@@ -23,7 +23,7 @@ mongoose.connect(MONGO_URI)
     // Optionally, you might want to quit the app or show an error to the user
     // if MongoDB connection is critical
   });
- 
+  */
   const models = require("./storage/mongo_models");
 
 
@@ -189,7 +189,7 @@ ipcMain.handle("model-delete", async (_, { modelName, id }) => {
 });   
  
  */
-const SECRET_KEY = "tu_clave_secreta_super_segura"; // ¡NO compartas esto con el frontend!
+const SECRET_KEY = process.env.JWT_SECRET || "prestaweb-secret-key"; // ¡NO compartas esto con el frontend!
 
 ipcMain.handle("tokens", async (_, {func,data }) => {
   // Simulación de login real
@@ -205,7 +205,7 @@ ipcMain.handle("tokens", async (_, {func,data }) => {
 
   }
   if (func=="decode") {
-      const decoded = jwt.decode(data)
+      const decoded = jwt.decode(data,SECRET_KEY)
       return  decoded  
     } 
 
@@ -214,6 +214,19 @@ ipcMain.handle("tokens", async (_, {func,data }) => {
   }
 });
  
+const bcrypt = require('bcrypt');
+
+ipcMain.handle('hash-password', async (event, password) => {
+  const saltRounds = 10;
+  const hash = await bcrypt.hash(password, saltRounds);
+  return hash;
+});
+
+ipcMain.handle('compare-password', async (event, password,hash) => {
+  const result = await bcrypt.compare(password, hash);
+  return result;
+});
+
 const DatabaseIpcMain = require('./ipcs/database/ipcmain');
 ipcMain.handle('database', DatabaseIpcMain);
 
