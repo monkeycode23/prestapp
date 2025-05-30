@@ -19,8 +19,8 @@ import { useSelector } from 'react-redux';
 import { Provider } from 'react-redux';
 import store from './redux/store'
 import { SocketProvider } from './context/socketContext';
-import ChatRoom from './pages/chat';
-
+import ChatRoom from './pages/Chat';
+import BottomBar from './components/BottomBar';
 function App() {
   const navigate = useNavigate();
   
@@ -48,7 +48,9 @@ function App() {
         {/*  */}
         <Route path="/" element={
           <SocketProvider>
-          <PrivateRoute><DefaultLayout/></PrivateRoute></SocketProvider> } >
+          <PrivateRoute><DefaultLayout/>
+          <BottomBar/>
+          </PrivateRoute></SocketProvider> } >
           <Route index path="dashboard" element={<Dashboard />} />
           <Route path="users" element={<Profile />} />
           <Route path="profile" element={<Profile />} />

@@ -6,7 +6,7 @@ import LogoIcon from '../../images/logo/logo-icon.svg';
 import DarkModeSwitcher from './DarkModeSwitcher.jsx';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import DropDownConnectedClients from './DropDownConnectedClients.jsx';
 const Header = (props) => {
 
     const navigate = useNavigate()
@@ -82,12 +82,14 @@ const Header = (props) => {
           
        
           <ul className="flex items-center gap-2 2xsm:gap-4">
+
+            <DropDownConnectedClients />
             {/* <!-- Dark Mode Toggler --> */}
            {/*  <DarkModeSwitcher /> */}
             {/* <!-- Dark Mode Toggler --> */}
 
             {/* <!-- Notification Menu Area --> */}
-           {/*  <DropdownNotification /> */}
+             <DropdownNotification />
             {/* <!-- Notification Menu Area --> */}
 
             {/* <!-- Chat Notification Area --> */}

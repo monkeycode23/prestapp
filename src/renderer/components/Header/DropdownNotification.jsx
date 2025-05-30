@@ -1,11 +1,24 @@
-import React,{ useState } from 'react';
+import React,{ useState,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside.jsx';
+import { useSocket } from '../../context/socketContext';
+import apiServices from '../../services/api'
 
 const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
+  const {socket,isConnected,} = useSocket()
+  const {notifications} = useSocket()	
+  useEffect(()=>{
 
+/*     const fetchNotifications = async()=>{
+      const notifications = await apiServices.getNotifications()
+      //setNotifications(notifications)
+    } */
+
+    //fetchNotifications()
+
+  },[])
   return (
     <ClickOutside onClick={() => setDropdownOpen(false)} className="relative">
       <li>
@@ -19,7 +32,7 @@ const DropdownNotification = () => {
         >
           <span
             className={`absolute -top-0.5 right-0 z-1 h-2 w-2 rounded-full bg-meta-1 ${
-              notifying === false ? 'hidden' : 'inline'
+              notifications.length > 0 ? 'inline' : 'hidden'
             }`}
           >
             <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-meta-1 opacity-75"></span>

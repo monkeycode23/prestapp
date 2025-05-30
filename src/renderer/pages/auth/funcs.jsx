@@ -136,8 +136,10 @@ export const validateRules = {
 
 export async function validateUserName(username) {
   //const user= await window.sqlite.query("SELECT * FROM users WHERE username=?",fields.username.value)
-  
-  const user = await window.database.models.Users.getUser({username:username});
+  console.log("username",username)
+  const user = await window.database.models.Users.getUser({
+    where: `username = '${username}'`
+  });
 
   console.log(user)
   return   user  ? user[0] : false;
@@ -148,7 +150,9 @@ export async function validateUserName(username) {
 export async function validateUserEmail(email) {
   console.log(user)
 
-  const user = await window.database.models.Users.getUser({email: email});
+  const user = await window.database.models.Users.getUser({
+    where: `email = '${email}'`
+  });
   return   user ? user[0] : false;
 }
 

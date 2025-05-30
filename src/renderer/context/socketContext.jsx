@@ -130,6 +130,8 @@ export const SocketProvider/* : React.FC<SocketProviderProps> */ = ({ children }
       notifications,
       unreadCount,
       onlineUsers,
+      notifications,
+      
       addNotification,
       markNotificationsAsRead,
       fetchNotifications

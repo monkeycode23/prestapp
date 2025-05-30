@@ -1,163 +1,259 @@
-import React,{ useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Mic, Smile, Send, Paperclip } from "lucide-react";
+import EmojiPicker from "emoji-picker-react";
 
 export default function ChatRoom() {
-
-    /* const { socket, onlineUsers } = useSocket();
-    const { user: currentUser } = useAuth(); // Assuming user in AuthContext is the current client
-    
-    const [contacts, setContacts] = useState<ChatContact[]>([]);
-    const [selectedContact, setSelectedContact] = useState<ChatContact | null>(null);
-    const [messages, setMessages] = useState<Message[]>([]);
-    const [newMessage, setNewMessage] = useState('');
-    const messagesEndRef = useRef<HTMLDivElement | null>(null);
-    const fetchContacts = async () => {
-        try {
-          const fetchedContacts = await apiService.getChatContacts();
-          setContacts(fetchedContacts || []);
-        } catch (error) {
-          console.error('Error fetching contacts:', error);
-        }
-      };
-    
-      const fetchMessages = async (contactId: string) => {
-        if (!contactId) return;
-        try {
-          const fetchedMessages = await apiService.getChatHistory(contactId);
-          setMessages(fetchedMessages || []);
-          // Mark messages as read could also be handled here or via socket event
-        } catch (error) {
-          console.error('Error fetching messages for contact:', contactId, error);
-        }
-      };
-    
-      useEffect(() => {
-        fetchContacts();
-      }, []);
-    
-      useEffect(() => {
-        if (selectedContact) {
-          fetchMessages(selectedContact.user._id);
-        }
-      }, [selectedContact]);
-    
-      useEffect(() => {
-        if (socket) {
-          const handleReceiveMessage = (message: Message) => {
-            if (selectedContact && 
-                ((message.sender === selectedContact.user._id && message.receiver === currentUser?.id) || 
-                 (message.receiver === selectedContact.user._id && message.sender === currentUser?.id)) ) {
-              setMessages(prevMessages => [...prevMessages, message]);
-            } else {
-              // If message is not for the currently selected chat, update contact list (e.g., unread count or last message)
-              // And potentially show a small notification or update general notification count
-              fetchContacts(); // Refresh contacts to show new last message
-            }
-          };
-    
-          socket.on('receiveMessage', handleReceiveMessage);
-          // Consider adding listener for 'messageRead' if you implement that on backend
-    
-          return () => {
-            socket.off('receiveMessage', handleReceiveMessage);
-          };
-        }
-      }, [socket, selectedContact, currentUser]);
-    
-      useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, [messages]);
-    
-      const handleContactSelect = (contact: ChatContact) => {
-        setSelectedContact(contact);
-      };
-    
-      const handleSendMessage = (e: FormEvent) => {
-        e.preventDefault();
-        if (!newMessage.trim() || !selectedContact || !currentUser || !socket) return;
-    
-        const messageData = {
-          sender: currentUser.id, // Assuming currentUser from useAuth has the id
-          receiverId: selectedContact.user._id,
-          content: newMessage.trim(),
-        };
-    
-        socket.emit('sendMessage', messageData);
-        
-        // Optimistic UI update (optional, but good for UX)
-        const optimisticMessage: Message = {
-            _id: new Date().toISOString(), // Temporary ID
-            sender: currentUser.id,
-            receiver: selectedContact.user._id,
-            content: newMessage.trim(),
-            read: false,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        };
-        setMessages(prev => [...prev, optimisticMessage]);
-        setNewMessage('');
-        fetchContacts(); // Refresh contacts to update last message and order
-      };
-    
-      if (!currentUser) return <p>Cargando...</p>;
-     */
   const [messages, setMessages] = useState([
-    { id: 1, user: "Ana", text: "Hola!" },
-    { id: 2, user: "Vos", text: "¡Hola Ana! ¿Todo bien?" }
+    
+      {
+        type: "text",
+        content: "Hola, ¿cómo están todos?",
+        user: {
+          name: "Ana",
+          avatar: "https://i.pravatar.cc/150?img=47",
+        },
+        time: "10:23",
+      },
+      {
+        type: "file",
+        file: {
+          name: "reporte.pdf",
+          size: 102400,
+          type: "application/pdf",
+          url: "#",
+        },
+        user: {
+          name: "Carlos",
+          avatar: "https://i.pravatar.cc/150?img=12",
+        },
+        time: "10:24",
+      },
+    
+    
+    {user: {
+      name: "Ana",
+      avatar: "https://i.pravatar.cc/150?img=47",
+    },
+    time: "10:23", type: "text", content: "Hola, ¿cómo están todos?" },
+    { user: {
+      name: "Ana",
+      avatar: "https://i.pravatar.cc/150?img=47",
+    },
+    time: "10:23", type: "text", content: "Hola, ¿cómo están todos?" },
+
+    {
+      user: {
+        name: "Ana",
+        avatar: "https://i.pravatar.cc/150?img=47",
+      },
+      time: "10:23",
+      type: "audio",
+      content: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // audio de ejemplo
+    }
   ]);
-  const [newMessage, setNewMessage] = useState("");
+  
+  const [users, setUsers] = useState(["Ana", "Luis", "Carlos", "Tú", "Marcela", "Pedro"]);
+  
+  const [input, setInput] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const chunksRef = useRef([]);
+  const messagesEndRef = useRef(null);
 
-  const handleSend = () => {
-    if (newMessage.trim() === "") return;
-
-    setMessages((prev) => [
-      ...prev,
-      { id: Date.now(), user: "Vos", text: newMessage }
-    ]);
-    setNewMessage("");
+  const sendMessage = (text) => {
+    if (text.trim()) {
+      const newMsg = {
+        type: "text",
+        content: text,
+        user: {
+          name: "Tú",
+          avatar: "https://i.pravatar.cc/150?img=64",
+        },
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages([...messages, newMsg]);
+      setInput("");
+      setShowEmojiPicker(false);
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
   };
-
   
 
+  const handleEmoji = (emojiData) => {
+    setInput((prev) => prev + emojiData.emoji);
+  };
+
+  const toggleRecording = async () => {
+    if (!recording) {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      recorder.ondataavailable = (e) => chunksRef.current.push(e.data);
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+        chunksRef.current = [];
+        setMessages((prev) => [...prev, {user: {
+          name: "Tú",
+          avatar: "https://i.pravatar.cc/150?img=64",
+        },
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), type: "audio", content: URL.createObjectURL(blob) }]);
+      };
+      recorder.start();
+      setMediaRecorder(recorder);
+      setRecording(true);
+    } else {
+      mediaRecorder.stop();
+      setRecording(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col h-[500px] w-full max-w-md mx-auto border rounded-2xl shadow p-4 bg-white">
-      {/* Chat Header */}
-      <div className="text-lg font-semibold mb-2 text-center border-b pb-2">
-        Sala de Chat
+    <div className="flex h-[80vh] w-full bg-gray-100 text-sm">
+      {/* Chat Area */}
+      <div className="flex flex-col flex-1">
+        {/* Mensajes */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.map((msg, idx) => (
+  <div key={idx} className="flex items-start gap-3">
+    {/* Avatar */}
+    <img
+      src={msg.user.avatar}
+      alt={msg.user.name}
+      className="w-8 h-8 rounded-full object-cover mt-1"
+    />
+    {/* Contenido */}
+    <div>
+      <div className="flex gap-2 items-center">
+        <span className="font-semibold">{msg.user.name}</span>
+        <span className="text-xs text-gray-500">{msg.time}</span>
       </div>
 
-      {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto space-y-2 mb-2">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`max-w-[70%] px-4 py-2 rounded-xl text-sm ${
-              msg.user === "Vos"
-                ? "ml-auto bg-blue-100 text-right"
-                : "bg-gray-100 text-left"
-            }`}
-          >
-            <div className="font-medium">{msg.user}</div>
-            <div>{msg.text}</div>
+      <div className="mt-1 bg-white px-4 py-2 rounded-xl shadow max-w-md">
+        {msg.type === "text" && <p>{msg.content}</p>}
+
+        {msg.type === "audio" && <audio controls src={msg.content} className="w-full" />}
+
+        {msg.type === "file" && (
+          <>
+            {msg.file.type.startsWith("audio") && (
+              <audio controls src={msg.file.url} className="w-full" />
+            )}
+            {msg.file.type.startsWith("video") && (
+              <video controls src={msg.file.url} className="w-full rounded" />
+            )}
+            {!msg.file.type.startsWith("audio") &&
+              !msg.file.type.startsWith("video") && (
+                <div>
+                  <p className="font-medium">{msg.file.name}</p>
+                  <p className="text-xs text-gray-500">{msg.file.type}</p>
+                  <p className="text-xs text-gray-400">
+                    {(msg.file.size / 1024).toFixed(1)} KB
+                  </p>
+                  <a
+                    href={msg.file.url}
+                    download={msg.file.name}
+                    className="text-blue-600 underline text-xs mt-1 inline-block"
+                  >
+                    Descargar
+                  </a>
+                </div>
+              )}
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+))}
+
+
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="border-t p-4 bg-white">
+          <div className="relative flex gap-2 items-end">
+            <button onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+              <Smile className="text-gray-500 w-6 h-6" />
+            </button>
+            {showEmojiPicker && (
+              <div className="absolute bottom-16 left-0 z-10">
+                <EmojiPicker onEmojiClick={handleEmoji} />
+              </div>
+            )}
+
+<label className="cursor-pointer">
+  <input
+    type="file"
+    className="hidden"
+    onChange={(e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const url = URL.createObjectURL(file);
+        setMessages((prev) => [
+          ...prev,
+          {
+            user: {
+              name: "Tú",
+              avatar: "https://i.pravatar.cc/150?img=64",
+            },
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            type: "file",
+            file: {
+              name: file.name,
+              size: file.size,
+              type: file.type,
+              url: url,
+            },
+          },
+        ]);
+      }
+    }}
+  />
+  <Paperclip className="w-5 h-5 text-gray-500 hover:text-gray-700" />
+</label>
+
+            <textarea
+              rows={1}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  sendMessage(input);
+                }
+              }}
+              className="flex-1 border rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+              placeholder="Escribe un mensaje..."
+            />
+
+            <button
+              onClick={toggleRecording}
+              className={`p-2 rounded-lg ${recording ? "bg-red-200" : "hover:bg-gray-200"}`}
+            >
+              <Mic className={`w-5 h-5 ${recording ? "text-red-600" : "text-gray-500"}`} />
+            </button>
+
+            <button
+              onClick={() => sendMessage(input)}
+              className="p-2 rounded-lg hover:bg-blue-100"
+            >
+              <Send className="w-5 h-5 text-blue-600" />
+            </button>
           </div>
-        ))}
+        </div>
       </div>
 
-      {/* Input */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          className="flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-          placeholder="Escribí un mensaje..."
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-        />
-        <button
-          onClick={handleSend}
-          className="bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition"
-        >
-          Enviar
-        </button>
+      {/* Users Panel */}
+      <div className="w-64 border-l bg-white p-4">
+        <h2 className="text-lg font-semibold mb-2">Conectados</h2>
+        <ul className="space-y-2">
+          {users.map((user, i) => (
+            <li key={i} className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-green-500" />
+              {user}
+            </li>
+          ))}
+        </ul>
       </div>
     </div>
   );

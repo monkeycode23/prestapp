@@ -58,8 +58,9 @@ const SignUp = () => {
 
     if(window.electron){
 
+      console.log(fields)
       const user = await validateUserName(fields.username.value);
-      //console.log("user",user)
+      console.log("user",user)
   
       if (user) {
         setField({
@@ -85,16 +86,12 @@ const SignUp = () => {
       setField({ type: "validate", field: "rpassword" });
 
       const user2 = await insertUser(fields)
-      if(user2){
-        
-        token = await generateToken(
-          user,
-          rememberMe
-            ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
-            : new Date(Date.now() + 2 * 60 * 60 * 1000)
-        );
-        return navigate("/dashboard");
-      }
+
+      const token = await generateToken(user2);
+
+      console.log(token)
+        dispatch(register({user:user2,token:token}));
+    
     }else{
 
 
@@ -106,6 +103,8 @@ const SignUp = () => {
      }
 
      if(response.type == "success"){
+        dispatch(register({user:response.user,token:response.token}));
+    
       return navigate("/dashboard");
      }
 
