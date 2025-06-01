@@ -8,4 +8,4 @@ module.exports = {
     getClient: (filter) => ipcRenderer.invoke('database', {model: 'clients', method: 'getOne', params:filter}),
     getTotalClients: () => ipcRenderer.invoke('database', {model: 'clients', method: 'getTotal'}),
     getClientLastId: () => ipcRenderer.invoke('database', {model: 'clients', method: 'getLastId'})
-}  
+}    

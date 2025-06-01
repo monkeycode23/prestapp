@@ -16,6 +16,10 @@ import { useNavigate } from "react-router-dom";
 
 //redux
 import { deleteClient } from "../../../redux/reducers/clients";
+import { deleteClientMongo } from "../../../pages/Client/funcs";
+
+//services
+import clientsService from "../../../services/clientsService";
 
 //funcs
 
@@ -54,11 +58,28 @@ function FormModal() {
 
       <div className="flex flex-row gap-2 justify-center">
         <button
-        onClick={() => {
+        onClick={async() => {
 
             window.database.models.Clients.deleteClient(client.id)
-            
             dispatch(deleteClient({id:client.id}))
+            
+           /*  if(navigator.isOnline){ */
+          
+              /**
+               *TODO: agregar llamada api para eliminar un cliente
+               */
+              
+             await clientsService.deleteClient(client.id)
+          // deleteClientMongo(client)           
+              /*  } */
+            
+              await window.database.models.ActivityLog.createActivity({
+                action_type: "DELETE",
+                entity: "clients",
+                entity_id: client.id,
+                payload: JSON.stringify(client),
+                synced: navigator.onLine ? 1 : 0,
+              });
 
             setNotification({
               message: "Cliente borrado correctamente",

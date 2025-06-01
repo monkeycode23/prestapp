@@ -41,7 +41,8 @@ import {
   setBruteGains,
   setDebt,
   setTotalLendMoney
-  ,setTotalToPay
+  ,setTotalToPay,
+  setStatics
 } from "../../redux/reducers/clients";
 import { setPaymentsCount } from "../../redux/reducers/payments";
 import {
@@ -79,30 +80,19 @@ const Client = () => {
   //redux states
   //client
   const client = useSelector((state) => state.clients.client);
-  const totalLendMoney = useSelector((state) => state.clients.totalLendMoney);
-
+  const clients =useSelector((state) => state.clients);
   //loan
   const loans = useSelector((state) => state.loans.loans);
-  const totalLoans = useSelector((state) => state.loans.totalLoans);
   //gains
   const netGains = useSelector((state) => state.clients.netGains);
   const bruteGains = useSelector((state) => state.clients.bruteGains);
-  const debt = useSelector((state) => state.clients.debt);
-  //Information
-  const information = useSelector((state) => state.information);
-  //payments
-  const paymentsCount = useSelector((state) => state.payments.paymentsCount);
+
+
+  
 
   //Pagination
   const pagination = useSelector((state) => state.pagination);
-  /*   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(6);
-  const [search, setSearch] = useState("");
-  const [totalPages, setTotalPages] = useState(1);
-  const [filter, setFilter] = useState('')
-
-
- */
+  
 
   useEffect(() => {
     const init = async () => {
@@ -128,7 +118,7 @@ const Client = () => {
 
       const limit = pagination.limit.loans.limit;
 
-      console.log(pagination.page)
+      //console.log(pagination.page)
       const fetchLoans = await getClientLoans(
         id,
         pagination.filter,
@@ -169,10 +159,14 @@ const Client = () => {
       //Get Notes
       const notes = await getClientNotes(id);
 
+      
+
       //Get Payments Count
       const paymentsCount = await getClientPaymentsCount(id);
       dispatch(setPaymentsCount(paymentsCount));
+      
 
+      
       //Get Gains
       const gains = await getClientGains(id);
       dispatch(setNetGains(gains.net_amount));
@@ -181,13 +175,23 @@ const Client = () => {
       //deb 
       const debt = await fetchClientDebt(id);
       
-      console.log(debt)
-      dispatch(setTotalToPay(debt.totalToPaid))
+      //console.log(debt)
+      //dispatch(setTotalToPay(debt.totalToPaid))
 
-      dispatch(setDebt(debt.debt));
-      dispatch(setTotalLendMoney(debt.totalAmount));
+      dispatch(setStatics({
+        notes,
+        paymentsState:paymentsCount,
+        totalLendMoney:debt.totalAmount,
+        debt:debt.debt,
+        totalToPaid:debt.totalToPaid,
+        totalLoans:fetchLoans.total,
+        bruteGains:gains.brute_gain,
+        netGains:gains.net_amount
+      }))
 
 
+      console.log(clients)
+      
     };
     init();
 
@@ -196,7 +200,9 @@ const Client = () => {
       dispatch(setLoans([]));
       dispatch(setTotalLoans(0));
     };
-  }, [id, pagination.page, pagination.limit.loans.limit, pagination.label,pagination.filter]);
+  }, [id, pagination.page,
+     pagination.limit.loans.limit,
+     pagination.label,pagination.filter]);
 
   // Efecto separado para resetear el filtro solo cuando cambia el ID del cliente
 /*   useEffect(() => {
@@ -219,7 +225,7 @@ const Client = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         <CardDataStats
           title="Prestamos del Cliente"
-          total={totalLoans}
+          total={clients.totalLoans}
           rate="0.0"
           levelUp
         >
@@ -228,7 +234,7 @@ const Client = () => {
 
         <CardDataStats
             title="Total de Dinero Prestado"
-            total={"$" + Intl.NumberFormat("de-DE").format(totalLendMoney)}
+            total={"$" + Intl.NumberFormat("de-DE").format(clients.totalLendMoney)}
             rate="0.0%"
             levelUp
           >
@@ -255,7 +261,7 @@ const Client = () => {
 
         <CardDataStats
           title="Deuda del cliente"
-          total={"$ " + formatAmount(debt)}
+          total={"$ " + formatAmount(clients.debt)}
           rate="0.0"
           levelUp
         >

@@ -18,11 +18,7 @@ function Step4() {
   
         const errors = validate({
            email:{
-            required:{
-              param:true,
-              message:"Este campo es requerido para avanzar",
-              
-            },
+            
             minLength:{
               param:3,
               message:"No puede ser menor a 3"
@@ -39,11 +35,7 @@ function Step4() {
           },
           phonenumber:{
             
-            required:{
-              param:true,
-              message:"Este campo es requerido para avanzar",
-              
-            },
+            
             phonenumber:{
               param:true,
               message:"Formato de numero invalido  ejempplo(0000-000000)",

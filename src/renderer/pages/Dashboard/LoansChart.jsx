@@ -1,82 +1,125 @@
-import React from 'react';
-import ReactApexChart from 'react-apexcharts';
+import React, { useEffect, useState } from "react";
+import ReactApexChart from "react-apexcharts";
+import { getLoansByStatus } from "./funcs";
 
 const LoansChart = ({ data }) => {
-  const chartOptions = {
+  const [loansByStatus, setLoansByStatus] = useState({
+    active: 0,
+    completed: 0,
+    cancelled: 0,
+  });
+
+  const loansStatusOptions = {
     chart: {
-      type: 'bar',
-      horizontal: true,
+      type: "bar",
       toolbar: {
-        show: false
-      }
+        show: false,
+      },
     },
     plotOptions: {
       bar: {
         horizontal: true,
-        barHeight: '70%',
+        barHeight: "70%",
         distributed: true,
         borderRadius: 4,
-      }
+      },
     },
     dataLabels: {
       enabled: true,
       formatter: function (val) {
-        return val + " préstamos"
+        return val + " préstamos";
       },
       style: {
-        fontSize: '12px',
-        colors: ["#fff"]
-      }
+        fontSize: "12px",
+        colors: ["#fff"],
+      },
     },
-    colors: ['#3B82F6', '#10B981', '#EF4444'],
-    labels: ['Activos', 'Completados', 'Cancelados'],
-    legend: {
-      show: false
-    },
+    colors: ["#3B82F6", "#10B981", "#EF4444"],
     xaxis: {
-      categories: ['Activos', 'Completados', 'Cancelados'],
+      categories: ["Activos", "Completados", "Cancelados"],
       labels: {
-        formatter: function(val) {
-          return val
-        }
-      }
+        formatter: function (val) {
+          return val;
+        },
+      },
+      tickAmount: 5,
+      forceNiceScale: true,
+      labels: {
+        formatter: function (val) {
+          return Math.round(val);
+        },
+      },
     },
     yaxis: {
       labels: {
         style: {
-          fontSize: '14px',
-          fontWeight: 600
-        }
-      }
+          fontSize: "14px",
+          fontWeight: 600,
+        },
+      },
     },
     tooltip: {
       y: {
-        formatter: function(val) {
-          return val + " préstamos"
-        }
-      }
-    }
+        formatter: function (val) {
+          return Math.round(val) + " préstamos";
+        },
+      },
+    },
   };
 
-  const chartSeries = [{
-    name: 'Préstamos',
-    data: [
-      data?.active || 0,
-      data?.completed || 0,
-      data?.cancelled || 0
-    ]
-  }];
+  const [show, setShow] = useState(true);
+
+  const loansStatusSeries = [
+    {
+      name: "Préstamos",
+      data: [
+        loansByStatus.active || 0,
+        loansByStatus.completed || 0,
+        loansByStatus.cancelled || 0,
+      ],
+    },
+  ];
+
+  useEffect(() => {
+    const init = async (params) => {
+      // atos de préstamos por estado
+      const statusData = await getLoansByStatus();
+
+      setShow(
+        statusData.active == 0 &&
+          statusData.completed == 0 &&
+          statusData.cancelled == 0
+          ? false
+          : true
+      );
+      setLoansByStatus(statusData);
+    };
+    // Obtener d
+    init();
+    return () => {};
+  }, []);
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm p-4">
-      <ReactApexChart
-        options={chartOptions}
-        series={chartSeries}
-        type="bar"
-        height={300}
-      />
-    </div>
+    <>
+      {show ? (
+        <div className="col-span-12 xl:col-span-6">
+          <div className="bg-white px-7.5 py-7.5 rounded-lg shadow-sm p- border border-stroke rounded-lg ">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">
+              Estado de Préstamos
+            </h2>
+            <ReactApexChart
+              options={loansStatusOptions}
+              series={loansStatusSeries}
+              type="bar"
+              height={350}
+            />
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
+    </>
   );
 };
 
-export default LoansChart; 
+export default LoansChart;

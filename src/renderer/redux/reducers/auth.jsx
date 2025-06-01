@@ -13,7 +13,9 @@ const setToken = ()=>{
             
             return null
         }
-        return decodedToken
+
+        
+        return token
     }
     return null
 }
@@ -21,6 +23,7 @@ const setToken = ()=>{
 const initialState = {
     user: null,
     sessionExpired:false,
+    isAuthenticated:true,
     token:setToken(),
     loading: false,
     error: null
@@ -30,11 +33,16 @@ const authSlice = createSlice({
     name: 'auth',
     initialState,
     reducers: {
+        setUser: (state, action) => {
+            state.user = state.user ? {...state.user, ...action.payload} : action.payload;
+        },
+       
         login: (state, action) => {
-            state.user = action.payload.user;
-            state.token = action.payload.token;
-            //console.log(action.payload)
 
+            console.log(action.payload)
+            state.user = action.payload.user;
+            if(typeof action.payload.token == "string") state.token = action.payload.token;
+            //console.log(action.payload)
            localStorage.setItem("auth_token", action.payload.token);
         },
         logout: (state) => {
@@ -56,6 +64,6 @@ const authSlice = createSlice({
     }
 }); 
  
-export const { login, logout, register, setSessionExpired } = authSlice.actions;
+export const { login, logout, register, setSessionExpired, setUser } = authSlice.actions;
 
 export default authSlice.reducer; 

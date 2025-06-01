@@ -1,9 +1,8 @@
 const Database = require('better-sqlite3');
 const path = require('path');
-const app = require('electron').app;
 const logger = require('../../logger');
 const fs = require('fs');
-
+const app = require('electron').app;
 
 class DatabaseManager {
  
@@ -15,7 +14,9 @@ class DatabaseManager {
     ? './'
     : process.resourcesPath;
 
-    console.log("dbPath:----------------------------->",process.env.NODE_ENV);
+    console.log("ENV :----------------------------->",process.env.NODE_ENV);
+    console.log("DB PATH  :----------------------------->",process.resourcesPath);
+
     this.connect()
   }
  
@@ -66,17 +67,16 @@ class DatabaseManager {
   }
 
 
-
-  addColumn(table,col){
+  exec(sql, params = []) {
     try {
-      const query = `ALTER TABLE ${table} ADD COLUMN ${col}`;
-      this.db.exec(query);
-      logger.info(`Tabla ${table} modificada`);
+      return this.db.exec(sql);
+      
     } catch (error) {
-      logger.error("Error al crear la tabla:", error);
+      logger.error("Error al ejecutar la consulta:", error);
       throw error;
     }
   }
+  
 
   runQuery(sql, params = []) {
     try {
@@ -118,6 +118,7 @@ class DatabaseManager {
 
   query(sql, params = [],options={type:"all"}) {
     try {
+      console.log(sql)
       const stmt = this.db.prepare(sql);
 
       if(options.type == "all"){

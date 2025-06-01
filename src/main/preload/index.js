@@ -2,6 +2,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 const database = require('../ipcs/database');
 
+const mongoObjects = require('../ipcs/mongo')
 
 /* 
     Expose the database to the preload set invoke methods for database
@@ -13,9 +14,37 @@ contextBridge.exposeInMainWorld('database', {
     }
   });
 
+
+  contextBridge.exposeInMainWorld('exportdb', {
+    iniciarExportacion: () => ipcRenderer.invoke('iniciar-exportacion'),
+    onProgresoExportacion: (callback) => ipcRenderer.on('progreso-exportacion', (_, mensaje) => callback(mensaje))
+  });
+
+  
+/*   contextBridge.exposeInMainWorld('mongo', {
+    findOne: (modelName,query,populate) => ipcRenderer.invoke("model-findOne", {modelName,query,populate}),
+
+    findAll: (modelName,query,populate) => ipcRenderer.invoke("model-findAll", {modelName,query,populate}),
+    create: (modelName, data) => ipcRenderer.invoke("model-create", { modelName, data }),
+    update: (modelName, id, data) => ipcRenderer.invoke("model-update", { modelName, id, data }),
+    delete: (modelName, id) => ipcRenderer.invoke("model-delete", { modelName, id }),
+  }); */
+
+  contextBridge.exposeInMainWorld('jwt', {
+    generate: (data) => ipcRenderer.invoke("tokens", {func:"generate",data}),
+    decode: (token) => ipcRenderer.invoke("tokens", { func:"decode", token }),
+  });
+
+  contextBridge.exposeInMainWorld('hash', {
+    hashPassword: (password) => ipcRenderer.invoke('hash-password', password),
+    comparePassword: (password,hash) => ipcRenderer.invoke('compare-password', password,hash)
+  })
+
+  contextBridge.exposeInMainWorld('messages', {
+    syncDBMessage: (callback) => ipcRenderer.on('sync-db-status', (_, message) => callback(message))
+  })
   contextBridge.exposeInMainWorld('electron', {
     exportDatabaseToCSV: (dbname) => ipcRenderer.send('export-csv', dbname),
-     
     uploadFile: (file) => {
       const reader = new FileReader();
   
@@ -42,6 +71,7 @@ contextBridge.exposeInMainWorld('database', {
   
       reader.readAsArrayBuffer(file); // Leemos el archivo como ArrayBuffer para enviarlo
     },
+    syncDB: () => ipcRenderer.invoke('sync-db'),
     onFileReceived: (callback) => ipcRenderer.on('file-received', callback)
   });
 

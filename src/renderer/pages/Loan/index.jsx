@@ -41,7 +41,9 @@ import {
   getTotalPayments,
   checkAndUpdateActiveLoans,
   isLoanCompletedPaid,
-  getLeftMoney
+  getLeftMoney,
+  getLoanTotalPaid,
+  checkCompletedLoan
 } from "./funcs";
 
 
@@ -55,12 +57,12 @@ const Loan = () => {
   const netGains = useSelector((state) => state.payments.netGains);
   const totalPayments = useSelector((state) => state.payments.totalPayments);
   const dispatch = useDispatch();
+  const pagination = useSelector((state) => state.pagination);
 
   const { id } = useParams();
 
   const [expired, setExpired] = useState([]);
 
-  const pagination = useSelector((state) => state.pagination);
 
   
   useEffect(() => {
@@ -71,11 +73,28 @@ const Loan = () => {
 
         dispatch(setLabel("payments"));
 
+
+        //get loann info
         const fetchLoan = await getLoan(id);
+        console.log(fetchLoan)
+
+       // checkCompletedLoan(id,fetchLoan.installment_number)
+
         dispatch(setLoan(fetchLoan));
 
         // Verificar si el préstamo actual está completado
         const isCompleted = await isLoanCompletedPaid(id);
+        if (!isCompleted && fetchLoan.status === 'completed') {
+          await window.database.models.Loans.updateLoan({
+            id: id,
+            status: "active"
+          });
+          dispatch(setLoan({
+            ...fetchLoan,
+            status: "active"
+          }));
+        }
+
         if (isCompleted && fetchLoan.status === 'active') {
           await window.database.models.Loans.updateLoan({
             id: id,
@@ -88,6 +107,8 @@ const Loan = () => {
         }
 
         const limit = pagination.limit.payments.limit;
+        
+        //get payments all
         const payments = await getPayments(id, {
           limit: limit,
           offset: (pagination.page - 1) * limit,
@@ -95,6 +116,8 @@ const Loan = () => {
         });
 
         dispatch(setPayments(payments.payments));
+
+
 
         const total = await getTotalPayments(id, {
           status: false
@@ -112,7 +135,10 @@ const Loan = () => {
         const fetchLeftMoney  = await getLeftMoney(id)
         
         console.log(fetchLeftMoney)
-        dispatch(setLeftToPaid((loan.amount+loan.gain)-fetchLeftMoney))
+        console.log(loan)
+        const loanPaid = await getLoanTotalPaid(id)
+        
+        dispatch(setLeftToPaid((fetchLoan.amount+fetchLoan.gain)-fetchLeftMoney))
       } catch (error) {
         console.log("error---a>>", error);
       }

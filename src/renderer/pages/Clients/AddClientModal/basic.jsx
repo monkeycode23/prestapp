@@ -17,11 +17,7 @@ function Step3() {
   
         const errors = validate({
            name:{
-            required:{
-              param:true,
-              message:"Este campo es requerido para avanzar",
-              
-            },
+            
             minLength:{
               param:3,
               message:"No puede ser menor a 3"
@@ -34,11 +30,7 @@ function Step3() {
           },
           lastname:{
             
-            required:{
-              param:true,
-              message:"Este campo es requerido para avanzar",
-              
-            },
+           
             minLength:{
               param:3,
               message:"No puede ser menor a 3"

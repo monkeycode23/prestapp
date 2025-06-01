@@ -13,13 +13,25 @@ const wallets = new Wallets();
 const Notes = require('../../storage/database/Models/Notes');
 const notes = new Notes();
 
+const ActivityLog = require('../../storage/database/Models/ActivityLog');
+const  activityLog = new ActivityLog()  
+
 
 const DatabaseIpcMain =(event, data) => {
     const method = data.method;
     const params = data.params;
     let result; 
+    
+    
     switch(data.model){
+
+      case 'activity_log': 
+      console.log(data)
+       // console.log("method:----------------------------->",data.model,data.method,data.params);
+        result = activityLog[method](params);
+        break;
       case 'users': 
+      console.log(data)
        // console.log("method:----------------------------->",data.model,data.method,data.params);
         result = users[method](params);
         break;

@@ -46,6 +46,63 @@ export const getTotalClientsIncompletePayments = async () => {
  * @returns {Promise<{clients: Client[], total: number}>}
  */
 
+
+
+export const getClientReputation=async (id)=>{
+
+  
+
+  try {
+    
+/*     const select = `ROUND((
+      SUM(
+        CASE 
+          WHEN p.status = 'paid' THEN 1.0
+          WHEN p.status = 'pending' THEN 0.75
+          WHEN p.status = 'incomplete' THEN 0.5
+          WHEN p.status = 'expired' THEN 0.0
+          ELSE 0
+        END
+      ) * 100.0 / NULLIF(COUNT(p.id), 0)
+    ), 2) AS reputation` */
+
+
+    
+  const select = `
+
+  -- Reputación calculada
+  ROUND((
+    SUM(
+      CASE 
+        WHEN p.status = 'paid' THEN 1.0
+        WHEN p.status = 'pending' THEN 0.95
+        WHEN p.status = 'incomplete' THEN 0.5
+        WHEN p.status = 'expired' THEN 0.0
+        ELSE 0
+      END
+    ) * 100.0 / NULLIF(COUNT(p.id), 0)
+  ), 2) AS reputation
+`;
+
+  const query = {
+    select: select,
+    joins: `
+      LEFT JOIN payments p ON loans.id = p.loan_id
+    `,
+    where: `client_id = ${id}`,
+   
+  };
+
+  const result = await window.database.models.Loans.getLoans(query)
+
+  console.log("result",result)
+  return result.length ? result[0].reputation : 0
+    
+  } catch (error) {
+    conssole.log(error)
+  }
+}
+
 export const getClients = async (filter, limit = 5, page = 1) => {
   
   function filters(filter) {
@@ -77,14 +134,34 @@ export const getClients = async (filter, limit = 5, page = 1) => {
   const filterString = filters(filter)
 
   const select = `
-    DISTINCT clients.*,
-    COUNT(DISTINCT l.id) AS total_loans,
-    COUNT(DISTINCT p.id) AS total_payments,
-    SUM(CASE WHEN p.status = 'paid' THEN 1 ELSE 0 END) AS total_paid_payments,
-    SUM(CASE WHEN p.status = 'pending' THEN 1 ELSE 0 END) AS total_pending_payments,
-    SUM(CASE WHEN p.status = 'expired' THEN 1 ELSE 0 END) AS total_expired_payments,
-    SUM(CASE WHEN p.status = 'incomplete' THEN 1 ELSE 0 END) AS total_incomplete_payments
-  `
+  DISTINCT clients.*,
+
+  -- Préstamos
+  COUNT(DISTINCT l.id) AS total_loans,
+  COUNT(DISTINCT CASE WHEN l.status = 'active' THEN l.id END) AS total_active_loans,
+  COUNT(DISTINCT CASE WHEN l.status = 'completed' THEN l.id END) AS total_completed_loans,
+  COUNT(DISTINCT CASE WHEN l.status = 'canceled' THEN l.id END) AS total_canceled_loans,
+
+  -- Pagos
+  COUNT(DISTINCT p.id) AS total_payments,
+  COUNT(DISTINCT CASE WHEN p.status = 'paid' THEN p.id END) AS total_paid_payments,
+  COUNT(DISTINCT CASE WHEN p.status = 'pending' THEN p.id END) AS total_pending_payments,
+  COUNT(DISTINCT CASE WHEN p.status = 'expired' THEN p.id END) AS total_expired_payments,
+  COUNT(DISTINCT CASE WHEN p.status = 'incomplete' THEN p.id END) AS total_incomplete_payments,
+
+  -- Reputación calculada
+  ROUND((
+    SUM(
+      CASE 
+        WHEN p.status = 'paid' THEN 1.0
+        WHEN p.status = 'pending' THEN 0.75
+        WHEN p.status = 'incomplete' THEN 0.5
+        WHEN p.status = 'expired' THEN 0.0
+        ELSE 0
+      END
+    ) * 100.0 / NULLIF(COUNT(p.id), 0)
+  ), 2) AS reputation
+`;
 
   const query = {
     select: select,
@@ -116,6 +193,40 @@ export const getClients = async (filter, limit = 5, page = 1) => {
     clients,
     total: totalClients[0].total
   }
+}
+
+export const getTopClients = async (limit = 3) => {
+  const query = {
+    select: `clients.id, clients.nickname, SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid` ,
+    joins: `LEFT JOIN loans l ON clients.id = l.client_id LEFT JOIN payments p ON l.id = p.loan_id`,
+    groupBy: 'clients.id',
+    orderBy: 'total_paid DESC',
+    limit: limit
+  };
+  const clients = await window.database.models.Clients.getClients(query);
+  return clients;
+}
+
+export const getClientsWithReputation = async (limit = 3) => {
+  const query = {
+    select: `clients.id, clients.nickname, 
+      SUM(CASE WHEN p.status = 'paid' THEN p.amount ELSE 0 END) as total_paid,
+      SUM(CASE WHEN p.status = 'expired' THEN 1 ELSE 0 END) as expired,
+      SUM(CASE WHEN p.status = 'incomplete' THEN 1 ELSE 0 END) as incomplete` ,
+    joins: `LEFT JOIN loans l ON clients.id = l.client_id LEFT JOIN payments p ON l.id = p.loan_id`,
+    groupBy: 'clients.id',
+    orderBy: 'total_paid DESC',
+    limit: limit
+  };
+  const clients = await window.database.models.Clients.getClients(query);
+  // Calcular reputación
+  return clients.map(c => {
+    const expired = Number(c.expired) || 0;
+    const incomplete = Number(c.incomplete) || 0;
+    let reputation = 100 - (expired * 5) - (incomplete * 2);
+    if (reputation < 0) reputation = 0;
+    return { ...c, reputation };
+  });
 }
 
 
