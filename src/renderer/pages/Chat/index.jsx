@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Mic, Smile, Send, Paperclip } from "lucide-react";
 import EmojiPicker from "emoji-picker-react";
-
+import { useSelector, useDispatch } from "react-redux";
+import chatService from "../../services/chatSevice";
+import {sendMessage} from "../../services/socketServices"
+import { useSocket } from "../../context/socketContext";
+import {setUser} from "../../redux/reducers/auth"
+import {useNotification} from "../../components/Notifications"
 export default function ChatRoom() {
-  const [messages, setMessages] = useState([
+  const {user,token} = useSelector((state) => state.auth);
+  const {messages, setMessages} = useSocket()
+
+  /* const [messages, setMessages] = useState([
     
       {
         type: "text",
@@ -50,28 +58,71 @@ export default function ChatRoom() {
       type: "audio",
       content: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3", // audio de ejemplo
     }
-  ]);
-  
-  const [users, setUsers] = useState(["Ana", "Luis", "Carlos", "Tú", "Marcela", "Pedro"]);
-  
+  ]); */
+  const {showNotification,setNotification} = useNotification()
+  const [users, setUsers] = useState([]);
+  const [room, setRoom] = useState({})
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [recording, setRecording] = useState(false);
   const [mediaRecorder, setMediaRecorder] = useState(null);
   const chunksRef = useRef([]);
   const messagesEndRef = useRef(null);
+  const dispatch = useDispatch()
+  useEffect(()=>{
+    const fetchRoom = async () => {
+      /* const users = await User.find({})
+      setUsers(users) */
+      try{
+        console.log(user)
+      console.log(token)
+      
+        dispatch(setUser(await window.jwt.decode(token)))
+      
+      const room = await chatService.createRoom({name: "Room 1", description: "Description 1",
+         is_private: false, owner: user?.id,type:"group",
+          })
+          console.log(room)
+        const amIJoined = room.users.some(userRoom => userRoom.sqlite_id === user.sqlite_id)
+        console.log(amIJoined)
+        if(!amIJoined){
+          await chatService.joinRoom(room._id, user.id)
+          setUsers([...room.users,user])
+        }
+        setRoom(room)
+        setUsers(room.users)
+        setMessages(room.messages) 
+      }catch(error){
+        setNotification({
+          title: "Error al crear la sala",
+          message: error.message,
+          type: "error",
+          position: "top-right"
+        })
+        showNotification()
+        console.log(error)
+      }
+    //  const rooms = await chatService.getRoom()
+      //setRooms(rooms) 
+    } 
+    fetchRoom()
+  },[])
 
-  const sendMessage = (text) => {
-    if (text.trim()) {
+  const sendMessage2 = (text) => {
+    console.log(text)
+    if (text) {
+      
       const newMsg = {
         type: "text",
         content: text,
-        user: {
-          name: "Tú",
+        user: { 
+          ...user,
+          name: user.username,
           avatar: "https://i.pravatar.cc/150?img=64",
         },
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
+      sendMessage(newMsg,room._id)
       setMessages([...messages, newMsg]);
       setInput("");
       setShowEmojiPicker(false);
@@ -117,14 +168,14 @@ export default function ChatRoom() {
   <div key={idx} className="flex items-start gap-3">
     {/* Avatar */}
     <img
-      src={msg.user.avatar}
-      alt={msg.user.name}
+      src={"https://i.pravatar.cc/150?img=64"}
+      alt={"Avatar"}
       className="w-8 h-8 rounded-full object-cover mt-1"
     />
     {/* Contenido */}
     <div>
       <div className="flex gap-2 items-center">
-        <span className="font-semibold">{msg.user.name}</span>
+        <span className="font-semibold">{"asdasdasd"}</span>
         <span className="text-xs text-gray-500">{msg.time}</span>
       </div>
 
@@ -219,7 +270,8 @@ export default function ChatRoom() {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  sendMessage(input);
+                  console.log(input)
+                  sendMessage2(input);
                 }
               }}
               className="flex-1 border rounded-lg px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -234,7 +286,7 @@ export default function ChatRoom() {
             </button>
 
             <button
-              onClick={() => sendMessage(input)}
+              onClick={() => sendMessage2(input)}
               className="p-2 rounded-lg hover:bg-blue-100"
             >
               <Send className="w-5 h-5 text-blue-600" />
@@ -250,7 +302,7 @@ export default function ChatRoom() {
           {users.map((user, i) => (
             <li key={i} className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-green-500" />
-              {user}
+              {user.username}
             </li>
           ))}
         </ul>

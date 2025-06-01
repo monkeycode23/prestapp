@@ -1,6 +1,6 @@
 const logger = require("../../../logger");
 const db = require("../database");
-const ClienteMongo = require("../../mongo_models/cliente.js");
+/* const ClienteMongo = require("../../mongo_models/cliente.js");
 const PagoMongo = require("../../mongo_models/pago.js");
 const PrestamoMongo = require("../../mongo_models/prestamo.js");
 
@@ -12,12 +12,12 @@ const mongoModelMap = {
   // Add other mappings if needed:
   // users: UserMongo, // Assuming you have a UserMongo model
 };
-
+ */
 class Models {
   constructor(tableName) {
     this.tableName = tableName;
     this.db = db;
-    this.MongoModel = mongoModelMap[tableName]; // Get the corresponding Mongoose model
+   // this.MongoModel = mongoModelMap[tableName]; // Get the corresponding Mongoose model
   }
 
   addColumn(column,query) {

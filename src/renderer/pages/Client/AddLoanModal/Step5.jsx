@@ -23,7 +23,7 @@ const Step5 = ({ setLoans }) => {
    const installments = new Array(Number(formData.installments.value)).fill(0);
    const [pDates, setPDates] = useState(installments.map((e, i) => new Date()))
  // const leftToPaid  = useSelector((state) => state.loans)
-  const debt = useState(state=>state.clients.debt)  
+  const debt = useSelector(state=>state.clients.debt)  
  //console.log(formData.installments.value)
    
    useEffect(() => {

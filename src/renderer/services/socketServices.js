@@ -11,6 +11,16 @@ export const getSocket = ()/* : Socket */ => {
   return socket;
 };
 
+export const sendMessage = (message,roomId/* : Message */) => {
+  if (!socket) {
+    throw new Error("Socket not initialized. Call initializeSocket first.");
+  }
+  socket.emit('sendMessage', {...message,
+    user_sender:message.user ? message.user._id : null,
+    client_sender:message.client ? message.client._id : null,
+    roomId});
+}
+
 export const initializeSocket = (token/* ?: string */)/* : Socket */ => {
   // Disconnect existing socket if any before creating a new one
   if (socket && socket.connected) {

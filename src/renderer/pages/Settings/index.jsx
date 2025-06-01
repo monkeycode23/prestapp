@@ -1,12 +1,16 @@
 import React, { useState,useEffect } from 'react';
 import { Moon, Sun, Upload, LayoutGrid, List, RefreshCw } from 'lucide-react'; // Ejemplo con íconos opcionales
 import CommentThread from './Comments';
-
+import {useNotification} from '../../components/Notifications';
+//import {useToast} from '../../components/ui/use-toast';
 const Settings = () => {
   const [file, setFile] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [layout, setLayout] = useState('grid');
-
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("Sincronizando bases de datos");
+  const {showNotification,setNotification} = useNotification()
+ 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
@@ -15,6 +19,29 @@ const Settings = () => {
     // lógica para subir
   };
 
+  const syncDB = async () => {
+    setLoading(true);
+    setMessage("Sincronizando bases de datos");
+    window.messages.syncDBMessage((message) => {
+      setMessage(message);
+    });
+    const result = await window.electron.syncDB()
+    setLoading(false);
+    console.log(result)
+    if(result.type === "success"){
+      setNotification({
+        title: "Sincronización completada",
+        message: "Las bases de datos han sido sincronizadas correctamente",
+        type: "success"
+      })
+    }else{
+      setNotification({
+        title: "Error al sincronizar",
+        message: result.message,
+        type: "error"
+      })
+    }
+  }
   const lokForUpdates = async () => {
     await window.updater.checkForUpdates();
   };
@@ -32,7 +59,14 @@ const Settings = () => {
     }
   }, [])
   
-
+  if(loading){
+    return <div className="flex items-center justify-center h-screen">
+      <div className="flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-indigo-500"></div>
+        <h1 className="text-2xl font-bold">{message}...</h1>
+      </div>
+    </div>
+  }
   return (
     <div className={`max-w-3xl mx-auto mt-10 p-6 rounded-xl shadow-md border ${darkMode ? 'bg-gray-800 text-white' : 'bg-white'}`}>
       <h1 className="text-3xl font-bold mb-6">⚙️ Configuración</h1>
@@ -100,7 +134,19 @@ const Settings = () => {
         </button>
       </div>
 
-
+{/* Buscar Actualizaciones */}
+<div className="py-4">
+        <div className="flex items-center gap-3 mb-2">
+          <RefreshCw />
+          <h3 className="text-lg font-semibold">Sincronizar bases de datos</h3>
+        </div>
+        <button
+          onClick={syncDB}
+          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+        >
+          Buscar
+        </button>
+      </div>
       <CommentThread></CommentThread>
 
     </div>

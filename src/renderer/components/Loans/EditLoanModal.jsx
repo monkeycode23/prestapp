@@ -10,6 +10,9 @@ import { createPayments } from "../../pages/Client/funcs";
 import { setPayments } from "../../redux/reducers/payments";
 import { setBruteGains, setNetGains } from "../../redux/reducers/payments";
 
+
+import loansService from "../../services/loansService";
+
 function EditLoanModal({ loan, button }) {
   return (
     <Modal title={"Editar Prestamo"} button={button}>
@@ -21,7 +24,7 @@ function EditLoanModal({ loan, button }) {
 function EditLoanForm({ loan }) {
   const dispatch = useDispatch();
   loan = loan ? loan : useSelector((state) => state.loans.loan);
-
+  const pagination = useSelector((state) => state.pagination);
   const {
     label,
     payment_interval,
@@ -33,11 +36,6 @@ function EditLoanForm({ loan }) {
     loan_date,
     generate_payments_date,
   } = loan;
-
-  // console.log(id)
-
-  // console.log(payment)
-  // console.log(loan)
 
   const { showNotification, setNotification } = useNotification();
 
@@ -113,6 +111,96 @@ function EditLoanForm({ loan }) {
         };
       });
     }
+  }
+
+  async function autoGeneratePayments(loan) {
+    //deete curent cuotas
+
+    await window.database.models.Payments.deleteMany({
+      where: `loan_id='${loan.id}'`,
+    });
+
+    console.log("formData:----------------------------->", formData);
+    const payments = await createPayments(loan);
+    return payments
+  }
+
+  async function updateLoanDb() {
+    //console.log("-------------->>form data",formData);
+
+    const gain =
+      (Number(formData.amount.value) * Number(formData.interest_rate.value)) /
+      100;
+    const totalAmount = Number(formData.amount.value) + Number(gain);
+    // console.log("totalAmount:----------------------------->",totalAmount)
+
+    const loanMap= {
+      ...loan,
+      amount: formData.amount.value,
+      status: formData.status.value,
+      gain: gain,
+      total_amount: totalAmount,
+      payment_interval: formData.payment_interval.value,
+      loan_date: formData.loan_date.value,
+      installment_number: formData.installment_number.value,
+      interest_rate: formData.interest_rate.value,
+      label: formData.label.value,
+    }
+    delete loanMap.user_id
+    delete loanMap.nickname
+
+    window.database.models.Loans.updateLoan(loanMap);
+    let _payments =[]
+
+    if (
+      loanMap.amount != loan.amount ||
+      loanMap.installment_number != loan.installment_number ||
+      loanMap.interest_rate != loan.interest_rate ||
+      loanMap.loan_date != loan.loan_date ||
+      loanMap.payment_interval != loan.payment_interval
+    ) {
+      const generate =
+        window.confirm(`Uno de los valores del prestamo que afecta a
+                las cuotas ha cambiado desea autogenerar las cuotas nuevamente?
+               Cuidado al hacer esto se borraran todas las cuotas actuales del prestamo
+               `);
+      if (generate) _payments =  await autoGeneratePayments(loanMap);
+    }
+
+   
+
+    return {
+      prestamo:loanMap,
+      payments:_payments.filter((payment,index) => index<pagination.limit ? payment:false)
+    }
+  }
+
+
+  function updateLoanRedux({prestamo,payments}){
+    console.log("prestamo:----------------------------->",prestamo)
+    dispatch(
+      setLoan(prestamo)
+    ); 
+    if(payments && payments.length > 0) dispatch(setPayments(payments));
+
+    dispatch(setBruteGains(0));
+    dispatch(setNetGains(0));
+  }
+
+  async function updateLoanApi({prestamo,payments}){
+
+    try {
+      const response = await loansService.updateLoan(loan.id, {
+         prestamo,
+         payments
+      });
+      console.log(response);
+      return response;
+
+    } catch (error) {
+      console.log(error);
+    }
+    
   }
 
   return (
@@ -317,94 +405,17 @@ function EditLoanForm({ loan }) {
 
         <button
           onClick={async () => {
-            console.log("-------------->>form data",formData);
 
-            const gain = (Number(formData.amount.value)*Number(formData.interest_rate.value)/100)
-            const totalAmount= Number(formData.amount.value)+Number(gain)
-            console.log("totalAmount:----------------------------->",totalAmount)
-           
-            window.database.models.Loans.updateLoan({
-              id: formData.id.value,
-              amount: formData.amount.value,
-              total_amount: totalAmount,
-              status: formData.status.value,
-              gain:gain,
-              payment_interval: formData.payment_interval.value,
-              loan_date: formData.loan_date.value,
-              installment_number: formData.installment_number.value,
-              interest_rate: formData.interest_rate.value,
-              label: formData.label.value,
-            });
+            const {prestamo,payments} = await updateLoanDb()
 
-           
+            console.log("prestamo:----------------------------->",prestamo)
+            console.log("payments:----------------------------->",payments)
 
-            const generate =
-              window.confirm(`Uno de los valores del prestamo que afecta a
-                         las cuotas ha cambiado desea autogenerar las cuotas nuevamente?
-                        Cuidado al hacer esto se borraran todas las cuotas actuales del prestamo
-                        `);
-            if (generate) {
-              //deete curent cuotas
-              console.log("asdaisdaksjdhajksdwasdunaasdasdnlasdnk")
-              await window.database.models.Payments.deleteMany({
-                where: `loan_id='${loan.id}'`,
-              });
+            if(navigator.onLine) await updateLoanApi({prestamo,payments})
 
-            console.log("formData:----------------------------->",formData)
-              const payments = await createPayments({
-                ...loan,
-                amount: formData.amount.value,
-                status: formData.status.value,
-                payment_interval: formData.payment_interval.value,
-                total_amount: totalAmount,
-                loan_date: formData.loan_date.value,
-                installment_number: formData.installment_number.value,
-                interest_rate: formData.interest_rate.value,
-                label: formData.label.value,
-              });
+            updateLoanRedux({prestamo,payments})
 
-              dispatch(setPayments(payments));
-
-              dispatch(setBruteGains(0))
-              dispatch(setNetGains(0))
-              
-              dispatch(
-                setLoan({
-                  ...loan,
-                  amount: formData.amount.value,
-                  status: "active",
-                  total_amount: totalAmount,
-                  payment_interval: formData.payment_interval.value,
-                  loan_date: formData.loan_date.value,
-                  installment_number: formData.installment_number.value,
-                  interest_rate: formData.interest_rate.value,
-                  label: formData.label.value,
-                })
-              );
-
-              window.database.models.Loans.updateLoan({
-                id:loan.id,
-                
-                status:"active",
-                
-              })
-            }else{
-                dispatch(
-                    setLoan({
-                      ...loan,
-                      amount: formData.amount.value,
-                      status: formData.status.value,
-                      total_amount: totalAmount,
-                      payment_interval: formData.payment_interval.value,
-                      loan_date: formData.loan_date.value,
-                      installment_number: formData.installment_number.value,
-                      interest_rate: formData.interest_rate.value,
-                      label: formData.label.value,
-                    })
-                  );
-            }
-           
-              toggleModal();
+            toggleModal();
 
             setNotification({
               type: "success",
@@ -413,18 +424,7 @@ function EditLoanForm({ loan }) {
 
             showNotification();
 
-            /*  if(loans!=null){
-                            setLoans((prev)=>prev.map((p)=>p.id==loan.id ? {
-                                ...p,
-                                amount:formData.amount.value,
-                                state:formData.state.value,
-                                installments:formData.installments.value,
-                                payment_interval:formData.interval.value,
-                                aproved_date:formData.date.value,
-                                label:formData.label.value,
-                                interes_percentage:formData.interes.value,
-                            } : p))
-                        } */
+          
           }}
           className="p-3 bg-primary text-white"
         >
@@ -437,6 +437,6 @@ function EditLoanForm({ loan }) {
 
 import { useNotification } from "../../components/Notifications";
 
-import {updateLoan} from "../../redux/reducers/loans"
+import { updateLoan } from "../../redux/reducers/loans";
 
 export default EditLoanModal;

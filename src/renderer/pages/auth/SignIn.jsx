@@ -19,6 +19,7 @@ import {
   generateToken,
 } from "./funcs";
 import { GoogleIcon } from "../../components/Icons";
+import { webAppLogin } from "./funcs";
 
 const SignIn = () => {
   const dispatch = useDispatch();
@@ -68,58 +69,57 @@ const SignIn = () => {
     }
     let user;
     let token;
-    if(window.electron){
-      
-    
-    if (fields.username.value.includes("@")) {
-      user = await validateUserEmail(fields.username.value);
-    } else {
-      user = await validateUserName(fields.username.value);
-    }
 
-    if (!user) {
-      togglErr(true);
-      return;
-    }
+    if (window.electron) {
+      if (fields.username.value.includes("@")) {
+        user = await validateUserEmail(fields.username.value);
+      } else {
+        user = await validateUserName(fields.username.value);
+      }
 
-    const compare = await comparePassword(fields.password.value, user.password);
-
-    if (!compare) {
-      togglErr(true);
-      return;
-    }
-
-    setField({ type: "validate", field: "username" });
-    setField({ type: "validate", field: "password" });
-
-     token = await generateToken(
-      user,
-      rememberMe
-        ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
-        : new Date(Date.now() + 2 * 60 * 60 * 1000)
-    );
-    }else{
-
-      const response = await webAppLogin(fields.username.value,fields.password.value);
-
-      if(response.type === "error"){
+      if (!user) {
         togglErr(true);
         return;
       }
 
-      if(response.type === "success"){
+      const compare = await comparePassword(
+        fields.password.value,
+        user.password
+      );
+
+      if (!compare) {
+        togglErr(true);
+        return;
+      }
+
+      setField({ type: "validate", field: "username" });
+      setField({ type: "validate", field: "password" });
+
+      token = await generateToken(
+        user,
+        rememberMe
+          ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
+          : new Date(Date.now() + 2 * 60 * 60 * 1000)
+      );
+    } else {
+      const response = await webAppLogin(
+        fields.username.value,
+        fields.password.value
+      );
+
+      if (response.type === "error") {
+        togglErr(true);
+        return;
+      }
+
+      if (response.type === "success") {
         user = response.user;
         token = response.token;
       }
-
     }
-    
-    
-      
-  
-      //console.log(token);
-      dispatch(login({ user: user, token: token }));
-  
+
+    console.log(token, user);
+    dispatch(login({ user: user, token: token }));
 
     navigate("/dashboard");
   };

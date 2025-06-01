@@ -1,192 +1,24 @@
-import axios from 'axios';
+import api from './api'; // Importar la instancia de Axios configurada
 /* import xhrAdapter from 'axios/lib/adapters/xhr';
  */
-/* 
 
-// Definición de tipos
-export interface Cliente {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  codigoAcceso: string;
-}
-
-export interface Notification {
-  _id: string;
-  user: string;
-  from?: { _id: string; nickname?: string; };
-  type: string;
-  message: string;
-  link?: string;
-  read: boolean;
-  created_at: string;
-}
-
-export interface Prestamo {
-  _id: string;
-  cliente: string;
-  amount: number;
-  label: string;
-  payments: Pago[];
-  interest_rate: number;
-  payment_interval: number;
-  loan_date: string;
-  due_date: string;
-  total_amount: number;
-  status: string;
-  fechaDesembolso: string;
-  montoCuota: number;
-  total_paid: number;
-  remaining_amount: number;
-  installment_number: number;
-  cuotasPagadas: number;
-  cuotasRestantes: number;
-  proposito?: string;
-  garantia?: string;
-  observaciones?: string;
-}
-
-export interface Pago {
-  _id: string;
-  prestamo: string | Prestamo;
-  cliente: string;
-  incomplete_amount: number;
-  amount: number;
-  paid_date: string;
-  created_at: string;
-  updated_at: string;
-  reference: string;
-  notes: string;
-  payment_date: string;
-  installment_number: number;
-  payment_method: string;
-  comprobante?: string;
-  status: string;
-  comments?: string;
-  label?: string;
-}
-
-export interface Message {
-  _id: string;
-  sender: string | { _id: string; nickname?: string }; // Cliente ID or populated Cliente
-  receiver: string | { _id: string; nickname?: string }; // Cliente ID or populated Cliente
-  content: string;
-  read: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ResumenCliente {
-  cliente: {
-    id: string;
-    nombre: string;
-    apellido: string;
-    email: string;
-  };
-  prestamos: {
-    total: number;
-    activos: number;
-    pagados: number;
-    prestamos: Prestamo[];
-  };
-  montos: {
-    totalPrestado: number;
-    totalPagado: number;
-    totalPendiente: number;
-  };
-  pagosRecientes: Pago[];
-}
-
-export interface DetallePrestamo {
-  prestamo: Prestamo;
-  pagos: Pago[];
-  resumen: {
-    totalPagado: number;
-    cuotasPagadas: number;
-    cuotasRestantes: number;
-    montoRestante: number;
-    proximaFechaPago: string | null;
-    porcentajePagado: string;
-  };
-  cuotasRestantesProgramadas: {
-    numeroCuota: number;
-    fechaEstimada: string;
-    monto: number;
-    status: string;
-    pagada: boolean;
-  }[];
-}
-
-export interface PagosPendientesResponse {
-  pagosPendientes: {
-    prestamo: {
-      id: string;
-      label: string;
-      monto: number;
-      montoCuota: number;
-      cuotasPagadas: number;
-      cuotasRestantes: number;
-      numeroCuotas: number;
-      status: string;
-    };
-    proximoPago: Pago;
-    pagos: Pago[];
-    diasRestantes: number;
-  }[];
-}
-
-export interface PagosHistorialResponse {
-  pagos: Pago[];
-  paginacion: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
- */
-// Configuración de axios
-const API_BASE_URL =/*  process.env.REACT_APP_API_URL || */ 'http://localhost:4000/api';
-
-const api = axios.create({
-  baseURL: API_BASE_URL,
-/*   adapter: xhrAdapter,
- */
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Interceptor para agregar el token a todas las peticiones
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('auth_token');
-    console.log(token)
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
 
 // Servicios de API
-const apiService = {
-  // Autenticación
-  login: async (codigoAcceso/* : string */) => {
-    const response = await api.post('/auth/login', { codigoAcceso });
+const clientsService = {
+  
+  createClient: async (clientData) => {
+    const response = await api.post('/clientes/create', clientData);
     return response.data;
   },
-  
-  verifyToken: async () => {
-    const response = await api.get('/auth/verificar');
+  updateClient: async (clientId, dataToUpdate) => {
+    const response = await api.put(`/clientes/${clientId}`, dataToUpdate);
     return response.data;
   },
-  
+  deleteClient: async (idToDelete) => {
+    // La API usa POST para eliminar, podría ser DELETE /clientes/${idToDelete}
+    const response = await api.post(`/clientes/delete/${idToDelete}`);
+    return response.data;
+  },
   // Clientes
   getCliente: async (clienteId/* : string */) => {
     const response = await api.get(`/clientes/${clienteId}`);
@@ -199,6 +31,18 @@ const apiService = {
   },
   
   // Préstamos
+  createPrestamo: async (prestamoData) => {
+    const response = await api.post('/prestamos', prestamoData);
+    return response.data;
+  },
+  updatePrestamo: async (prestamoId, prestamoData) => {
+    const response = await api.put(`/prestamos/${prestamoId}`, prestamoData);
+    return response.data;
+  },
+  deletePrestamo: async (prestamoId) => {
+    const response = await api.delete(`/prestamos/${prestamoId}`);
+    return response.data;
+  },
   getPrestamosCliente: async (clienteId/* : string */) => {
     const response = await api.get/* <Prestamo[]> */(`/clientes/${clienteId}/prestamos`);
     return response.data;
@@ -210,6 +54,18 @@ const apiService = {
   },
   
   // Pagos
+  createPago: async (pagoData) => {
+    const response = await api.post('/pagos', pagoData);
+    return response.data;
+  },
+  updatePago: async (pagoId, pagoData) => {
+    const response = await api.put(`/pagos/${pagoId}`, pagoData);
+    return response.data;
+  },
+  deletePago: async (pagoId) => {
+    const response = await api.delete(`/pagos/${pagoId}`);
+    return response.data;
+  },
   getPagosCliente: async (clienteId/* : string */) => {
     const response = await api.get/* <Pago[]> */(`/clientes/${clienteId}/pagos`);
     return response.data;
@@ -227,16 +83,7 @@ const apiService = {
     return response.data;
   },
   
-  // Notifications
-  getNotifications: async () => {
-    const response = await api.get/* <Notification[]> */('/notifications'); 
-    return response.data;
-  },
   
-  markNotificationsAsRead: async (notificationIds/* ?: string[] */) => {
-    const response = await api.post('/notifications/mark-read', { notificationIds });
-    return response.data;
-  },
 
   // Chat
   getChatHistory: async (otherClientId/* : string */) => {
@@ -252,4 +99,4 @@ const apiService = {
   }
 };
 
-export default apiService; 
+export default clientsService; 

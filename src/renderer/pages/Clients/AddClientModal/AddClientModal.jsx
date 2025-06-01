@@ -42,9 +42,6 @@ export function AddClientModal({addClient,button}) {
           <StepForm targetStep={1}>
               <Step1></Step1>
           </StepForm>
-          <StepForm targetStep={2}>
-             <Step2></Step2>
-          </StepForm>
           
         </GuidedForm>
       </Modal>

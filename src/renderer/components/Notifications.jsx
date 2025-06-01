@@ -12,7 +12,8 @@ const Notification = ({ children }) => {
   const [notification, setNotification] = useState({
     message:"test notification",
     type:"success",
-
+    title:"",
+    position:"bottom-right"
   });
 
   const [popNoty, setPopNoty] = useState(false)
@@ -35,12 +36,22 @@ const Notification = ({ children }) => {
       notification,
       showNotification,
       hideNotification,
-      setNotification  
+      setNotification, 
     }}>
       {children}
      {
       popNoty ? (<div 
-        className={`fixed bottom-5 right-5 px-6 py-4 rounded-lg shadow-lg z-50 text-white transition-all duration-500 transform ${
+        className={`fixed ${notification.position ?
+          notification.position === "bottom-right" ? "bottom-5 right-5" :
+          notification.position === "bottom-center" ? "bottom-5 left-1/2 -translate-x-1/2" :
+          
+          notification.position === "bottom-left" ? "bottom-5 left-5" :
+          notification.position === "top-center" ? "top-20 left-1/2 -translate-x-1/2" :
+          notification.position === "top-right" ? "top-20 right-20" :
+          notification.position === "top-left" ? "top-20 left-20" :
+          "top-5 left-5"
+          : "bottom-5 right-5"
+        } px-6 py-4 rounded-lg shadow-lg z-50 text-white transition-all duration-500 transform ${
           notification.type === "success" ? "bg-green-500" : notification.type === "error" ? "bg-danger" : notification.type === "warning" ? "bg-warning" : "bg-primary"
         }`}
       >
@@ -56,7 +67,7 @@ const Notification = ({ children }) => {
 
 export const NotificationContainer = () => {
   const [notifications, setNotifications] = useState([]);
-
+  const {position} = useNotification()
   const addNotification = (message, type) => {
     setNotifications((prevNotifications) => [
       ...prevNotifications,
@@ -87,7 +98,10 @@ export const NotificationContainer = () => {
       </button>
 
       {/* Mostrar las notificaciones */}
-      <div className="absolute bottom-5 right-5 space-y-3">
+      <div className={`absolute ${position === "bottom-right" ? "bottom-5 right-5" :
+         position === "bottom-left" ? "bottom-5 left-5" :
+          position === "top-right" ? "top-5 right-5" :
+           "top-5 left-5"} space-y-3`}>
         {notifications.map((notification) => (
           <Notification
             key={notification.id}

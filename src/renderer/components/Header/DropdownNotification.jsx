@@ -8,15 +8,23 @@ const DropdownNotification = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
   const {socket,isConnected,} = useSocket()
-  const {notifications} = useSocket()	
+  const {notifications,markNotificationsAsRead,fetchNotifications,setNotifications} = useSocket()	
+  
   useEffect(()=>{
 
+      async function _fetchNotifications(){
+      const notifications =await fetchNotifications()
+     
+      }
 /*     const fetchNotifications = async()=>{
       const notifications = await apiServices.getNotifications()
       //setNotifications(notifications)
     } */
-
+    _fetchNotifications()
     //fetchNotifications()
+
+    console.log(notifications)
+
 
   },[])
   return (
@@ -64,75 +72,61 @@ const DropdownNotification = () => {
             </div>
 
             <ul className="flex h-auto flex-col overflow-y-auto">
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  to="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      Edit your information in a swipe
-                    </span>{' '}
-                    Sint occaecat cupidatat non proident, sunt in culpa qui
-                    officia deserunt mollit anim.
-                  </p>
-
-                  <p className="text-xs">12 May, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  to="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      It is a long established fact
-                    </span>{' '}
-                    that a reader will be distracted by the readable.
-                  </p>
-
-                  <p className="text-xs">24 Feb, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  to="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      There are many variations
-                    </span>{' '}
-                    of passages of Lorem Ipsum available, but the majority have
-                    suffered
-                  </p>
-
-                  <p className="text-xs">04 Jan, 2025</p>
-                </Link>
-              </li>
-              <li>
-                <Link
-                  className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
-                  to="#"
-                >
-                  <p className="text-sm">
-                    <span className="text-black dark:text-white">
-                      There are many variations
-                    </span>{' '}
-                    of passages of Lorem Ipsum available, but the majority have
-                    suffered
-                  </p>
-
-                  <p className="text-xs">01 Dec, 2024</p>
-                </Link>
-              </li>
+              {notifications ? notifications.map((notification)=>(
+                <Notification key={notification._id} type={notification.type} message={notification.message} />
+              )) : <li>No hay notificationes</li>}
             </ul>
           </div>
         )}
       </li>
     </ClickOutside>
   );
+};
+
+
+import { CheckCircle, XCircle, Info, AlertTriangle } from 'lucide-react';
+import PropTypes from 'prop-types';
+
+const typeStyles = {
+  success: {
+    icon: <CheckCircle className="text-green-500" />,
+    bg: 'bg-green-100',
+    border: 'border-green-400',
+    text: 'text-green-800',
+  },
+  error: {
+    icon: <XCircle className="text-red-500" />,
+    bg: 'bg-red-100',
+    border: 'border-red-400',
+    text: 'text-red-800',
+  },
+  info: {
+    icon: <Info className="text-blue-500" />,
+    bg: 'bg-blue-100',
+    border: 'border-blue-400',
+    text: 'text-blue-800',
+  },
+  warning: {
+    icon: <AlertTriangle className="text-yellow-500" />,
+    bg: 'bg-yellow-100',
+    border: 'border-yellow-400',
+    text: 'text-yellow-800',
+  },
+};
+ function Notification({ type = 'info', message }) {
+  const styles = typeStyles[type] || typeStyles.info;
+
+  return (
+    <div className={`flex items-start gap-3 p-4 rounded-sm shadow-md border-l-4 mb-1 ${styles.bg} ${styles.border}`}>
+      <div className="mt-1">{styles.icon}</div>
+      <div className={`text-sm font-medium ${styles.text}`}>{message}</div>
+    </div>
+  );
+}
+
+Notification.propTypes = {
+  type: PropTypes.oneOf(['success', 'error', 'info', 'warning']),
+  message: PropTypes.string.isRequired,
 };
 
 export default DropdownNotification;

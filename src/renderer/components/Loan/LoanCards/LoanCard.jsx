@@ -19,17 +19,80 @@ import { deleteLoan, setStatics } from "../../../redux/reducers/loans";
 import { setDebt, setTotalLendMoney } from "../../../redux/reducers/clients";
 import { useDispatch, useSelector } from "react-redux";
 import { useNotification } from "../../Notifications";
-import { deleteClientDb } from "../../../pages/Client/funcs";
 import {
   deleteLoanDb,
   getLoanCurrentGains,
   getLoanLeftToPay,
 } from "../../../pages/Loan/funcs";
+import  loansService  from "../../../services/loansService";
+
 
 const LoanCard = ({ loan }) => {
+
   const clients = useSelector((state) => state.clients);
   const dispatch = useDispatch();
   const { setNotification, showNotification } = useNotification();
+
+  async function deleteLoanDb() {
+    try {
+      //await deleteLoanDb(loan.id);
+      //handleBack();
+      await deleteLoanDb(loan.id);
+      //await window.database.models.Loans.deleteLoan(loan.id)
+      
+      //dispatch(setDebt(clients.debt-(loan.amount+loan.gain)))
+      const leftToPaid = await getLoanLeftToPay(loan.id);
+      const loanGains = await getLoanCurrentGains(loan.id);
+      
+      
+      dispatch(deleteLoan({ id: loan.id }));
+      dispatch(
+        setStatics({
+          totalLoans:
+            clients.totalLoans > 1 ? clients.totalLoans - 1 : 0,
+          debt: clients.debt - leftToPaid,
+          totalLendMoney: clients.totalLendMoney - loan.amount,
+          bruteGains: clients.bruteGains - loanGains.brute,
+          netGains: clients.netGains - loanGains.net,
+        })
+      );
+
+      await window.database.models.ActivityLog.createActivity({
+        action_type: "DELETE",
+        entity: "loans",
+        entity_id: loan.id,
+        payload: JSON.stringify(loan),
+        synced: navigator.onLine ? 1 : 0,
+      });
+
+      setNotification({
+        type: "success",
+        message: "Prestamo eliminado con exito",
+      });
+      showNotification();
+    } catch (error) {
+      setNotification({
+        type: "danger",
+        message: "Error al borrar el prestamo " + error,
+      });
+      showNotification();
+    }
+  }
+
+  async function deleteLoanApi() {
+    try {
+     // const aqui = await loansService.deletePrestamo(loan.id);
+      //console.log(aqui,"aqui")
+    } catch (error) {
+      setNotification({
+        type: "danger",
+        message: "Error al borrar el prestamo " + error,
+      });
+      showNotification();
+  }
+
+  }
+
   return (
     <div
       className={`w-full flex  gap-4 xsm:col-span-12
@@ -115,40 +178,10 @@ shadow-2xl
               /> */}
         <button
           onClick={async () => {
-            try {
-              //await deleteLoanDb(loan.id);
-              //handleBack();
-              await deleteLoanDb(loan.id);
-              //await window.database.models.Loans.deleteLoan(loan.id)
-              dispatch(deleteLoan({ id: loan.id }));
+           
+            deleteLoanDb()
 
-              //dispatch(setDebt(clients.debt-(loan.amount+loan.gain)))
-              const leftToPaid = await getLoanLeftToPay(loan.id);
-              const loanGains = await getLoanCurrentGains(loan.id);
-
-              dispatch(
-                setStatics({
-                  totalLoans:
-                    clients.totalLoans > 1 ? clients.totalLoans - 1 : 0,
-                  debt: clients.debt - leftToPaid,
-                  totalLendMoney: clients.totalLendMoney - loan.amount,
-                  bruteGains: clients.bruteGains - loanGains.brute,
-                  netGains: clients.netGains - loanGains.net,
-                })
-              );
-
-              setNotification({
-                type: "success",
-                message: "Prestamo eliminado con exito",
-              });
-              showNotification();
-            } catch (error) {
-              setNotification({
-                type: "danger",
-                message: "Error al borrar el prestamo " + error,
-              });
-              showNotification();
-            }
+            deleteLoanApi()
           }}
           className="flex items-center gap-2  text-sm font-medium text-black bg-white border  hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >

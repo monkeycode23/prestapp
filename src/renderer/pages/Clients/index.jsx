@@ -44,9 +44,33 @@ import {
   getTotalClientsIncompletePayments,
 } from "./funcs";
 
-import { deleteClient } from "../../redux/reducers/clients";
+import { deleteClient as deleteClientReduxAction } from "../../redux/reducers/clients"; // Renombrado para evitar conflicto
 //hooks
 import useLocalStorage from "../../hooks/useLocalStorage";
+
+// Services
+import clientsService from "../../services/clientsService.js";
+
+// Activity Log Function (Nueva versión)
+const addActivityLog = async (actionType, entityType, entityId, payloadObject, explicitSyncStatus = null) => {
+  const isOnline = navigator.onLine;
+  const currentSyncStatus = explicitSyncStatus !== null ? explicitSyncStatus : (isOnline ? 1 : 0);
+
+  try {
+    const logEntry = {
+      action_type: actionType, // "CREATE", "UPDATE", "DELETE"
+      entity: entityType,      // "clients", "loans", "payments"
+      entity_id: entityId ? entityId.toString() : null,
+      payload: JSON.stringify(payloadObject), // El objeto completo o los cambios
+      synced: currentSyncStatus, // 0 si está offline o falló la sincro, 1 si está online y (asumimos) sincro exitosa
+      // created_at: new Date().toISOString(), // La DB puede generar esto
+    };
+    await window.database.models.ActivityLog.createActivity(logEntry); // Usando createActivity
+    console.log("Activity logged (new format):", logEntry);
+  } catch (error) {
+    console.error("Failed to add activity log (new format):", error);
+  }
+};
 
 const Clients = () => {
   const dispatch = useDispatch();
@@ -127,9 +151,50 @@ const Clients = () => {
     dispatch(setPage(page));
   }
 
-  async function addClient(client) {
-    setClients((prev) => [client, ...prev]);
-    setTotalClients((prev) => totalClients + 1);
+  async function handleAddClient(clientDataFromModal) {
+    let newClient = null;
+    let syncStatus = 0; // 0 for offline/failed, 1 for online/success
+
+    try {
+      // Intenta crear el cliente a través de la API
+      const createdClient = await clientsService.createClient(clientDataFromModal);
+      newClient = createdClient; // Asume que la API devuelve el cliente creado, idealmente con su ID asignado por el backend
+      syncStatus = 1;
+      console.log("Client created via API:", newClient);
+
+      // Actualizar estado de Redux o local si la llamada a la API fue exitosa
+      // Es importante que el cliente tenga el ID del backend aquí
+      dispatch(setClients([newClient, ...clients])); // Agrega al inicio de la lista actual
+      dispatch(setTotalClients(totalClients + 1));
+      // Podrías necesitar recargar la lista de clientes para asegurar consistencia con el backend
+      // o actualizar la UI de forma optimista y luego reconciliar.
+
+    } catch (apiError) {
+      console.error("Failed to create client via API:", apiError);
+      syncStatus = 0;
+      // Si la API falla (ej. offline), crea el cliente localmente con un ID temporal si es necesario
+      // o simplemente registra el intento fallido.
+      // Por ahora, vamos a asumir que el modal nos da toda la info necesaria y la guardamos.
+      newClient = { 
+        ...clientDataFromModal, 
+        id: `local-${Date.now()}`, // ID temporal local
+        // Asegúrate de que la estructura coincida con la que espera tu UI
+      };
+      // Aquí podrías optar por agregar el cliente a la UI con un indicador de "no sincronizado"
+      // o manejarlo de otra forma. Por simplicidad, lo agregaremos visualmente.
+      dispatch(setClients([newClient, ...clients])); 
+      dispatch(setTotalClients(totalClients + 1));
+      alert("Error al crear cliente en el servidor. Se guardó localmente (simulado).");
+    }
+
+    // Registrar actividad independientemente del resultado de la API
+    const entityIdForLog = newClient && newClient.id ? newClient.id : null;
+    // La data completa del cliente (clientDataFromModal) es el payload para CREATE
+    await addActivityLog("CREATE", "clients", entityIdForLog, clientDataFromModal, syncStatus);
+
+    // La función original se llamaba `addClient`, pero la lógica del modal pasaba `addClient` como prop.
+    // Vamos a mantener la lógica de actualización de UI aquí si es necesario, 
+    // o asegurar que el modal reciba el cliente actualizado (con ID del backend si es posible).
   }
 
   return (
@@ -206,7 +271,7 @@ const Clients = () => {
           </div>
           <div className="flex justify-between mb-4 mt-2">
             <AddClientModal
-              addClient={addClient}
+              addClientFunction={handleAddClient}
               button={
                 <button className="bg-primary text-white px-3 py-1 rounded-lg hover:bg-blue-500/80">
                   nuevo cliente +
@@ -236,24 +301,45 @@ const Clients = () => {
                     todos
                   </button>
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       console.log(
                         "delete selected.items:----------------------------->",
                         selected.items
                       );
-                      for (let i = 0; i < selected.items.length; i++) {
-                        // dispatch(deleteItems())
-                        window.database.models.Clients.deleteClient(
-                          selected.items[i].id
+                      const itemsToDelete = [...selected.items];
+                      dispatch(resetItems());
+
+                      for (let i = 0; i < itemsToDelete.length; i++) {
+                        const clientToDelete = itemsToDelete[i];
+                        let syncStatus = 0;
+                        try {
+                          await clientsService.deleteClient(clientToDelete.id);
+                          syncStatus = 1;
+                          console.log("Client deleted via API:", clientToDelete.id);
+                          
+                          dispatch(deleteClientReduxAction({ id: clientToDelete.id }));
+
+                        } catch (apiError) {
+                          console.error(
+                            `Failed to delete client ${clientToDelete.id} via API:`,
+                            apiError
+                          );
+                          syncStatus = 0;
+                          alert(`Error al eliminar cliente ${clientToDelete.nombre} del servidor. Inténtalo más tarde.`);
+                        }
+                        // Registrar actividad (formato nuevo)
+                        await addActivityLog(
+                          "DELETE", // actionType
+                          "clients", // entityType
+                          clientToDelete.id, // entityId
+                          { id: clientToDelete.id, nombre: clientToDelete.nombre }, // payload: info del cliente eliminado
+                          syncStatus // explicitSyncStatus
                         );
-                        dispatch(deleteItem({ id: selected.items[i].id }));
-                        dispatch(setSelectAll(!selected.selectAll));
-                        dispatch(deleteClient({ id: selected.items[i].id }));
                       }
                     }}
-                    className="bg-red-500 text-sm text-white px-1  rounded-full hover:bg-red-500/80"
+                    className="bg-red-500 text-white p-2 rounded-lg hover:bg-red-500/80"
                   >
-                    eliminar
+                    <PersonMinus />
                   </button>
                 </div>
               </>

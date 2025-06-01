@@ -1,161 +1,30 @@
 import axios from 'axios';
-import authService from './authService';
-/* import xhrAdapter from 'axios/lib/adapters/xhr';
- */
-/* 
+// Ya no importamos authService aquí, cada servicio lo manejará o usará el token directamente.
 
-// Definición de tipos
-export interface Cliente {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  codigoAcceso: string;
-}
+/* import xhrAdapter from 'axios/lib/adapters/xhr'; // Comentado si no se usa */
 
-export interface Notification {
-  _id: string;
-  user: string;
-  from?: { _id: string; nickname?: string; };
-  type: string;
-  message: string;
-  link?: string;
-  read: boolean;
-  created_at: string;
-}
+// Las definiciones de tipos (interfaces) idealmente deberían estar en un archivo separado, 
+// por ejemplo, 'types.ts' o 'interfaces.ts', y ser importadas donde se necesiten.
+// Por ahora, las dejamos comentadas o asumimos que están definidas globalmente o no son estrictamente necesarias para esta refactorización de servicios.
 
-export interface Prestamo {
-  _id: string;
-  cliente: string;
-  amount: number;
-  label: string;
-  payments: Pago[];
-  interest_rate: number;
-  payment_interval: number;
-  loan_date: string;
-  due_date: string;
-  total_amount: number;
-  status: string;
-  fechaDesembolso: string;
-  montoCuota: number;
-  total_paid: number;
-  remaining_amount: number;
-  installment_number: number;
-  cuotasPagadas: number;
-  cuotasRestantes: number;
-  proposito?: string;
-  garantia?: string;
-  observaciones?: string;
-}
+/*
+export interface Cliente { ... }
+export interface Notification { ... }
+export interface Prestamo { ... }
+export interface Pago { ... }
+export interface Message { ... }
+export interface ResumenCliente { ... }
+export interface DetallePrestamo { ... }
+export interface PagosPendientesResponse { ... }
+export interface PagosHistorialResponse { ... }
+*/
 
-export interface Pago {
-  _id: string;
-  prestamo: string | Prestamo;
-  cliente: string;
-  incomplete_amount: number;
-  amount: number;
-  paid_date: string;
-  created_at: string;
-  updated_at: string;
-  reference: string;
-  notes: string;
-  payment_date: string;
-  installment_number: number;
-  payment_method: string;
-  comprobante?: string;
-  status: string;
-  comments?: string;
-  label?: string;
-}
-
-export interface Message {
-  _id: string;
-  sender: string | { _id: string; nickname?: string }; // Cliente ID or populated Cliente
-  receiver: string | { _id: string; nickname?: string }; // Cliente ID or populated Cliente
-  content: string;
-  read: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ResumenCliente {
-  cliente: {
-    id: string;
-    nombre: string;
-    apellido: string;
-    email: string;
-  };
-  prestamos: {
-    total: number;
-    activos: number;
-    pagados: number;
-    prestamos: Prestamo[];
-  };
-  montos: {
-    totalPrestado: number;
-    totalPagado: number;
-    totalPendiente: number;
-  };
-  pagosRecientes: Pago[];
-}
-
-export interface DetallePrestamo {
-  prestamo: Prestamo;
-  pagos: Pago[];
-  resumen: {
-    totalPagado: number;
-    cuotasPagadas: number;
-    cuotasRestantes: number;
-    montoRestante: number;
-    proximaFechaPago: string | null;
-    porcentajePagado: string;
-  };
-  cuotasRestantesProgramadas: {
-    numeroCuota: number;
-    fechaEstimada: string;
-    monto: number;
-    status: string;
-    pagada: boolean;
-  }[];
-}
-
-export interface PagosPendientesResponse {
-  pagosPendientes: {
-    prestamo: {
-      id: string;
-      label: string;
-      monto: number;
-      montoCuota: number;
-      cuotasPagadas: number;
-      cuotasRestantes: number;
-      numeroCuotas: number;
-      status: string;
-    };
-    proximoPago: Pago;
-    pagos: Pago[];
-    diasRestantes: number;
-  }[];
-}
-
-export interface PagosHistorialResponse {
-  pagos: Pago[];
-  paginacion: {
-    total: number;
-    totalPages: number;
-    currentPage: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
- */
-// Configuración de axios
 const API_BASE_URL = 'http://localhost:4000/api';
-/*  process.env.REACT_APP_API_URL || */ 
+// const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api'; // Opción con variable de entorno
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-/*   adapter: xhrAdapter,
- */
+  // adapter: xhrAdapter, // Comentado si no se usa
   headers: {
     'Content-Type': 'application/json',
   },
@@ -165,84 +34,17 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('auth_token');
-    console.log(token)
+    // console.log('Token desde api.js:', token); // Para depuración
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
   (error) => {
+    // console.error('Error en interceptor de request:', error); // Para depuración
     return Promise.reject(error);
   }
 );
 
-// Servicios de API
-const apiService = {
-  ...authService,
-  
-  // Clientes
-  getCliente: async (clienteId/* : string */) => {
-    const response = await api.get(`/clientes/${clienteId}`);
-    return response.data;
-  },
-  
-  getResumenCliente: async (clienteId/* : string */) => {
-    const response = await api.get/* <ResumenCliente> */(`/clientes/${clienteId}/resumen`);
-    return response.data;
-  },
-  
-  // Préstamos
-  getPrestamosCliente: async (clienteId/* : string */) => {
-    const response = await api.get/* <Prestamo[]> */(`/clientes/${clienteId}/prestamos`);
-    return response.data;
-  },
-  
-  getDetallePrestamo: async (prestamoId/* : string */) => {
-    const response = await api.get/* <DetallePrestamo> */(`/prestamos/${prestamoId}/detalle`);
-    return response.data;
-  },
-  
-  // Pagos
-  getPagosCliente: async (clienteId/* : string */) => {
-    const response = await api.get/* <Pago[]> */(`/clientes/${clienteId}/pagos`);
-    return response.data;
-  },
-  
-  getHistorialPagos: async (clienteId/* : string */, page = 1, limit = 10) => {
-    const response = await api.get/* <PagosHistorialResponse> */(
-      `/pagos/cliente/${clienteId}/historial?page=${page}&limit=${limit}`
-    );
-    return response.data;
-  },
-  
-  getPagosPendientes: async (clienteId/* : string */) => {
-    const response = await api.get/* <PagosPendientesResponse> */(`/pagos/cliente/${clienteId}/pendientes`);
-    return response.data;
-  },
-  
-  // Notifications
-  getNotifications: async () => {
-    const response = await api.get/* <Notification[]> */('/notifications'); 
-    return response.data;
-  },
-  
-  markNotificationsAsRead: async (notificationIds/* ?: string[] */) => {
-    const response = await api.post('/notifications/mark-read', { notificationIds });
-    return response.data;
-  },
-
-  // Chat
-  getChatHistory: async (otherClientId/* : string */) => {
-    const response = await api.get/* <Message[]> */(`/chat/history/${otherClientId}`); 
-    return response.data;
-  },
-
-  getChatContacts: async () => {
-    // Define a type for chat contacts if needed, e.g., ChatContact[]
-    // For now, using any as a placeholder, should be replaced with a proper type
-    const response = await api.get/* <any[]> */(`/chat/contacts`); 
-    return response.data;
-  }
-};
-
-export default apiService; 
+// Ya no exportamos un objeto apiService con todos los métodos, solo la instancia de axios.
+export default api; 

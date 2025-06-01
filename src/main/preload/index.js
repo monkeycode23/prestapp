@@ -21,14 +21,14 @@ contextBridge.exposeInMainWorld('database', {
   });
 
   
-  contextBridge.exposeInMainWorld('mongo', {
+/*   contextBridge.exposeInMainWorld('mongo', {
     findOne: (modelName,query,populate) => ipcRenderer.invoke("model-findOne", {modelName,query,populate}),
 
     findAll: (modelName,query,populate) => ipcRenderer.invoke("model-findAll", {modelName,query,populate}),
     create: (modelName, data) => ipcRenderer.invoke("model-create", { modelName, data }),
     update: (modelName, id, data) => ipcRenderer.invoke("model-update", { modelName, id, data }),
     delete: (modelName, id) => ipcRenderer.invoke("model-delete", { modelName, id }),
-  });
+  }); */
 
   contextBridge.exposeInMainWorld('jwt', {
     generate: (data) => ipcRenderer.invoke("tokens", {func:"generate",data}),
@@ -39,9 +39,12 @@ contextBridge.exposeInMainWorld('database', {
     hashPassword: (password) => ipcRenderer.invoke('hash-password', password),
     comparePassword: (password,hash) => ipcRenderer.invoke('compare-password', password,hash)
   })
+
+  contextBridge.exposeInMainWorld('messages', {
+    syncDBMessage: (callback) => ipcRenderer.on('sync-db-status', (_, message) => callback(message))
+  })
   contextBridge.exposeInMainWorld('electron', {
     exportDatabaseToCSV: (dbname) => ipcRenderer.send('export-csv', dbname),
-     
     uploadFile: (file) => {
       const reader = new FileReader();
   
@@ -68,6 +71,7 @@ contextBridge.exposeInMainWorld('database', {
   
       reader.readAsArrayBuffer(file); // Leemos el archivo como ArrayBuffer para enviarlo
     },
+    syncDB: () => ipcRenderer.invoke('sync-db'),
     onFileReceived: (callback) => ipcRenderer.on('file-received', callback)
   });
 

@@ -62,6 +62,9 @@ function FormModal() {
 
             window.database.models.Loans.deleteLoan(loan.id)
             
+              /**
+               *TODO: agregar llamada api para eliminar un prestamo
+               */
 
             deleteLoanMongo(loan)
 

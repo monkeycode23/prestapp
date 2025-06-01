@@ -1,9 +1,8 @@
 const Database = require('better-sqlite3');
 const path = require('path');
-const app = require('electron').app;
 const logger = require('../../logger');
 const fs = require('fs');
-
+const app = require('electron').app;
 
 class DatabaseManager {
  

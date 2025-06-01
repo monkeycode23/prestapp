@@ -109,25 +109,24 @@ function Step2() {
               nickname:formData.nickname.value,
              }))
              
-             if(navigator.onLine){
+             /* if(navigator.onLine){
               const mongoClient= await window.mongo.create("Cliente",{...clientMap,sqlite_id:client[0].id})
               console.log(mongoClient)
-              await window.database.models.ActivityLog.createActivity({
-                action_type:"CREATE",
-                entity:"clients",
-                entity_id:client[0].id,
-                payload:JSON.stringify(clientMap),
-                synced:1
-              })
-             }else{
               
-              await window.database.models.ActivityLog.createActivity({
-                action_type:"CREATE",
-                entity:"clients",
-                entity_id:client[0].id,
-                payload:JSON.stringify(clientMap)
-              })
-             }
+             } */
+
+              /**
+               *TODO: agregar llamada api para agregar un cliente
+               */
+
+
+             await window.database.models.ActivityLog.createActivity({
+              action_type:"CREATE",
+              entity:"clients",
+              entity_id:client[0].id,
+              payload:JSON.stringify(clientMap),
+              synced:navigator.onLine ? 1 : 0
+            })
             
               toggleModal()
             }}>

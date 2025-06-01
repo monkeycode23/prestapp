@@ -4,12 +4,12 @@ import { setPaidPayments, setProgress } from "../../../redux/reducers/payments"
 
 const ProgressBar = ()=>{
     const payments = useSelector((state)=>state.payments)
-    const loan = useSelector((state)=>state.loans)
+    const loans = useSelector((state)=>state.loans)
     const dispatch = useDispatch()
 
     useEffect(() => {
         async function init(){
-            if (!loan.loan?.id) return;
+            if (!loans.loan?.id) return;
 
             const paymentsData = await window.database.models.Payments.getPayments({
                 select: `COUNT(*) AS totalCount,
@@ -17,7 +17,7 @@ const ProgressBar = ()=>{
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) AS pendingCount,
                 SUM(CASE WHEN status = 'expired' THEN 1 ELSE 0 END) AS expiredCount,
                 SUM(CASE WHEN status = 'incomplete' THEN 1 ELSE 0 END) AS incompleteCount`,
-                where: `loan_id = '${loan.loan.id}'`
+                where: `loan_id = '${loans.loan.id}'`
             })
 
             const paidPayments = paymentsData[0].paidCount;
@@ -28,7 +28,7 @@ const ProgressBar = ()=>{
         }
 
         init()
-    }, [dispatch, loan.loan?.id, payments.paidPayments])
+    }, [dispatch, loans.loan?.id, payments.paidPayments])
 
     return (
         <div className="mt-4">
@@ -44,7 +44,7 @@ const ProgressBar = ()=>{
             </div>
             <div className="flex justify-between items-center mt-1">
                 <span className="text-xs text-gray-500">Cuotas pagadas: {payments.paidPayments}</span>
-                <span className="text-xs text-gray-500">Total cuotas: {payments.totalPayments}</span>
+                <span className="text-xs text-gray-500">Total cuotas: {loans.loan?.installment_number}</span>
             </div>
         </div>
     )

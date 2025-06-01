@@ -2,21 +2,22 @@ import React,{ useState,useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ClickOutside from '../ClickOutside.jsx';
 import { useSocket } from '../../context/socketContext';
-import apiServices from '../../services/api'
+import notificationService from '../../services/notificationService'
 import { UserIcon } from 'lucide-react';
 const DropDownConnectedClients = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notifying, setNotifying] = useState(true);
-  const {socket,onlineUsers,setOnlineUsers} = useSocket()
+  const {socket,onlineUsers,setOnlineUsers,onlineClients} = useSocket()
 
   useEffect(()=>{
 
-    const fetchNotifications = async()=>{
-      const notifications = await apiServices.getNotifications()
+  /*   const fetchNotifications = async()=>{
+      const notifications = await notificationService.getNotifications()
       setNotifications(notifications)
-    }
+    } */
 
-    fetchNotifications()
+   /*  fetchNotifications() */
+   console.log(onlineUsers)
 
   },[])
   return (
@@ -32,7 +33,7 @@ const DropDownConnectedClients = () => {
         >
           <span
             className={`absolute -top-0.5 right-0 z-1 h-2 w-2 rounded-full bg-green-500 ${
-              onlineUsers.length > 0 ? 'inline' : 'hidden'
+              onlineUsers.length > 0 || onlineClients.length > 0 ? 'inline' : 'hidden'
             }`}
           >
             <span className="absolute -z-1 inline-flex h-full w-full animate-ping rounded-full bg-meta-1 opacity-75"></span>
@@ -53,7 +54,29 @@ const DropDownConnectedClients = () => {
 
             <ul className="flex h-auto flex-col overflow-y-auto">
               {
-                onlineUsers.map((user)=>(
+                onlineUsers.length ? onlineUsers.map((user)=>(
+                  <li key={user._id}>
+                    <Link
+                      className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
+                      to="#"
+                    >
+
+                      
+                        <span className="text-black dark:text-white">
+                        <p className="text-sm">
+                          <span className={` z-1 h-2 w-2 mr-2 rounded-full bg-green-500`}/> 
+                          {user.nickname}
+                        </p>
+                        </span>{' '}
+                        {/* {user.email} */}
+
+                     
+                    </Link>
+                  </li>
+                )) : <></>
+              }
+              {
+                onlineClients.length ? onlineClients.map((user)=>(
                   <li key={user._id}>
                     <Link
                       className="flex flex-col gap-2.5 border-t border-stroke px-4.5 py-3 hover:bg-gray-2 dark:border-strokedark dark:hover:bg-meta-4"
@@ -61,19 +84,19 @@ const DropDownConnectedClients = () => {
                     >
 
                       <p className="text-sm">
-                        <span
-             className={`absolute -top-0.5 right-0 z-1 h-2 w-2 rounded-full bg-green-500`}
-                />
+                        
                         <span className="text-black dark:text-white">
-                          {user.name}
+                        <span
+             className={`  h-2 w-2 rounded-full mr-2 bg-green-500`}
+                /> {user.nickname}
                         </span>{' '}
-                        {user.email}
+                        {/* {user.email} */}
                       </p>
 
-                      <p className="text-xs">01 Dec, 2024</p>
+                 
                     </Link>
                   </li>
-                ))
+                )) : <></>
               }
             </ul>
           </div>
