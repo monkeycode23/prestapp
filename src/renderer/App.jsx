@@ -34,7 +34,7 @@ import {
   Calendar,
   Payments,
   ChatRoom
-} from './pages'
+} from './pages/index'
 
 import { dashboardLoader } from './loaders';
 

@@ -24,7 +24,7 @@ class Payments extends Models{
         `); 
  
 
-        //this.db.addColumn("payments",'notes TEXT ')
+        this.addColumn("notes",'TEXT')
          
     //this.db.runQuery(`ALTER TABLE payments ADD COLUMN payment_method TEXT`)
 

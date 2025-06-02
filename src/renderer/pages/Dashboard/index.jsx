@@ -113,7 +113,7 @@ const Dashboard = () => {
           console.log("totalClients:----------------------------->",fetchTotalClients)
           dispatch(setTotalClients(fetchTotalClients))
            */
-        // Calcular morosidad
+       /*  // Calcular morosidad
         const totalActivos = fetchTotalLoans.active || 0;
         // Obtener cantidad de pagos vencidos (expired)
         const expiredPayments =
@@ -138,12 +138,12 @@ const Dashboard = () => {
             select: `COUNT(*) as total_proximos`,
             where: `status = 'pending' AND payment_date > '${hoyStr}' AND payment_date <= '${sieteDiasStr}'`,
           });
-        setPagosProximos(pagosProximosRes[0]?.total_proximos || 0);
+        setPagosProximos(pagosProximosRes[0]?.total_proximos || 0); */
 
         // Promedio de monto por préstamo activo
-        const totalMonto = fetchLoansTotalAmounts.loans || 0;
+        /* const totalMonto = fetchLoansTotalAmounts.loans || 0;
         const promedio = totalActivos > 0 ? totalMonto / totalActivos : 0;
-        setPromedioPrestamo(promedio);
+        setPromedioPrestamo(promedio); */
 
         // Top clientes con reputación
       } catch (error) {

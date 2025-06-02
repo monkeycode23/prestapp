@@ -133,8 +133,12 @@ function Step1() {
           /**
            *TODO: agregar llamada api para agregar un cliente
            */
-          const response = await clientsService.createClient({...clientMap,sqlite_id:client[0].id});
-          console.log(response,"response")
+          try{
+            const response = await clientsService.createClient({...clientMap,sqlite_id:client[0].id});
+            console.log(response,"response")
+          }catch(error){
+            console.log(error,"error")
+          }
 
           await window.database.models.ActivityLog.createActivity({
             action_type: "CREATE",

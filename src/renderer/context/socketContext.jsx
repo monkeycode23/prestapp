@@ -1,28 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Socket } from 'socket.io-client';
 import { initializeSocket, disconnectSocket } from '../services/socketServices';
-/* import { useAuth } from './AuthContext';i // Import actual types
-import {useSelector,} from 'react-redux'
-/* interface SocketContextType {
-  socket: Socket | null;
-  isConnected: boolean;
-  notifications: Notification[]; // Use imported Notification
-  unreadCount: number;
-  onlineUsers: string[];
-  addNotification: (notification: Notification) => void; // Use imported Notification
-  markNotificationsAsRead: (notificationIds?: string[]) => Promise<void>; 
-  fetchNotifications: () => Promise<void>;
-}
- */
+
+
 import {useNotification} from "../components/Notifications"
 
 import { useSelector } from 'react-redux'
 import notificationService from '../services/notificationService'
 
-const SocketContext = createContext/* <SocketContextType | undefined> */(undefined);
+const SocketContext = createContext(undefined);
 
 
-export const useSocket = ()/* : SocketContextType  */=> {
+export const useSocket = ()=> {
   const context = useContext(SocketContext);
   if (!context) {
     throw new Error('useSocket must be used within a SocketProvider');
@@ -34,7 +23,8 @@ export const useSocket = ()/* : SocketContextType  */=> {
   children: ReactNode;
 } */
 
-export const SocketProvider/* : React.FC<SocketProviderProps> */ = ({ children }) => {
+export const SocketProvider= ({ children }) => {
+
   const {showNotification,setNotification} = useNotification()
   const { token, isAuthenticated, user } = useSelector(state=>state.auth)
   const [socketInstance, setSocketInstance] = useState/* <Socket | null> */(null);
@@ -67,8 +57,9 @@ export const SocketProvider/* : React.FC<SocketProviderProps> */ = ({ children }
       try{
       const newSocket = initializeSocket(token);
       setSocketInstance(newSocket);
-      // fetchNotifications(); // This will be called by the dependency array change if user/isAuthenticated changes
+       fetchNotifications(); // This will be called by the dependency array change if user/isAuthenticated changes
       console.log("Conectando al servidor",newSocket)  
+      
       if(newSocket.connected){
         setNotification({
           title: "Conectando al servidor",

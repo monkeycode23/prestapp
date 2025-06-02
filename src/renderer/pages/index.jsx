@@ -1,15 +1,15 @@
-import Dashboard from './pages/Dashboard';
-import Profile from './pages/Users';
-import SignIn from './pages/auth/SignIn';
-import SignUp from './pages/auth/SignUp';
-import Error404 from './pages/error/404';
-import Clients from './pages/Clients';
-import Client from './pages/Client';
-import Loan from './pages/Loan';
-import Settings from './pages/Settings';
-import Calendar from './pages/Calendar';
-import Payments from './pages/Payments';
-import ChatRoom from './pages/Chat';
+import Dashboard from './Dashboard';
+import Profile from './Users';
+import SignIn from './auth/SignIn';
+import SignUp from './auth/SignUp';
+import Error404 from './error/404';
+import Clients from './Clients';
+import Client from './Client';
+import Loan from './Loan';
+import Settings from './Settings';
+import Calendar from './Calendar';
+import Payments from './Payments';
+import ChatRoom from './Chat/index';
 
 export {
     Dashboard,
@@ -21,7 +21,7 @@ export {
     Client,
     Loan,
     Settings,
-    Callendar,
+    Calendar,
     Payments,
     ChatRoom
 }
