@@ -1,8 +1,14 @@
 import React from 'react';
 import { Route, Routes, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Provider } from 'react-redux';
+
+//componets
 import PrivateRoute from './components/PrivateRoute';
 import DefaultLayout from './layouts/DefaultLayout';
-import Dashboard from './pages/Dashboard';
+/* import Dashboard from './pages/Dashboard';
 import Profile from './pages/Users';
 import SignIn from './pages/auth/SignIn';
 import SignUp from './pages/auth/SignUp';
@@ -13,14 +19,31 @@ import Loan from './pages/Loan';
 import Settings from './pages/Settings';
 import Calendar from './pages/Calendar';
 import Payments from './pages/Payments';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { Provider } from 'react-redux';
+import ChatRoom from './pages/Chat';
+ */
+import {
+  Dashboard,
+  Profile,
+  SignIn,
+  SignUp,
+  Error404,
+  Clients,
+  Client,
+  Loan,
+  Settings,
+  Calendar,
+  Payments,
+  ChatRoom
+} from './pages'
+
+import { dashboardLoader } from './loaders';
+
 import store from './redux/store'
 import { SocketProvider } from './context/socketContext';
-import ChatRoom from './pages/Chat';
 import BottomBar from './components/BottomBar';
+
+
+
 function App() {
   const navigate = useNavigate();
   
@@ -51,7 +74,7 @@ function App() {
           <PrivateRoute><DefaultLayout/>
           <BottomBar/>
           </PrivateRoute></SocketProvider> } >
-          <Route index path="dashboard" element={<Dashboard />} />
+          <Route index path="dashboard" loader={dashboardLoader} element={<Dashboard />} />
           <Route path="users" element={<Profile />} />
           <Route path="profile" element={<Profile />} />
 

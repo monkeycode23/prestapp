@@ -28,6 +28,8 @@ import {
   setTotalLoansCompleted,
   setTotalUnpaidPayments,
 } from "../../redux/reducers/dashboard";
+
+
 import { toLocaleDate } from "../Payments/funcs";
 import ReactApexChart from "react-apexcharts";
 import { ExpiredDate } from "../../components/Icons";
@@ -41,19 +43,16 @@ import LoansChart from "./LoansChart";
 /**
  * component
  */
+
+
+/**
+ * loader
+ */
+import useLoaderData from "react-router-dom";
+
 const Dashboard = () => {
   const dispatch = useDispatch();
-  //const loans = useSelector(state => state.loans.loans)
-  const [loansByStatus, setLoansByStatus] = useState({
-    active: 0,
-    completed: 0,
-    cancelled: 0,
-  });
-  const [morosidad, setMorosidad] = useState(0);
-  const [pagosProximos, setPagosProximos] = useState(0);
-  const [promedioPrestamo, setPromedioPrestamo] = useState(0);
-  const [topClientes, setTopClientes] = useState([]);
-
+ 
   const {
     totalLoans,
     totalLoansCompleted,
@@ -63,6 +62,9 @@ const Dashboard = () => {
     totalPaidPaymentsNetGains,
     totalUnpaidPayments,
   } = useSelector((state) => state.dashboard);
+
+  //const { cliente, prestamos } = useLoaderData();
+
 
   useEffect(() => {
     const init = async () => {

@@ -18,6 +18,8 @@ const dashboardSlice = createSlice({
     name: 'dashboard',
     initialState,
     reducers: {
+        
+
         setTotalUnpaidPayments: (state, action) => {
             state.totalUnpaidPayments = action.payload;
         },
